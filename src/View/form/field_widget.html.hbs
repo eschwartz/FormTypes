@@ -1,0 +1,19 @@
+{{#if form.label}}
+  <label {{>html_attrs form.labelAttrs}}>
+    {{form.label}}
+  </label>
+{{/if}}
+
+{{!--This will work for <select><options></option>...</select>--}}
+{{#if form.children}}
+{{!--Wrap child fields inside parent field tags--}}
+  <{{form.tagName}} {{>html_attrs form.attrs}} >
+  {{#each children}}
+    {{>partial_widget this}}
+  {{/each}}
+  </{{form.tagName}}>
+{{/if}}
+
+
+{{!--<input type="text" value="from data option, which is transformed into `attrs`.`value`" placeholder="from attrs.placeholder" />--}}
+<{{form.tagName}} {{>html_attrs form.attrs}} />
