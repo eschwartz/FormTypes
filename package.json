@@ -9,6 +9,7 @@
   "author": "Edan Schwartz <edanschwartz@gmail.com>",
   "license": "BSD",
   "dependencies": {
+    "handlebars": "^3.0.0",
     "underscore": "^1.8.2"
   },
   "devDependencies": {
