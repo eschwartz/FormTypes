@@ -13,5 +13,9 @@ node_modules/
 *.js.map
 typings/
 
+#mocha
+test/mocha.css
+test/index.html
+
 # created by grunt-ts
 tscommand-*.tmp.txt
