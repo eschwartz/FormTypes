@@ -1,3 +1,4 @@
-var FormType = require('./FormType');
+///<reference path="../typings/node/node.d.ts" />
+import FormType = require('./FormType');
 
-window.FormType = FormType;
+global.window.FormType = FormType;
