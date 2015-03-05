@@ -3,6 +3,7 @@
 import FormTypeOptionsInterface = require('../Options/FormTypeOptionsInterface')
 import TemplateInterface = require('../View/Template/TemplateInterface');
 import FormTemplateCollectionInterface = require('../View/Template/FormTemplateCollectionInterface');
+import FormTemplateCollection = require('../View/Template/FormTemplateCollection');
 import _ = require('underscore');
 import Handlebars = require('handlebars');
 
@@ -15,11 +16,11 @@ class AbstractFormType {
   protected Handlebars:HandlebarsStatic;
 
   constructor(options:FormTypeOptionsInterface = {}) {
-    this.Handlebars = Handlebars.create();
     this.options = this.setDefaultOptions(_.clone(options));
     this.el = this.createElementFromString('<div></div>');
+    this.Handlebars = Handlebars.create();
 
-    this.registerTemplatePartials();
+    this.setTemplates(new FormTemplateCollection());
   }
 
   public render() {
@@ -29,6 +30,11 @@ class AbstractFormType {
     this.el = this.createElementFromString(html);
 
     return this;
+  }
+
+  public setTemplates(templates:FormTemplateCollectionInterface) {
+    this.templates = templates;
+    this.registerTemplatePartials();
   }
 
   protected createTemplateContext():_.Dictionary<any> {
@@ -41,15 +47,16 @@ class AbstractFormType {
    * The returned object is set to this.options.
    */
   protected setDefaultOptions(options:FormTypeOptionsInterface):FormTypeOptionsInterface {
-    options = _.clone(options);
-    _.defaults(options, {
+    var defaults = {
       tagName: 'form',
       type: 'form',
       attrs: {},
       children: [],
-      data: null,
-      templates: {}
-    });
+      data: null
+    };
+    var optionKeys = Object.keys(defaults);
+
+    options = _.defaults(_.pick(options, optionKeys), defaults);
 
     _.defaults(options.attrs, {
       name: options.name
@@ -64,7 +71,7 @@ class AbstractFormType {
     });
   }
 
-  createElementFromString(htmlString:string):HTMLElement {
+  protected createElementFromString(htmlString:string):HTMLElement {
     var container = document.createElement('div');
     container.innerHTML = htmlString;
 
