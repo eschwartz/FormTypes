@@ -1,7 +1,6 @@
-///<reference path="../typings/ref.d.ts" />
+import AbstractFormType = require('./AbstractFormType');
 
-class FormType {
-  public el:HTMLElement;
+class FormType extends AbstractFormType{
 
   public render():FormType {
     this.el = document.createElement('form');
