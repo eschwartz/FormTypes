@@ -1,0 +1,17 @@
+# standard gitignore
+.idea/
+.idea/*
+.DS_STORE
+*.log
+TODO
+node_modules/
+
+# typscript
+.baseDir.ts
+.tscache/
+*.js
+*.js.map
+typings/
+
+# created by grunt-ts
+tscommand-*.tmp.txt

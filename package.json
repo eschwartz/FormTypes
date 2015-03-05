@@ -1,0 +1,22 @@
+{
+  "name": "FormTypes",
+  "version": "0.0.0",
+  "description": "Forms in Javascript. For Real.",
+  "main": "build/FormTypes.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "author": "Edan Schwartz <edanschwartz@gmail.com>",
+  "license": "BSD",
+  "dependencies": {},
+  "devDependencies": {
+    "browserify": "^9.0.3",
+    "grunt": "^0.4.5",
+    "grunt-browserify": "^3.5.0",
+    "grunt-ts": "^3.0.0",
+    "grunt-tslint": "^2.0.0",
+    "tsd": "^0.6.0-beta.5",
+    "tslint": "^2.1.1",
+    "typescript": "^1.4.1"
+  }
+}
