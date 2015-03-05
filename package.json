@@ -8,7 +8,9 @@
   },
   "author": "Edan Schwartz <edanschwartz@gmail.com>",
   "license": "BSD",
-  "dependencies": {},
+  "dependencies": {
+    "underscore": "^1.8.2"
+  },
   "devDependencies": {
     "browserify": "^9.0.3",
     "browserify-shim": "^3.8.3",
