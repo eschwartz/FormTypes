@@ -1,6 +1,5 @@
 ///<reference path="../../typings/underscore/underscore.d.ts" />
 import AbstractFormType = require('../FormType/AbstractFormType');
-import TemplateCollectionInterface = require('../View/Template/TemplateCollectionInterface')
 interface FormTypeOptionsInterface extends _.Dictionary<any> {
   /**
    * A unique name for the form type instance.

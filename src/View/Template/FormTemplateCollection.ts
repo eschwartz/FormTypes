@@ -13,6 +13,7 @@ var option_widget:TemplateInterface = require('../form/option_widget.html.hbs');
  * Default form templates.
  */
 class FormTemplateCollection implements FormTemplateCollectionInterface {
+  [index:string]:TemplateInterface;
   form:TemplateInterface;
   form_start:TemplateInterface;
   form_rows:TemplateInterface;

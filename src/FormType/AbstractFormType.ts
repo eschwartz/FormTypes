@@ -8,10 +8,9 @@ import _ = require('underscore');
 import Handlebars = require('handlebars');
 
 class AbstractFormType {
-  public el:HTMLElement;
+  public el:Node;
 
   protected options:FormTypeOptionsInterface;
-  protected el:HTMLElement;
   protected templates:FormTemplateCollectionInterface;
   protected Handlebars:HandlebarsStatic;
 
@@ -71,8 +70,8 @@ class AbstractFormType {
     });
   }
 
-  protected createElementFromString(htmlString:string):HTMLElement {
-    var container = document.createElement('div');
+  protected createElementFromString(htmlString:string):Node {
+    var container:HTMLElement = document.createElement('div');
     container.innerHTML = htmlString;
 
     return container.firstChild;
