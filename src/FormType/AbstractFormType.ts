@@ -29,7 +29,9 @@ class AbstractFormType {
 
   public render() {
     var context = this.createTemplateContext();
-    var html:string = this.templates.form(context, {
+    var html:string = this.templates.form({
+      form: context
+    }, {
       partials: this.templates,
       helpers: {
         partial_widget: PartialWidgetHelperFactory(this.templates)
@@ -67,6 +69,7 @@ class AbstractFormType {
     var defaults = {
       tagName: 'form',
       type: 'form',
+      name: _.uniqueId('form_'),
       attrs: {},
       data: null
     };
@@ -85,9 +88,10 @@ class AbstractFormType {
 
   protected createElementFromString(htmlString:string):Node {
     var container:HTMLElement = document.createElement('div');
-    container.innerHTML = htmlString;
+    container.innerHTML = htmlString.trim();
 
-    return container.firstChild;
+    return container.childNodes.length === 1 ?
+      container.firstChild : container;
   }
 }
 

@@ -15,7 +15,9 @@ var PartialWidgetFactory = function(partials:any) {
       );
     }
 
-    var compiled:string = partialTemplate(form, {
+    var compiled:string = partialTemplate({
+      form: form
+    }, {
       partials: partials
     });
     return new Handlebars.SafeString(compiled);
