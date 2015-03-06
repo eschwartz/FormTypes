@@ -8,12 +8,10 @@
 {{#if form.children}}
 {{!--Wrap child fields inside parent field tags--}}
   <{{form.tagName}} {{>html_attrs form.attrs}} >
-  {{#each children}}
-    {{>partial_widget this}}
+  {{#each form.children}}
+    {{partial_widget this}}
   {{/each}}
   </{{form.tagName}}>
+{{else}}
+  <{{form.tagName}} {{>html_attrs form.attrs}} />
 {{/if}}
-
-
-{{!--<input type="text" value="from data option, which is transformed into `attrs`.`value`" placeholder="from attrs.placeholder" />--}}
-<{{form.tagName}} {{>html_attrs form.attrs}} />

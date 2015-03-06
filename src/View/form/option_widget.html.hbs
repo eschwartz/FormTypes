@@ -1,3 +1,4 @@
-<{{form.tagName}} {{>html_attrs form.attrs}}>
-  {{form.label}}
-</{{form.tagName}}>
+<option value="{{form.data}}"
+  {{#if form.selected}}selected{{/if}}>
+    {{form.label}}
+</option>
