@@ -22,14 +22,53 @@ describe('FormType', () => {
   describe('render', () => {
 
     it('should render a text input', () => {
-      var formType = new FormType();
-      var $form;
+      var textType = new TextType();
+      var $inputForm:JQuery, $input:JQuery;
 
-      formType.render();
-      $form = $(formType.el);
+      textType.render();
+      $inputForm = $(textType.el);
+      $input = $inputForm.find('input');
 
-      assert.equal($form.prop('tagName').toLowerCase(), 'form', 'Expected form element to exist');
-      assert.equal($form.children().length, 0, 'Expected form to have no children');
+      assert.equal($input.length, 1,
+        'Expected a single input element to exist');
+    });
+
+    it('should render the TextType\'s data as the input\'s value', () => {
+      var $input:JQuery;
+      var textType = new TextType({
+        data: 'foobar'
+      });
+
+      textType.render();
+      $input = $(textType.el).find('input');
+
+      assert.equal($input.val(), 'foobar');
+    });
+
+    it('should render attributes on the input', () => {
+      var $input:JQuery;
+      var textType = new TextType({
+        attrs: {
+          placeholder: 'Enter stuff here...',
+          required: true
+        }
+      });
+
+      $input = $(textType.render().el).find('input');
+
+      assert.equal($input.attr('placeholder'), 'Enter stuff here...',
+        'Expected `placeholder` attribute to be set.');
+      assert($input.attr('required'),
+        'Expected `required` attribute to be set.');
+    });
+
+    it('should render a label for the input', () => {
+    });
+
+    it('should use a shared uid for the input id and the label[for] attribute', () => {
+    });
+
+    it('should render label attributes', () => {
     });
 
   });

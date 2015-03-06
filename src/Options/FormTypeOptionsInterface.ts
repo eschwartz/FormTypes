@@ -25,6 +25,8 @@ interface FormTypeOptionsInterface extends _.Dictionary<any> {
    * Child form elements.
    */
   children?:AbstractFormType[];
+
+  data?:any;
 }
 
 export = FormTypeOptionsInterface;

@@ -1,6 +1,9 @@
+///ts:ref=underscore.d.ts
+/// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
 import AbstractFormType = require('./AbstractFormType');
-import FormTypeOptionsInterface = require('../Options/FormTypeOptionsInterface');
+import FieldTypeOptionsInterface = require('../Options/FieldTypeOptionsInterface');
 import StringUtil = require('../Util/StringUtil');
+import _ = require('underscore');
 
 
 /**
@@ -8,14 +11,19 @@ import StringUtil = require('../Util/StringUtil');
  */
 class FieldType extends AbstractFormType {
 
-  protected setDefaultOptions(options:FormTypeOptionsInterface):FormTypeOptionsInterface {
-    var options = super.setDefaultOptions(options);
-
-    return _.defaults(options, {
+  protected setDefaultOptions(options:FieldTypeOptionsInterface):FieldTypeOptionsInterface {
+    _.defaults(options, {
+      tagName: 'input',
       type: 'field',
-      label: StringUtil.camelCaseToWords(options.name),
+      label: null,   // to be defaulted below, after we have name option
       labelAttrs: {}
     });
+
+    options = super.setDefaultOptions(options);
+
+    options.label || (options.label = StringUtil.camelCaseToWords(options.name));
+
+    return options;
   }
 
 }
