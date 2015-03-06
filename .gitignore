@@ -14,9 +14,5 @@ node_modules/
 !Gruntfile.js
 typings/generated/
 
-#mocha
-test/mocha.css
-test/index.html
-
 # created by grunt-ts
 tscommand-*.tmp.txt

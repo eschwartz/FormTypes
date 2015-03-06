@@ -5,7 +5,10 @@ var Gruntfile = function(grunt) {
         target: 'es5',
         comments: true,
         module: 'commonjs',
-        compiler: './node_modules/.bin/tsc'
+        compiler: './node_modules/.bin/tsc',
+        // Source maps don't work so well,
+        // because browserify creates source maps, too
+        sourceMap: false
       },
       build: {
         src: [
@@ -14,7 +17,7 @@ var Gruntfile = function(grunt) {
         ],
         reference: 'typings/generated/ref.d.ts'
       },
-      test: {
+      tests: {
         src: [
           'src/**/*.ts',
           'typings/**/*.d.ts',
@@ -67,13 +70,46 @@ var Gruntfile = function(grunt) {
         transform: ['hbsfy']
       },
       dist: {
+        options: {
+          external: ['jquery', 'underscore', 'handlebars']
+        },
         files: {
           'build/FormTypes.js': ['src/exports.js']
         }
       },
-      test: {
+      vendor: {
+        options: {
+          require: [
+            'jquery',
+            'underscore',
+            'handlebars'
+          ]
+        },
         files: {
-          'test/tests.js': ['test/**/*Test.js']
+          'build/vendor.js': []
+        }
+      },
+      // Vendor bundle for tests
+      'vendor-tests': {
+        options: {
+          require: [
+            'jquery',
+            'underscore',
+            'handlebars',
+            'jsdom',
+            'mocha-jsdom'
+          ]
+        },
+        files: {
+          'build/vendor-tests.js': []
+        }
+      },
+      tests: {
+        options: {
+          external: ['jquery', 'underscore', 'handlebars', 'jsdom', 'mocha-jsdom']
+        },
+        files: {
+          'build/tests.js': ['test/spec/**/*Test.js']
         }
       }
     }
@@ -87,8 +123,8 @@ var Gruntfile = function(grunt) {
     'browserify:dist'
   ]);
   grunt.registerTask('build-tests', [
-    'ts:test',
-    'browserify:test'
+    'ts:tests',
+    'browserify:tests'
   ]);
 };
 module.exports = Gruntfile;
