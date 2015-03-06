@@ -1,4 +1,4 @@
-///<reference path="./typings/gruntjs/gruntjs.d.ts" />
+///<reference path="./typings/generated/gruntjs/gruntjs.d.ts" />
 import Grunt = require('grunt');
 
 var Gruntfile = function(grunt:IGrunt) {
@@ -16,7 +16,7 @@ var Gruntfile = function(grunt:IGrunt) {
           'test/**/*.ts',
           'typings/**/*.d.ts'
         ],
-        reference: 'typings/ref.d.ts'
+        reference: 'typings/generated/ref.d.ts'
       },
       test: {
         src: [
@@ -24,17 +24,17 @@ var Gruntfile = function(grunt:IGrunt) {
           'typings/**/*.d.ts',
           'test/**/*.ts'
         ],
-        reference: 'typings/ref.d.ts'
+        reference: 'typings/generated/ref.d.ts'
       },
       watch: {
         src: ['src/**/*.ts', 'typings/**/*.d.ts'],
         watch: 'src/',
-        reference: 'typings/ref.d.ts'
+        reference: 'typings/generated/ref.d.ts'
       },
       'watch-test': {
         src: ['src/**/*.ts', 'typings/**/*.d.ts', 'test/**/*.ts'],
         watch: 'test/',
-        reference: 'typings/ref.d.ts'
+        reference: 'typings/generated/ref.d.ts'
       },
       'transforms-watch': {
         src: [
@@ -44,7 +44,7 @@ var Gruntfile = function(grunt:IGrunt) {
         ],
         watch: './',
         compile: false,
-        reference: 'typings/ref.d.ts'
+        reference: 'typings/generated/ref.d.ts'
       },
       'transforms': {
         src: [
@@ -53,7 +53,7 @@ var Gruntfile = function(grunt:IGrunt) {
           'typings/**/*.d.ts'
         ],
         compile: false,
-        reference: 'typings/ref.d.ts'
+        reference: 'typings/generated/ref.d.ts'
       }
     },
     tslint: {

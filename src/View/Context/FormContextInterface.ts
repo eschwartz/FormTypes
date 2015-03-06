@@ -1,4 +1,5 @@
-///<reference path="../../../typings/underscore/underscore.d.ts" />
+///ts:ref=underscore.d.ts
+/// <reference path="../../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
 
 interface FormContextInterface extends _.Dictionary<any> {
   /**

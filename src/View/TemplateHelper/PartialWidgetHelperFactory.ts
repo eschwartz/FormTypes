@@ -1,5 +1,5 @@
 ///ts:ref=handlebars.d.ts
-/// <reference path="../../../typings/handlebars/handlebars.d.ts"/> ///ts:ref:generated
+/// <reference path="../../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
 import TemplateHelperInterface = require('./TemplateHelperInterface');
 import FormContextInterface = require('../Context/FormContextInterface');
 import Handlebars = require('handlebars');

@@ -11,7 +11,7 @@ node_modules/
 .tscache/
 *.js
 *.js.map
-typings/
+typings/generated/
 
 #mocha
 test/mocha.css

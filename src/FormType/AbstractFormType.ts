@@ -1,6 +1,8 @@
-///<reference path="../../typings/underscore/underscore.d.ts" />
-///<reference path="../../typings/handlebars/handlebars.ext.d.ts" />
-import FormTypeOptionsInterface = require('../Options/FormTypeOptionsInterface')
+///ts:ref=underscore.d.ts
+/// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
+///ts:ref=handlebars.ext.d.ts
+/// <reference path="../../typings/handlebars/handlebars.ext.d.ts"/> ///ts:ref:generated
+import FormTypeOptionsInterface = require('../Options/FormTypeOptionsInterface');
 import TemplateInterface = require('../View/Template/TemplateInterface');
 import FormTemplateCollectionInterface = require('../View/Template/FormTemplateCollectionInterface');
 import FormTemplateCollection = require('../View/Template/FormTemplateCollection');
