@@ -61,9 +61,9 @@ class AbstractFormType {
       children: [],
       data: null
     };
-    var optionKeys = Object.keys(defaults);
+    var sanitizedOptions = _.pick(options, Object.keys(defaults));
 
-    options = _.defaults(_.pick(options, optionKeys), defaults);
+    options = _.defaults(sanitizedOptions, defaults);
 
     _.defaults(options.attrs, {
       name: options.name
