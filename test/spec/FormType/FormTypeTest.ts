@@ -5,7 +5,7 @@
 ///ts:ref=jquery.d.ts
 /// <reference path="../../typings/generated/jquery/jquery.d.ts"/> ///ts:ref:generated
 import assert = require('assert');
-import FormType = require('../../src/FormType/FormType');
+import FormType = require('../../../src/FormType/FormType');
 var jsdom:jsdom = require('mocha-jsdom');
 
 describe('FormType', () => {
