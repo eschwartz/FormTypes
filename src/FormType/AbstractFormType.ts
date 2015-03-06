@@ -9,6 +9,7 @@ import FormTemplateCollection = require('../View/Template/FormTemplateCollection
 import _ = require('underscore');
 import Handlebars = require('handlebars');
 import PartialWidgetHelperFactory = require('../View/TemplateHelper/PartialWidgetHelperFactory');
+import FormContextInterface = require('../View/Context/FormContextInterface');
 
 class AbstractFormType {
   public el:Node;
@@ -16,11 +17,12 @@ class AbstractFormType {
   protected options:FormTypeOptionsInterface;
   protected templates:FormTemplateCollectionInterface;
   protected Handlebars:HandlebarsStatic;
+  protected children:AbstractFormType[];
 
   constructor(options:FormTypeOptionsInterface = {}) {
     this.options = this.setDefaultOptions(_.clone(options));
     this.el = this.createElementFromString('<div></div>');
-    this.Handlebars = Handlebars.create();
+    this.children = [];
 
     this.setTemplates(new FormTemplateCollection());
   }
@@ -41,11 +43,19 @@ class AbstractFormType {
 
   public setTemplates(templates:FormTemplateCollectionInterface) {
     this.templates = templates;
-    //this.registerTemplatePartials();
   }
 
-  protected createTemplateContext():_.Dictionary<any> {
-    return this.options;
+  protected createTemplateContext():FormContextInterface {
+    var formContext:FormContextInterface = _.extend({},
+      this.options, {
+        children: this.children.
+          map((childForm:AbstractFormType) => {
+            var childContext = childForm.createTemplateContext();
+            return childContext;
+          })
+      });
+
+    return formContext;
   }
 
   /**
@@ -58,24 +68,19 @@ class AbstractFormType {
       tagName: 'form',
       type: 'form',
       attrs: {},
-      children: [],
       data: null
     };
     var sanitizedOptions = _.pick(options, Object.keys(defaults));
 
     options = _.defaults(sanitizedOptions, defaults);
 
+    this.children = options.children || [];
+
     _.defaults(options.attrs, {
       name: options.name
     });
 
     return options;
-  }
-
-  protected registerTemplatePartials():void {
-    _.each(this.templates, (template:TemplateInterface, name:string) => {
-      this.Handlebars.registerPartial(name, template);
-    });
   }
 
   protected createElementFromString(htmlString:string):Node {
