@@ -70,9 +70,9 @@ class FormTemplateCollection implements FormTemplateCollectionInterface {
     return this.getTemplate('option_widget', templateString);
   }
 
-  get select_widget():TemplateInterface {
-    var templateString:string = fs.readFileSync(__dirname + '/../form/select_widget.html.hbs', 'utf8');
-    return this.getTemplate('select_widget', templateString);
+  get choice_widget():TemplateInterface {
+    var templateString:string = fs.readFileSync(__dirname + '/../form/choice_widget.html.hbs', 'utf8');
+    return this.getTemplate('choice_widget', templateString);
   }
 
   protected getTemplate(name:string, templateString:string) {

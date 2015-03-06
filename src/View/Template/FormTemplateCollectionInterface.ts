@@ -15,7 +15,7 @@ interface FormTemplateCollectionInterface extends TemplateCollectionInterface {
   /** Generic form field template */
   field_widget:TemplateInterface;
   text_widget:TemplateInterface;
-  select_widget:TemplateInterface;
+  choice_widget:TemplateInterface;
   /** Template for an `option` type form */
   option_widget:TemplateInterface;
 }
