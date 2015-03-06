@@ -21,9 +21,10 @@ class AbstractFormType {
   protected Handlebars:HandlebarsStatic;
 
   constructor(options:FormTypeOptionsInterface = {}) {
-    this.children = options.children || [];
     this.Handlebars = Handlebars.create();
     this.options = this.setDefaultOptions(_.clone(options));
+    this.children = this.options.children || [];
+
     this.el = this.createElementFromString('<div></div>');
 
     this.setDefaultTemplates(options.templates);
@@ -60,7 +61,7 @@ class AbstractFormType {
       html_attrs: defaultTemplates.html_attrs,
       field_widget: defaultTemplates.field_widget,
       text_widget: defaultTemplates.text_widget,
-      select_widget: defaultTemplates.select_widget,
+      choice_widget: defaultTemplates.choice_widget,
       option_widget: defaultTemplates.option_widget
     });
 
@@ -91,11 +92,11 @@ class AbstractFormType {
       type: 'form',
       name: _.uniqueId('form_'),
       attrs: {},
-      data: null
+      data: null,
+      children: []
     };
-    var sanitizedOptions = _.omit(options, ['children']);
 
-    options = _.defaults(sanitizedOptions, defaults);
+    _.defaults(options, defaults);
 
     _.defaults(options.attrs, {
       name: options.name
