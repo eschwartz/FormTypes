@@ -64,12 +64,12 @@ var Gruntfile = function(grunt) {
       }
     },
     browserify: {
-      options: {
-        transform: ['brfs']
-      },
       dist: {
         files: {
           'build/FormTypes.js': ['src/exports.js']
+        },
+        options: {
+          transform: ['hbsfy']
         }
       }
     }
