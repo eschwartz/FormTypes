@@ -8,6 +8,7 @@ import FormTemplateCollectionInterface = require('../View/Template/FormTemplateC
 import FormTemplateCollection = require('../View/Template/FormTemplateCollection');
 import _ = require('underscore');
 import Handlebars = require('handlebars');
+import PartialWidgetHelperFactory = require('../View/TemplateHelper/PartialWidgetHelperFactory');
 
 class AbstractFormType {
   public el:Node;
@@ -25,8 +26,13 @@ class AbstractFormType {
   }
 
   public render() {
-    var context = this.createTemplateContext;
-    var html:string = this.templates.form(context);
+    var context = this.createTemplateContext();
+    var html:string = this.templates.form(context, {
+      partials: this.templates,
+      helpers: {
+        partial_widget: PartialWidgetHelperFactory(this.templates)
+      }
+    });
 
     this.el = this.createElementFromString(html);
 
@@ -35,7 +41,7 @@ class AbstractFormType {
 
   public setTemplates(templates:FormTemplateCollectionInterface) {
     this.templates = templates;
-    this.registerTemplatePartials();
+    //this.registerTemplatePartials();
   }
 
   protected createTemplateContext():_.Dictionary<any> {

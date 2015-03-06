@@ -1,5 +1,5 @@
 interface TemplateInterface {
-  (context:any):string;
+  (context:any, options?:any):string;
 }
 
 export = TemplateInterface;

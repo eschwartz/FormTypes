@@ -4,16 +4,21 @@ import TemplateHelperInterface = require('./TemplateHelperInterface');
 import FormContextInterface = require('../Context/FormContextInterface');
 import Handlebars = require('handlebars');
 
-var PartialWidgetFactory = function(Handlebars:HandlebarsStatic):TemplateHelperInterface {
+var PartialWidgetFactory = function(partials:any) {
   return function(form:FormContextInterface) {
     var partial = form.type + '_widget';
-    var partialTemplate = Handlebars.partials[partial];
+    var partialTemplate = partials[partial];
 
     if (!partialTemplate) {
-      throw new Error('Unable to find partial for form of type ' + form.type);
+      throw new Error('Unable to find partial for form of type ' + form.type + '.' +
+        '(Looking for a partial named ' + partial + ')'
+      );
     }
 
-    return partialTemplate(form);
+    var compiled:string = partialTemplate(form, {
+      partials: partials
+    });
+    return new Handlebars.SafeString(compiled);
   };
 };
 
