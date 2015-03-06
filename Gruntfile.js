@@ -1,7 +1,4 @@
-///<reference path="./typings/generated/gruntjs/gruntjs.d.ts" />
-import Grunt = require('grunt');
-
-var Gruntfile = function(grunt:IGrunt) {
+var Gruntfile = function(grunt) {
   grunt.initConfig({
     ts: {
       options: {
@@ -40,7 +37,7 @@ var Gruntfile = function(grunt:IGrunt) {
         src: [
           'src/**/*.ts',
           'test/**/*.ts',
-          'typings/**/*.d.ts',
+          'typings/**/*.d.ts'
         ],
         watch: './',
         compile: false,
@@ -67,6 +64,9 @@ var Gruntfile = function(grunt:IGrunt) {
       }
     },
     browserify: {
+      options: {
+        transform: ['brfs']
+      },
       dist: {
         files: {
           'build/FormTypes.js': ['src/exports.js']
@@ -74,17 +74,13 @@ var Gruntfile = function(grunt:IGrunt) {
       }
     }
   });
-
   grunt.loadNpmTasks('grunt-ts');
   grunt.loadNpmTasks('grunt-tslint');
   grunt.loadNpmTasks('grunt-browserify');
-
   grunt.registerTask('build', [
     'tslint',
     'ts:build',
     'browserify'
   ]);
 };
-
-export = Gruntfile;
-
+module.exports = Gruntfile;
