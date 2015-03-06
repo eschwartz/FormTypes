@@ -10,7 +10,6 @@ var Gruntfile = function(grunt) {
       build: {
         src: [
           'src/**/*.ts',
-          'test/**/*.ts',
           'typings/**/*.d.ts'
         ],
         reference: 'typings/generated/ref.d.ts'
@@ -64,12 +63,17 @@ var Gruntfile = function(grunt) {
       }
     },
     browserify: {
+      options: {
+        transform: ['hbsfy']
+      },
       dist: {
         files: {
           'build/FormTypes.js': ['src/exports.js']
-        },
-        options: {
-          transform: ['hbsfy']
+        }
+      },
+      test: {
+        files: {
+          'test/tests.js': ['test/**/*Test.js']
         }
       }
     }
@@ -80,7 +84,11 @@ var Gruntfile = function(grunt) {
   grunt.registerTask('build', [
     'tslint',
     'ts:build',
-    'browserify'
+    'browserify:dist'
+  ]);
+  grunt.registerTask('build-tests', [
+    'ts:test',
+    'browserify:test'
   ]);
 };
 module.exports = Gruntfile;

@@ -10,7 +10,10 @@ var jsdom:jsdom = require('mocha-jsdom');
 
 describe('FormType', () => {
   var $:JQueryStatic;
-  jsdom();
+
+  if (!document) {
+    jsdom();
+  }
 
   before(() => {
     $ = require('jquery');
