@@ -7,7 +7,6 @@ import TemplateInterface = require('../View/Template/TemplateInterface');
 import FormTemplateCollectionInterface = require('../View/Template/FormTemplateCollectionInterface');
 import FormTemplateCollection = require('../View/Template/FormTemplateCollection');
 import _ = require('underscore');
-import Handlebars = require('handlebars');
 import PartialWidgetHelperFactory = require('../View/TemplateHelper/PartialWidgetHelperFactory');
 import FormContextInterface = require('../View/Context/FormContextInterface');
 
@@ -16,7 +15,6 @@ class AbstractFormType {
 
   protected options:FormTypeOptionsInterface;
   protected templates:FormTemplateCollectionInterface;
-  protected Handlebars:HandlebarsStatic;
   protected children:AbstractFormType[];
 
   constructor(options:FormTypeOptionsInterface = {}) {
@@ -73,7 +71,7 @@ class AbstractFormType {
       attrs: {},
       data: null
     };
-    var sanitizedOptions = _.pick(options, Object.keys(defaults));
+    var sanitizedOptions = _.omit(options, ['children']);
 
     options = _.defaults(sanitizedOptions, defaults);
 

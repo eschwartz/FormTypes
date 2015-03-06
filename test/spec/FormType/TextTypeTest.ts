@@ -8,7 +8,7 @@ import assert = require('assert');
 import TextType = require('../../../src/FormType/TextType');
 var jsdom:jsdom = require('mocha-jsdom');
 
-describe('FormType', () => {
+describe('TextType', () => {
   var $:JQueryStatic;
 
   if (typeof window === 'undefined') {
@@ -63,12 +63,70 @@ describe('FormType', () => {
     });
 
     it('should render a label for the input', () => {
+      var textType = new TextType();
+
+      textType.render();
+
+      assert.equal($(textType.el).find('label').length, 1,
+        'Expected a single label to be rendered.');
+    });
+
+    it('should use the label option as the label text', () => {
+      var $label:JQuery;
+      var textType = new TextType({
+        label: 'My Great Text Input'
+      });
+
+      textType.render();
+      $label = $(textType.el).find('label');
+
+      assert.equal($label.text().trim(), 'My Great Text Input',
+        'Expected label text to match label option.');
+    });
+
+    it('should use the camelCased name option to generate a default label', () => {
+      var $label:JQuery;
+      var textType = new TextType({
+        name: 'userName'
+      });
+
+      textType.render();
+      $label = $(textType.el).find('label');
+
+      assert.equal($label.text().trim(), 'User Name',
+        'Expected label text to match label option.');
     });
 
     it('should use a shared uid for the input id and the label[for] attribute', () => {
+      var $input:JQuery, $label:JQuery;
+      var textType = new TextType({
+        name: 'userName'
+      });
+
+      textType.render();
+      $label = $(textType.el).find('label');
+      $input = $(textType.el).find('input');
+
+      assert($label.attr('for'), 'Expected label to have a `for` attribute');
+      assert($input.attr('id'), 'Expected input to have an `id` attribute');
+
+      assert.equal($label.attr('for'), $input.attr('id'),
+        'Expected label `for` attribute to match input\'s id');
     });
 
     it('should render label attributes', () => {
+      var $label:JQuery;
+      var textType = new TextType({
+        labelAttrs: {
+          'class': 'foo-bar faz-baz'
+        }
+      });
+
+      textType.render();
+      $label = $(textType.el).find('label');
+
+      assert.equal($label.attr('class'), 'foo-bar faz-baz',
+        'Expected label to have attributes from `labelAttrs` option.');
     });
 
   });
