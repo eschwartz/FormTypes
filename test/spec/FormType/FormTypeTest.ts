@@ -1,9 +1,9 @@
 ///ts:ref=mocha.d.ts
-/// <reference path="../../typings/generated/mocha/mocha.d.ts"/> ///ts:ref:generated
+/// <reference path="../../../typings/generated/mocha/mocha.d.ts"/> ///ts:ref:generated
 ///ts:ref=mocha-jsdom.d.ts
-/// <reference path="../../typings/mocha-jsdom/mocha-jsdom.d.ts"/> ///ts:ref:generated
+/// <reference path="../../../typings/mocha-jsdom/mocha-jsdom.d.ts"/> ///ts:ref:generated
 ///ts:ref=jquery.d.ts
-/// <reference path="../../typings/generated/jquery/jquery.d.ts"/> ///ts:ref:generated
+/// <reference path="../../../typings/generated/jquery/jquery.d.ts"/> ///ts:ref:generated
 import assert = require('assert');
 import FormType = require('../../../src/FormType/FormType');
 var jsdom:jsdom = require('mocha-jsdom');
