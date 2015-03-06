@@ -6,9 +6,42 @@
 </head>
 <body>
 
+<script type="text/javascript" src="../build/vendor.js"></script>
 <script type="text/javascript" src="../build/FormTypes.js"></script>
 <script type="text/javascript">
-  var formType = new FormType();
+  var Handlebars = require('handlebars');
+  var formType = new FormTypes.FormType({
+    templates: {
+      text_widget: Handlebars.compile('\
+      <div class="row"\
+           style="padding: 10px 0"> \
+        <label style="display:block">{{form.label}}</label>\
+        <input type="text" \
+               style="outline:3px solid green; margin: 10px 0" \
+               value="{{form.attrs.value}}"\
+        />\
+      </div>\
+      ')
+    },
+    children: [
+      new FormTypes.TextType({
+        label: 'Full name',
+        attrs: {
+          placeholder: 'eg. John Smith'
+        },
+        data: 'Jane Doe'
+      }),
+      new FormTypes.ChoiceType({
+        label: 'Country of residence',
+        choices: {
+          ca: 'Canada',
+          fr: 'France',
+          us: 'United States'
+        },
+        data: 'us'
+      })
+    ]
+  });
   formType.render();
 
   document.body.appendChild(formType.el);
