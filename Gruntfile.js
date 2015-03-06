@@ -126,5 +126,9 @@ var Gruntfile = function(grunt) {
     'ts:tests',
     'browserify:tests'
   ]);
+  grunt.registerTask('build-vendor', [
+    'browserify:vendor',
+    'browserify:vendor-tests'
+  ]);
 };
 module.exports = Gruntfile;
