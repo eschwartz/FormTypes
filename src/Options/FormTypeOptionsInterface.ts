@@ -1,7 +1,7 @@
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
 import AbstractFormType = require('../FormType/AbstractFormType');
-import FormTemplateCollectionInterface = require('../View/Template/FormTemplateCollectionInterface')
+import FormTemplateCollectionInterface = require('../View/Template/FormTemplateCollectionInterface');
 interface FormTypeOptionsInterface extends _.Dictionary<any> {
   type?:string;
 
