@@ -5,10 +5,12 @@
 import FormTypeOptionsInterface = require('../Options/FormTypeOptionsInterface');
 import TemplateInterface = require('../View/Template/TemplateInterface');
 import FormTemplateCollectionInterface = require('../View/Template/FormTemplateCollectionInterface');
+import TemplateCollectionInterface = require('../View/Template/TemplateCollectionInterface');
 import FormTemplateCollection = require('../View/Template/FormTemplateCollection');
 import _ = require('underscore');
-import PartialWidgetHelperFactory = require('../View/TemplateHelper/PartialWidgetHelperFactory');
+import PartialWidgetHelperFactory = require('../View/TemplateHelper/PartialWidgetHelper');
 import FormContextInterface = require('../View/Context/FormContextInterface');
+import Handlebars = require('handlebars');
 
 class AbstractFormType {
   public el:Node;
@@ -16,24 +18,21 @@ class AbstractFormType {
   protected options:FormTypeOptionsInterface;
   protected templates:FormTemplateCollectionInterface;
   protected children:AbstractFormType[];
+  protected Handlebars:HandlebarsStatic;
 
   constructor(options:FormTypeOptionsInterface = {}) {
+    this.children = options.children || [];
+    this.Handlebars = Handlebars.create();
     this.options = this.setDefaultOptions(_.clone(options));
     this.el = this.createElementFromString('<div></div>');
-    this.children = [];
 
-    this.setTemplates(new FormTemplateCollection());
+    this.setDefaultTemplates(options.templates);
   }
 
   public render() {
     var context = this.createTemplateContext();
     var html:string = this.templates.form({
       form: context
-    }, {
-      partials: this.templates,
-      helpers: {
-        partial_widget: PartialWidgetHelperFactory(this.templates)
-      }
     });
 
     this.el = this.createElementFromString(html);
@@ -42,7 +41,30 @@ class AbstractFormType {
   }
 
   public setTemplates(templates:FormTemplateCollectionInterface) {
+    _.each(templates, (template:TemplateInterface, name:string) => {
+      this.Handlebars.registerPartial(name, template);
+    });
+
     this.templates = templates;
+  }
+
+  protected setDefaultTemplates(templates?:FormTemplateCollectionInterface) {
+    var defaultTemplates = new FormTemplateCollection(this.Handlebars);
+
+    templates = _.defaults({}, templates || {}, {
+      form: defaultTemplates.form,
+      form_widget: defaultTemplates.form_widget,
+      form_start: defaultTemplates.form_start,
+      form_end: defaultTemplates.form_end,
+      form_rows: defaultTemplates.form_rows,
+      html_attrs: defaultTemplates.html_attrs,
+      field_widget: defaultTemplates.field_widget,
+      text_widget: defaultTemplates.text_widget,
+      select_widget: defaultTemplates.select_widget,
+      option_widget: defaultTemplates.option_widget
+    });
+
+    this.setTemplates(templates);
   }
 
   protected createTemplateContext():FormContextInterface {
@@ -74,8 +96,6 @@ class AbstractFormType {
     var sanitizedOptions = _.omit(options, ['children']);
 
     options = _.defaults(sanitizedOptions, defaults);
-
-    this.children = options.children || [];
 
     _.defaults(options.attrs, {
       name: options.name

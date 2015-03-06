@@ -67,7 +67,7 @@ var Gruntfile = function(grunt) {
     },
     browserify: {
       options: {
-        transform: ['hbsfy']
+        transform: ['brfs']
       },
       dist: {
         options: {

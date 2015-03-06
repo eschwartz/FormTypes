@@ -1,6 +1,7 @@
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
 import AbstractFormType = require('../FormType/AbstractFormType');
+import FormTemplateCollectionInterface = require('../View/Template/FormTemplateCollectionInterface')
 interface FormTypeOptionsInterface extends _.Dictionary<any> {
   type?:string;
 
@@ -19,7 +20,7 @@ interface FormTypeOptionsInterface extends _.Dictionary<any> {
   /**
    * Attributes to apply to the HTML element
    */
-  attrs?:_.Dictionary<string>;
+  attrs?:_.Dictionary<any>;
 
   /**
    * Child form elements.
@@ -27,6 +28,8 @@ interface FormTypeOptionsInterface extends _.Dictionary<any> {
   children?:AbstractFormType[];
 
   data?:any;
+
+  templates?:FormTemplateCollectionInterface;
 }
 
 export = FormTypeOptionsInterface;
