@@ -1,3 +1,5 @@
+///ts:ref=node.d.ts
+/// <reference path="../../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 import FormTemplateCollectionInterface = require('./FormTemplateCollectionInterface');
 import TemplateInterface = require('./TemplateInterface');
 require('handlebars');
@@ -15,6 +17,7 @@ class FormTemplateCollection implements FormTemplateCollectionInterface {
   form_end:TemplateInterface;
   html_attrs:TemplateInterface;
   field_widget:TemplateInterface;
+  text_widget:TemplateInterface;
   option_widget:TemplateInterface;
 
   constructor() {
@@ -25,6 +28,7 @@ class FormTemplateCollection implements FormTemplateCollectionInterface {
     this.form_end = require('../form/form_end.html.hbs');
     this.html_attrs = require('../form/html_attrs.html.hbs');
     this.field_widget = require('../form/field_widget.html.hbs');
+    this.text_widget = require('../form/text_widget.html.hbs');
     this.option_widget = require('../form/option_widget.html.hbs');
   }
 }
