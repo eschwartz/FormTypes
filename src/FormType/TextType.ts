@@ -23,6 +23,13 @@ class TextType extends FieldType {
     return options;
   }
 
+
+  public getData():string {
+    var input = <HTMLInputElement>this.getFormElement();
+
+    return input ? input.value : this.options.data;
+  }
+
 }
 
 export = TextType;

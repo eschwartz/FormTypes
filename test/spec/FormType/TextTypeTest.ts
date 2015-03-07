@@ -131,4 +131,46 @@ describe('TextType', () => {
 
   });
 
+  describe('getData', () => {
+
+    it('should return the initial data value, before rendering the type', () => {
+      var textType = new TextType({
+        data: 'foo'
+      });
+
+      assert.equal(textType.getData(), 'foo');
+    });
+
+    it('should return the initial data value, after rendering the type', () => {
+      var textType = new TextType({
+        data: 'foo'
+      });
+
+      textType.render();
+
+      assert.equal(textType.getData(), 'foo');
+    });
+
+    it('should return an empty string, if no data is provided', function() {
+      var textType = new TextType();
+      textType.render();
+
+      assert.strictEqual(textType.getData(), '');
+    });
+
+    it('should return changed values', function() {
+      var $input:JQuery;
+      var textType = new TextType({
+        data: 'foo'
+      });
+      textType.render();
+
+      $input = $(textType.el).find('input');
+      $input.val('bar');
+
+      assert.equal(textType.getData(), 'bar');
+    });
+
+  });
+
 });
