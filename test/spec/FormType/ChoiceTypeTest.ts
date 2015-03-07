@@ -85,5 +85,64 @@ describe('ChoiceType', () => {
     });
   });
 
+  describe('getData', () => {
+
+    it('should return the initial data value, before rendering the type', () => {
+      var choiceType = new ChoiceType({
+        data: 'bar',
+        choices: {
+          foo: 'Foo',
+          bar: 'Bar'
+        }
+      });
+
+      assert.equal(choiceType.getData(), 'bar');
+    });
+
+    it('should return the initial data value, after rendering the type', () => {
+      var choiceType = new ChoiceType({
+        data: 'bar',
+        choices: {
+          foo: 'Foo',
+          bar: 'Bar'
+        }
+      });
+
+      choiceType.render();
+
+      assert.equal(choiceType.getData(), 'bar');
+    });
+
+    it('should return the value of the first choice element, if no data is provided', function() {
+      var choiceType = new ChoiceType({
+        choices: {
+          foo: 'Foo',
+          bar: 'Bar'
+        }
+      });
+      choiceType.render();
+
+      assert.equal(choiceType.getData(), 'foo');
+    });
+
+    it('should return changed values', function() {
+      var $select:JQuery;
+      var choiceType = new ChoiceType({
+        data: 'foo',
+        choices: {
+          foo: 'Foo',
+          bar: 'Bar'
+        }
+      });
+      choiceType.render();
+
+      $select = $(choiceType.el).find('select');
+      $select.val('bar');
+
+      assert.equal(choiceType.getData(), 'bar');
+    });
+
+  });
+
 
 });

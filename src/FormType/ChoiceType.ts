@@ -28,6 +28,12 @@ class ChoiceType extends FieldType {
     return super.setDefaultOptions(options);
   }
 
+  public getData():string {
+    var $select = <HTMLSelectElement>this.getFormElement();
+
+    return $select ? $select.value : this.options.data;
+  }
+
 }
 
 export = ChoiceType;
