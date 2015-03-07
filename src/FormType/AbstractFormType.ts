@@ -13,7 +13,7 @@ import FormContextInterface = require('../View/Context/FormContextInterface');
 import Handlebars = require('handlebars');
 
 class AbstractFormType {
-  public el:Node;
+  public el:HTMLElement;
 
   protected options:FormTypeOptionsInterface;
   protected templates:FormTemplateCollectionInterface;
@@ -105,12 +105,12 @@ class AbstractFormType {
     return options;
   }
 
-  protected createElementFromString(htmlString:string):Node {
+  protected createElementFromString(htmlString:string):HTMLElement {
     var container:HTMLElement = document.createElement('div');
     container.innerHTML = htmlString.trim();
 
     return container.childNodes.length === 1 ?
-      container.firstChild : container;
+      <HTMLElement>container.firstChild : container;
   }
 }
 
