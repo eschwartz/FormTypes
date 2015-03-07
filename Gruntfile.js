@@ -97,7 +97,8 @@ var Gruntfile = function(grunt) {
             'underscore',
             'handlebars',
             'jsdom',
-            'mocha-jsdom'
+            'mocha-jsdom',
+            'sinon'
           ]
         },
         files: {
@@ -106,7 +107,7 @@ var Gruntfile = function(grunt) {
       },
       tests: {
         options: {
-          external: ['jquery', 'underscore', 'handlebars', 'jsdom', 'mocha-jsdom']
+          external: ['jquery', 'underscore', 'handlebars', 'jsdom', 'mocha-jsdom', 'sinon']
         },
         files: {
           'build/tests.js': ['test/spec/**/*Test.js']
