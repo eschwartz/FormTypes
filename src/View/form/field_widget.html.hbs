@@ -4,14 +4,4 @@
   </label>
 {{/if}}
 
-{{!--This will work for <select><options></option>...</select>--}}
-{{#if form.children}}
-{{!--Wrap child fields inside parent field tags--}}
-  <{{form.tagName}} {{>html_attrs form.attrs}} >
-  {{#each form.children}}
-    {{partial_widget this}}
-  {{/each}}
-  </{{form.tagName}}>
-{{else}}
-  <{{form.tagName}} {{>html_attrs form.attrs}} />
-{{/if}}
+<{{form.tagName}} {{>html_attrs form.attrs}} />

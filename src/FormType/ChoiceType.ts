@@ -1,11 +1,16 @@
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
+import AbstractFormType = require('./AbstractFormType');
 import FieldType = require('./FieldType');
 import OptionType = require('./OptionType');
 import ChoiceTypeOptionsInterface = require('../Options/ChoiceTypeOptionsInterface');
 import _ = require('underscore');
 
 class ChoiceType extends FieldType {
+
+  protected appendChildType(childType:AbstractFormType) {
+    this.getFormElement().appendChild(childType.el);
+  }
 
   protected setDefaultOptions(options:ChoiceTypeOptionsInterface) {
     _.defaults(options, {

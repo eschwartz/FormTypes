@@ -38,7 +38,17 @@ class AbstractFormType {
 
     this.el = this.createElementFromString(html);
 
+    this.children.forEach((formType:AbstractFormType) => {
+      formType.render();
+
+      this.appendChildType(formType);
+    });
+
     return this;
+  }
+
+  protected appendChildType(childType:AbstractFormType) {
+    this.el.appendChild(childType.el);
   }
 
   public setTemplates(templates:FormTemplateCollectionInterface) {

@@ -1,1 +1,7 @@
-{{>field_widget}}
+{{#if form.label}}
+  <label {{>html_attrs form.labelAttrs}}>
+    {{form.label}}
+  </label>
+{{/if}}
+
+<select {{>html_attrs form.attrs}}></select>
