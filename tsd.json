@@ -30,6 +30,9 @@
     },
     "sinon/sinon.d.ts": {
       "commit": "fa20411dd52348e933c2b23b24365236e92fa4ac"
+    },
+    "pubsubjs/pubsub.d.ts": {
+      "commit": "fa20411dd52348e933c2b23b24365236e92fa4ac"
     }
   }
 }
