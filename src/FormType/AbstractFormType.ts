@@ -1,3 +1,5 @@
+///ts:ref=node.d.ts
+/// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
 ///ts:ref=handlebars.ext.d.ts
@@ -11,6 +13,8 @@ import _ = require('underscore');
 import PartialWidgetHelperFactory = require('../View/TemplateHelper/PartialWidgetHelper');
 import FormContextInterface = require('../View/Context/FormContextInterface');
 import Handlebars = require('handlebars');
+import Events = require('events');
+
 
 class AbstractFormType {
   public el:HTMLElement;
@@ -19,9 +23,11 @@ class AbstractFormType {
   protected templates:FormTemplateCollectionInterface;
   protected children:AbstractFormType[];
   protected Handlebars:HandlebarsStatic;
+  protected eventEmitter:NodeJS.EventEmitter;
 
   constructor(options:FormTypeOptionsInterface = {}) {
     this.Handlebars = Handlebars.create();
+    this.eventEmitter = new Events.EventEmitter();
     this.options = this.setDefaultOptions(_.clone(options));
     this.children = this.options.children || [];
 
@@ -30,7 +36,7 @@ class AbstractFormType {
     this.setDefaultTemplates(options.templates);
   }
 
-  public render() {
+  public render():AbstractFormType {
     var context = this.createTemplateContext();
     var html:string = this.templates.form({
       form: context
@@ -146,6 +152,22 @@ class AbstractFormType {
     throw new Error(
       'Form of type "' + this.options.type + '" must implement a getData() method.'
     );
+  }
+
+  public on(event:string, listener:Function) {
+    this.eventEmitter.on(event, listener);
+  }
+
+  public once(event:string, listener:Function) {
+    this.eventEmitter.once(event, listener);
+  }
+
+  public removeListener(event:string, listener:Function) {
+    this.eventEmitter.removeListener(event, listener);
+  }
+
+  public removeAllListeners(event?:string) {
+    this.eventEmitter.removeAllListeners(event);
   }
 }
 

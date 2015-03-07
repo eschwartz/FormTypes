@@ -8,6 +8,17 @@ import _ = require('underscore');
 
 class ChoiceType extends FieldType {
 
+  public render():ChoiceType {
+    super.render();
+
+    this.getFormElement().
+      addEventListener('change', () => {
+        this.eventEmitter.emit('change');
+      });
+
+    return this;
+  }
+
   protected appendChildType(childType:AbstractFormType) {
     this.getFormElement().appendChild(childType.el);
   }

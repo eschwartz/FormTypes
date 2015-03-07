@@ -4,8 +4,12 @@
 /// <reference path="../../../typings/mocha-jsdom/mocha-jsdom.d.ts"/> ///ts:ref:generated
 ///ts:ref=jquery.d.ts
 /// <reference path="../../../typings/generated/jquery/jquery.d.ts"/> ///ts:ref:generated
+///ts:ref=sinon.d.ts
+/// <reference path="../../../typings/generated/sinon/sinon.d.ts"/> ///ts:ref:generated
 import assert = require('assert');
 import TextType = require('../../../src/FormType/TextType');
+import sinon = require('sinon');
+import DomEvents = require('../../Util/DomEvents');
 var jsdom:jsdom = require('mocha-jsdom');
 
 describe('TextType', () => {
@@ -169,6 +173,27 @@ describe('TextType', () => {
       $input.val('bar');
 
       assert.equal(textType.getData(), 'bar');
+    });
+
+  });
+
+  describe('`change` event', () => {
+
+    it('should fire after the input\'s value has changed', (done) => {
+      var onChange = sinon.spy();
+      var textType = new TextType();
+      var input:HTMLInputElement;
+
+      textType.render();
+      input = <HTMLInputElement>textType.getFormElement();
+
+      textType.on('change', () => {
+        assert.equal(input.value, 'foo');
+        onChange();
+        done();
+      });
+
+      DomEvents.dispatchInputEvent(input, 'foo');
     });
 
   });

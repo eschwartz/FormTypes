@@ -6,6 +6,18 @@ import _ = require('underscore');
 
 class TextType extends FieldType {
 
+  public render():TextType {
+    super.render();
+
+    // Trigger change on 'input' events.
+    this.getFormElement()
+      .addEventListener('input', () => {
+        this.eventEmitter.emit('change');
+      });
+
+    return this;
+  }
+
   protected setDefaultOptions(options:FieldTypeOptionsInterface):FieldTypeOptionsInterface {
     _.defaults(options, {
       tagName: 'input',
