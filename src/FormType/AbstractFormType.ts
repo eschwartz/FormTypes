@@ -122,13 +122,15 @@ class AbstractFormType {
     var tagName = this.options.tagName;
     var isInputTopLevelElement = this.el.tagName.toLowerCase() === tagName;
 
-    return isInputTopLevelElement ?
-        this.el : this.el.getElementsByTagName('input').item(0);
+    return <HTMLElement>(
+      isInputTopLevelElement ?
+        this.el : this.el.getElementsByTagName(tagName).item(0)
+    );
   }
 
-  public getData() {
+  public getData():any {
     throw new Error(
-      'Form of type ' + this.type + 'must implement a getData() method.'
+      'Form of type ' + this.options.type + 'must implement a getData() method.'
     );
   }
 }
