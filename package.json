@@ -10,6 +10,7 @@
   "license": "BSD",
   "dependencies": {
     "handlebars": "^3.0.0",
+    "pubsub-js": "^1.5.2",
     "underscore": "^1.8.2"
   },
   "devDependencies": {
