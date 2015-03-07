@@ -130,7 +130,7 @@ class AbstractFormType {
 
   public getData():any {
     throw new Error(
-      'Form of type ' + this.options.type + 'must implement a getData() method.'
+      'Form of type "' + this.options.type + '" must implement a getData() method.'
     );
   }
 }
