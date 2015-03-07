@@ -123,6 +123,10 @@ class AbstractFormType {
       <HTMLElement>container.firstChild : container;
   }
 
+  public getName():string {
+    return this.options.name;
+  }
+
   /**
    * Returns the element which is bound to the form.
    * For example, for a TextType, this would be the <input type="text" />
