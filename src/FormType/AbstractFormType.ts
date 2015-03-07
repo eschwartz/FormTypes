@@ -125,6 +125,12 @@ class AbstractFormType {
     return isInputTopLevelElement ?
         this.el : this.el.getElementsByTagName('input').item(0);
   }
+
+  public getData() {
+    throw new Error(
+      'Form of type ' + this.type + 'must implement a getData() method.'
+    );
+  }
 }
 
 export = AbstractFormType;
