@@ -29,11 +29,23 @@ class AbstractFormType {
     this.Handlebars = Handlebars.create();
     this.eventEmitter = new Events.EventEmitter();
     this.options = this.setDefaultOptions(_.clone(options));
-    this.children = this.options.children || [];
+    this.children = [];
+    if (this.options.children) {
+      this.options.children.forEach(this.addChild, this);
+    }
 
     this.el = this.createElementFromString('<div></div>');
 
     this.setDefaultTemplates(options.templates);
+  }
+
+  public addChild(child:AbstractFormType) {
+    this.children.push(child);
+
+    child.on('change', () => {
+      this.eventEmitter.emit('change');
+      this.eventEmitter.emit('change:' + child.getName());
+    });
   }
 
   public render():AbstractFormType {

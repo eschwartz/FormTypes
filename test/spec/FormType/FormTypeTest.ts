@@ -6,11 +6,15 @@
 /// <reference path="../../../typings/generated/jquery/jquery.d.ts"/> ///ts:ref:generated
 ///ts:ref=underscore.d.ts
 /// <reference path="../../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
+///ts:ref=sinon.d.ts
+/// <reference path="../../../typings/generated/sinon/sinon.d.ts"/> ///ts:ref:generated
 import assert = require('assert');
 import FormType = require('../../../src/FormType/FormType');
 import TextType = require('../../../src/FormType/TextType');
 import ChoiceType = require('../../../src/FormType/ChoiceType');
 import _ = require('underscore');
+import DomEvents = require('../../Util/DomEvents');
+import sinon = require('sinon');
 var jsdom:jsdom = require('mocha-jsdom');
 
 describe('FormType', () => {
@@ -184,6 +188,62 @@ describe('FormType', () => {
         }));
       });
 
+    });
+
+  });
+
+  describe('change event', () => {
+
+    it('should fire when any child type changes', (done) => {
+      var onChange = sinon.spy();
+      var input:HTMLInputElement;
+      var formType = new FormType({
+        children: [
+          new TextType({
+            name: 'fullName'
+          })
+        ]
+      });
+      formType.render();
+
+      input = formType.el.getElementsByTagName('input').item(0);
+
+      formType.on('change', () => {
+        assert.equal(formType.getData()['fullName'], 'Bob the Bob');
+        onChange();
+        done();
+      });
+
+      DomEvents.dispatchInputEvent(input, 'Bob the Bob');
+      assert(onChange.called);
+    });
+
+  });
+
+  describe('change:[child] event', () => {
+
+    it('should fire when the child type changes', (done) => {
+      var onChange = sinon.spy();
+      var input:HTMLInputElement;
+      var formType = new FormType({
+        children: [
+          new TextType({
+            name: 'fullName'
+          })
+        ]
+      });
+      formType.render();
+
+      input = formType.el.getElementsByTagName('input').item(0);
+
+      formType.on('change:fullName', () => {
+        assert.equal(formType.getData()['fullName'], 'Bob the Bob');
+        onChange();
+        done();
+      });
+
+      DomEvents.dispatchInputEvent(input, 'Bob the Bob');
+      assert(onChange.called);
     });
 
   });
