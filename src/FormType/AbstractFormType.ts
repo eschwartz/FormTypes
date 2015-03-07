@@ -112,6 +112,19 @@ class AbstractFormType {
     return container.childNodes.length === 1 ?
       <HTMLElement>container.firstChild : container;
   }
+
+  /**
+   * Returns the element which is bound to the form.
+   * For example, for a TextType, this would be the <input type="text" />
+   * element.
+   */
+  public getFormElement():HTMLElement {
+    var tagName = this.options.tagName;
+    var isInputTopLevelElement = this.el.tagName.toLowerCase() === tagName;
+
+    return isInputTopLevelElement ?
+        this.el : this.el.getElementsByTagName('input').item(0);
+  }
 }
 
 export = AbstractFormType;
