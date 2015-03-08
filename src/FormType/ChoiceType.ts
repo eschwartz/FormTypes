@@ -50,6 +50,24 @@ class ChoiceType extends FieldType {
     return $select ? $select.value : this.options.data;
   }
 
+  public setData(data:string):void {
+    var select = <HTMLSelectElement>this.getFormElement();
+    var isSameData = data === this.getData();
+
+    if (isSameData) {
+      return;
+    }
+
+    if (!select) {
+      this.options.data = data;
+    }
+    else {
+      select.value = data;
+    }
+
+    this.eventEmitter.emit('change');
+  }
+
 }
 
 export = ChoiceType;

@@ -148,6 +148,90 @@ describe('ChoiceType', () => {
 
   });
 
+  describe('setData', () => {
+
+    it('should set the value of the select element', () => {
+      var select:HTMLSelectElement;
+      var choiceType = new ChoiceType({
+        choices: {
+          chicken: 'The Chicken',
+          egg: 'The Egg'
+        },
+        data: 'egg'
+      });
+      choiceType.render();
+
+      choiceType.setData('chicken');
+
+      select = <HTMLSelectElement>choiceType.getFormElement();
+      assert.equal(select.value, 'chicken');
+    });
+
+    it('should set the return value of getData()', () => {
+      var choiceType = new ChoiceType({
+        choices: {
+          chicken: 'The Chicken',
+          egg: 'The Egg'
+        },
+        data: 'egg'
+      });
+      choiceType.render();
+
+      choiceType.setData('chicken');
+
+      assert.equal(choiceType.getData(), 'chicken');
+    });
+
+    it('should set the return value of getData() - before render', () => {
+      var choiceType = new ChoiceType({
+        choices: {
+          chicken: 'The Chicken',
+          egg: 'The Egg'
+        },
+        data: 'egg'
+      });
+
+      choiceType.setData('chicken');
+
+      assert.equal(choiceType.getData(), 'chicken');
+    });
+
+    it('should trigger a change event', () => {
+      var onChange = sinon.spy();
+      var choiceType = new ChoiceType({
+        choices: {
+          chicken: 'The Chicken',
+          egg: 'The Egg'
+        },
+        data: 'egg'
+      });
+
+      choiceType.on('change', onChange);
+
+      choiceType.setData('chicken');
+
+      assert(onChange.called);
+    });
+
+    it('should not trigger a change event, if the data is the same', () => {
+      var onChange = sinon.spy();
+      var choiceType = new ChoiceType({
+        choices: {
+          chicken: 'The Chicken',
+          egg: 'The Egg'
+        },
+        data: 'egg'
+      });
+
+      choiceType.on('change', onChange);
+
+      choiceType.setData('egg');
+
+      assert(!onChange.called);
+    });
+
+  });
+
   describe('change event', () => {
 
     it('should fire when the select input\'s value changes', (done) => {
