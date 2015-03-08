@@ -248,4 +248,81 @@ describe('FormType', () => {
 
   });
 
+  describe('functional tests', () => {
+
+    it('should swap out child types', () => {
+      var $form:JQuery, $countrySelect:JQuery;
+      var usForm = new FormType({
+        name: 'usForm',
+        children: [
+          new ChoiceType({
+            name: 'sodaOrPop',
+            choices: {
+              'soda': 'It\' called soda',
+              'pop': 'No, it\'s caled pop.'
+            }
+          })
+        ]
+      });
+      var franceForm = new FormType({
+        name: 'franceForm',
+        children: [
+          new ChoiceType({
+            name: 'croissantOrBaguette',
+            choices: {
+              'croissant': 'Croissant',
+              'baguette': 'Baguette'
+            }
+          })
+        ]
+      });
+
+      var formType = new FormType({
+        children: [
+          new ChoiceType({
+            name: 'country',
+            choices: {
+              us: 'United State',
+              fr: 'France'
+            },
+            data: 'us'
+          }),
+          usForm
+        ]
+      });
+
+
+      formType.on('change:country', () => {
+        var selectedCountry = formType.getData()['country'];
+        if (selectedCountry === 'us') {
+          formType.removeChild('franceForm');
+          formType.addChild(usForm)
+        }
+        else if (selectedCountry = 'fr') {
+          formType.removeChild('usForm');
+          formType.addChild(franceForm);
+        }
+      });
+
+      formType.render();
+      $form = $(formType.el);
+      $countrySelect = $form.find('[name=country]');
+
+      // Switch to France form
+      DomEvents.dispatchChangeEvent($countrySelect[0], 'fr');
+
+      // Check that the US form was replaced with the French form
+      assert.equal($form.find('[name=sodaOrPop]').length, 0);
+      assert.equal($form.find('[name=croissantOrBaguette]').length, 1);
+
+      // Switch back to US form
+      DomEvents.dispatchChangeEvent($countrySelect[0], 'us');
+
+      // Check that the French form was replaced with the US form
+      assert.equal($form.find('[name=croissantOrBaguette]').length, 0);
+      assert.equal($form.find('[name=sodaOrPop]').length, 1);
+    });
+
+  });
+
 });

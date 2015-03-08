@@ -24,10 +24,16 @@ class AbstractFormType {
   protected children:AbstractFormType[];
   protected Handlebars:HandlebarsStatic;
   protected eventEmitter:NodeJS.EventEmitter;
+  protected isRenderedFlag:boolean = false;
+  protected listeners:_.Dictionary<any>;
+  protected listenerId:string;
 
   constructor(options:FormTypeOptionsInterface = {}) {
     this.Handlebars = Handlebars.create();
     this.eventEmitter = new Events.EventEmitter();
+    this.listeners = {};
+    this.listenerId = _.uniqueId('form_type_');
+    this.el = this.createElementFromString('<div></div>');
     this.options = this.setDefaultOptions(_.clone(options));
     this.children = [];
     if (this.options.children) {
@@ -45,7 +51,31 @@ class AbstractFormType {
     child.on('change', () => {
       this.eventEmitter.emit('change');
       this.eventEmitter.emit('change:' + child.getName());
+    }, this.listenerId);
+
+    if (this.isRendered()) {
+      // Render child, if necessary
+      if (!child.isRendered()) {
+        child.render();
+      }
+      this.appendChildType(child);
+    }
+  }
+
+  public removeChild(name:string):void {
+    var child:AbstractFormType = _.find(this.children, (child:AbstractFormType) => {
+      return child.getName() === name;
     });
+
+    if (!child) {
+      return void 0;
+    }
+
+    this.removeChildType(child);
+
+    child.removeAllListenersById(this.listenerId);
+
+    this.children = _.without(this.children, child);
   }
 
   public render():AbstractFormType {
@@ -59,14 +89,28 @@ class AbstractFormType {
     this.children.forEach((formType:AbstractFormType) => {
       formType.render();
 
+      if (!formType.isRendered()) {
+        formType.render();
+      }
+
       this.appendChildType(formType);
     });
+
+    this.isRenderedFlag = true;
 
     return this;
   }
 
   protected appendChildType(childType:AbstractFormType) {
     this.el.appendChild(childType.el);
+  }
+
+  /**
+   * Remove a childType from the form's element
+   * @param childType
+   */
+  protected removeChildType(childType:AbstractFormType) {
+    this.el.removeChild(childType.el);
   }
 
   public setTemplates(templates:FormTemplateCollectionInterface) {
@@ -160,18 +204,42 @@ class AbstractFormType {
     );
   }
 
+  public isRendered():boolean {
+    return this.isRenderedFlag;
+  }
+
   public getData():any {
     throw new Error(
       'Form of type "' + this.options.type + '" must implement a getData() method.'
     );
   }
 
-  public on(event:string, listener:Function) {
+  public on(event:string, listener:Function, listenerId?:string) {
     this.eventEmitter.on(event, listener);
+
+    // Remember this listener, so we can remove it later
+    if (listenerId) {
+      this.listeners[listenerId] || (this.listeners[listenerId] = []);
+
+      this.listeners[listenerId].push({
+        event: event,
+        listener: listener
+      });
+    }
   }
 
-  public once(event:string, listener:Function) {
+  public once(event:string, listener:Function, listenerId?:string) {
     this.eventEmitter.once(event, listener);
+
+    // Remember this listener, so we can remove it later
+    if (listenerId) {
+      this.listeners[listenerId] || (this.listeners[listenerId] = []);
+
+      this.listeners[listenerId].push({
+        event: event,
+        listener: listener
+      });
+    }
   }
 
   public removeListener(event:string, listener:Function) {
@@ -180,6 +248,19 @@ class AbstractFormType {
 
   public removeAllListeners(event?:string) {
     this.eventEmitter.removeAllListeners(event);
+  }
+
+  /**
+   * When you bind to an event, you may optionally
+   * specify a listenerId. This method removes all
+   * listeners for that listenerId.
+   *
+   * @param listenerId
+   */
+  public removeAllListenersById(listenerId) {
+    this.listeners[listenerId].forEach((listener:any) => {
+      this.removeListener(listener.event, listener.listener)
+    });
   }
 }
 
