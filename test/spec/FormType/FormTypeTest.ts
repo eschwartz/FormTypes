@@ -214,6 +214,61 @@ describe('FormType', () => {
 
   });
 
+  describe('setData', () => {
+
+    it('should set data for all child elements', () => {
+      var $form:JQuery;
+      var formType = new FormType({
+        children: [
+          new TextType({
+            name: 'firstName'
+          }),
+          new TextType({
+            name: 'lastName'
+          }),
+          new FormType({
+            name: 'contactInfo',
+            children: [
+              new TextType({
+                name: 'phoneNumber'
+              }),
+              new TextType({
+                name: 'email'
+              })
+            ]
+          })
+        ]
+      });
+      formType.render();
+
+      formType.setData({
+        firstName: 'John',
+        lastName: 'Doe',
+        contactInfo: {
+          phoneNumber: '555-1212',
+          email: 'john_doe@example.com'
+        }
+      });
+
+      $form = $(formType.el);
+
+      assert.equal($form.find('[name=firstName]').val(), 'John');
+      assert.equal($form.find('[name=lastName]').val(), 'Doe');
+      assert.equal($form.find('[name=phoneNumber]').val(), '555-1212');
+      assert.equal($form.find('[name=email]').val(), 'john_doe@example.com');
+
+      assert(_.isEqual(formType.getData(), {
+        firstName: 'John',
+        lastName: 'Doe',
+        contactInfo: {
+          phoneNumber: '555-1212',
+          email: 'john_doe@example.com'
+        }
+      }));
+    });
+
+  });
+
   describe('change event', () => {
 
     it('should fire when any child type changes', (done) => {

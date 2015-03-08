@@ -63,9 +63,7 @@ class AbstractFormType {
   }
 
   public removeChild(name:string):void {
-    var child:AbstractFormType = _.find(this.children, (child:AbstractFormType) => {
-      return child.getName() === name;
-    });
+    var child:AbstractFormType = this.getChild(name);
 
     if (!child) {
       return void 0;
@@ -76,6 +74,12 @@ class AbstractFormType {
     child.removeAllListenersById(this.listenerId);
 
     this.children = _.without(this.children, child);
+  }
+
+  public getChild(name:string):AbstractFormType {
+    return _.find(this.children, (child:AbstractFormType) => {
+      return child.getName() === name;
+    });
   }
 
   public render():AbstractFormType {
