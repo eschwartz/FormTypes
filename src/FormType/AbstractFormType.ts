@@ -214,6 +214,12 @@ class AbstractFormType {
     );
   }
 
+  public setData(data:any):void {
+    throw new Error(
+      'Form of type "' + this.options.type + '" must implement a setData() method.'
+    );
+  }
+
   public on(event:string, listener:Function, listenerId?:string) {
     this.eventEmitter.on(event, listener);
 
