@@ -42,6 +42,24 @@ class TextType extends FieldType {
     return input ? input.value : this.options.data;
   }
 
+  public setData(data:string):void {
+    var input = <HTMLInputElement>this.getFormElement();
+    var isSame = data === this.getData();
+
+    if (isSame) {
+      return;
+    }
+
+    if (!input) {
+      this.options.data = data;
+    }
+    else {
+      input.value = data;
+    }
+
+    this.eventEmitter.emit('change');
+  }
+
 }
 
 export = TextType;

@@ -177,6 +177,62 @@ describe('TextType', () => {
 
   });
 
+  describe('setData', () => {
+
+    it('should set the value of the input element', () => {
+      var input:HTMLInputElement;
+      var textType = new TextType();
+      textType.render();
+
+      textType.setData('foo');
+
+      input = <HTMLInputElement>textType.getFormElement();
+      assert.equal(input.value, 'foo');
+    });
+
+    it('should set the return value of getData()', () => {
+      var textType = new TextType();
+      textType.render();
+
+      textType.setData('foo');
+
+      assert.equal(textType.getData(), 'foo');
+    });
+
+    it('should set the return value of getData() - before render', () => {
+      var textType = new TextType();
+
+      textType.setData('foo');
+
+      assert.equal(textType.getData(), 'foo');
+    });
+
+    it('should trigger a change event', () => {
+      var onChange = sinon.spy();
+      var textType = new TextType();
+
+      textType.on('change', onChange);
+
+      textType.setData('foo');
+
+      assert(onChange.called);
+    });
+
+    it('should not trigger a change event, if the data is not changed', () => {
+      var onChange = sinon.spy();
+      var textType = new TextType({
+        data: 'foo'
+      });
+
+      textType.on('change', onChange);
+
+      textType.setData('foo');
+
+      assert(!onChange.called);
+    });
+
+  });
+
   describe('`change` event', () => {
 
     it('should fire after the input\'s value has changed', (done) => {
