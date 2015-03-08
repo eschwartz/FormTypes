@@ -75,7 +75,29 @@ describe('FormType', () => {
 
     describe('before render', () => {
 
+      it('should return bootstrapped data', () => {
+        var formType = new FormType({
+          children: [
+            new TextType({
+              name: 'fullName',
+              data: 'John Doe'
+            }),
+            new ChoiceType({
+              name: 'country',
+              choices: {
+                us: 'United State',
+                ca: 'Canada'
+              },
+              data: 'ca'
+            })
+          ]
+        });
 
+        assert(_.isEqual(formType.getData(), {
+          fullName: 'John Doe',
+          country: 'ca'
+        }));
+      });
 
     });
 
