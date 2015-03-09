@@ -233,20 +233,20 @@ declare module 'FormTypes/Options/ChoiceTypeOptionsInterface' {
 }
 
 declare module 'FormTypes/Options/OptionTypeOptionsInterface' {
-    import FieldTypeOptionsInterface = require('FormTypes/Options/FieldTypeOptionsInterface');
-    interface OptionTypeOptionsInterface extends FieldTypeOptionsInterface {
-}
+  import FieldTypeOptionsInterface = require('FormTypes/Options/FieldTypeOptionsInterface');
+  interface OptionTypeOptionsInterface extends FieldTypeOptionsInterface {
+  }
 
-declare module 'FormTypes/View/Template/TemplateCollectionInterface' {
+  declare module 'FormTypes/View/Template/TemplateCollectionInterface' {
     interface TemplateCollectionInterface extends _.Dictionary<any> {
     }
     export = TemplateCollectionInterface;
-}
+  }
 
-declare module 'FormTypes/View/Template/TemplateInterface' {
+  declare module 'FormTypes/View/Template/TemplateInterface' {
     interface TemplateInterface {
-        (context: any, options?: any): string;
+      (context:any, options?:any): string;
     }
     export = TemplateInterface;
+  }
 }
-
