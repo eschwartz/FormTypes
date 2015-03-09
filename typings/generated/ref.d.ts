@@ -1,6 +1,7 @@
 //grunt-start
 /// <reference path="../../src/FormType/AbstractFormType.d.ts" />
 /// <reference path="../../src/FormType/AbstractFormType.ts" />
+/// <reference path="../../src/FormType/ChoiceType.d.ts" />
 /// <reference path="../../src/FormType/ChoiceType.ts" />
 /// <reference path="../../src/FormType/FieldType.d.ts" />
 /// <reference path="../../src/FormType/FieldType.ts" />
