@@ -23,7 +23,7 @@ class ChoiceType extends FieldType {
     this.getFormElement().appendChild(childType.el);
   }
 
-  protected setDefaultOptions(options:ChoiceTypeOptionsInterface) {
+  protected setDefaultOptions(options:ChoiceTypeOptionsInterface):ChoiceTypeOptionsInterface {
     _.defaults(options, {
       tagName: 'select',
       type: 'choice',
