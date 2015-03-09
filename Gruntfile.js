@@ -91,7 +91,7 @@ var Gruntfile = function(grunt) {
           }
         },
         files: {
-          'build/FormTypes.js': ['src/exports.js']
+          'dist/FormTypes.js': ['src/exports.js']
         }
       },
       vendor: {
@@ -103,7 +103,7 @@ var Gruntfile = function(grunt) {
           ]
         },
         files: {
-          'build/vendor.js': []
+          'dist/vendor.js': []
         }
       },
       // Vendor bundle for tests
@@ -119,7 +119,7 @@ var Gruntfile = function(grunt) {
           ]
         },
         files: {
-          'build/vendor-tests.js': []
+          'dist/vendor-tests.js': []
         }
       },
       tests: {
@@ -127,7 +127,7 @@ var Gruntfile = function(grunt) {
           external: ['jquery', 'underscore', 'handlebars', 'jsdom', 'mocha-jsdom', 'sinon']
         },
         files: {
-          'build/tests.js': ['test/spec/**/*Test.js']
+          'dist/tests.js': ['test/spec/**/*Test.js']
         }
       }
     }
