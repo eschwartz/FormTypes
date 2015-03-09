@@ -1,5 +1,6 @@
 var Gruntfile = function(grunt) {
   grunt.initConfig({
+    // Typescript compiler
     ts: {
       options: {
         target: 'es5',
@@ -55,6 +56,7 @@ var Gruntfile = function(grunt) {
         reference: 'typings/generated/ref.d.ts'
       }
     },
+    // Typescript Linter
     tslint: {
       src: {
         options: {
@@ -65,6 +67,7 @@ var Gruntfile = function(grunt) {
         }
       }
     },
+    // Browserify compiler
     browserify: {
       options: {
         transform: ['brfs']
