@@ -11,7 +11,8 @@ var Gruntfile = function(grunt) {
         compiler: './node_modules/.bin/tsc',
         // Source maps don't work so well,
         // because browserify creates source maps, too
-        sourceMap: false
+        sourceMap: false,
+        declaration: true
       },
       dist: {
         src: [
