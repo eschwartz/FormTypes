@@ -16,3 +16,8 @@ typings/generated/
 
 # created by grunt-ts
 tscommand-*.tmp.txt
+
+# Do not ignore /dist files.
+# I hate to do this, but this is the
+# easiest way to make the library bower-compatible
+!/dist/*.js
