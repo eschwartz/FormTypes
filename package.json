@@ -1,18 +1,23 @@
 {
-  "name": "FormTypes",
-  "version": "0.0.0",
+  "name": "form-types",
+  "version": "1.0.0",
   "description": "Forms in Javascript. For Real.",
-  "main": "build/FormTypes.js",
+  "main": "dist/FormTypes.js",
   "scripts": {
     "test": "grunt test"
   },
-  "author": "Edan Schwartz <edanschwartz@gmail.com>",
+  "authors": [{
+    "name": "Edan Schwartz",
+    "email": "edanschwartz@gmail.com",
+    "url": "http://www.edanschwartz.com"
+  }],
   "license": "BSD",
   "dependencies": {
     "handlebars": "^3.0.0",
     "underscore": "^1.8.2"
   },
   "devDependencies": {
+    "bower": "^1.3.12",
     "brfs": "^1.4.0",
     "browserify": "^9.0.3",
     "browserify-shim": "^3.8.3",
