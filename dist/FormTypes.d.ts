@@ -169,84 +169,86 @@ declare module 'FormTypes/Options/FormTypeOptionsInterface' {
 }
 
 declare module 'FormTypes/View/Template/FormTemplateCollectionInterface' {
-    import TemplateCollectionInterface = require('FormTypes/View/Template/TemplateCollectionInterface');
-    import TemplateInterface = require('FormTypes/View/Template/TemplateInterface');
-    interface FormTemplateCollectionInterface extends TemplateCollectionInterface {
-        /**
-          * The main form template.
-          * Serves as an entry point for all other templates.
-          */
-        form: TemplateInterface;
-        form_start: TemplateInterface;
-        form_rows: TemplateInterface;
-        form_end: TemplateInterface;
-        html_attrs: TemplateInterface;
-}
+  import TemplateCollectionInterface = require('FormTypes/View/Template/TemplateCollectionInterface');
+  import TemplateInterface = require('FormTypes/View/Template/TemplateInterface');
+  interface FormTemplateCollectionInterface extends TemplateCollectionInterface {
+    /**
+     * The main form template.
+     * Serves as an entry point for all other templates.
+     */
+    form: TemplateInterface;
+    form_start: TemplateInterface;
+    form_rows: TemplateInterface;
+    form_end: TemplateInterface;
+    html_attrs: TemplateInterface;
+  }
 
-declare module 'FormTypes/View/Context/FormContextInterface' {
+  declare module 'FormTypes/View/Context/FormContextInterface' {
     interface FormContextInterface extends _.Dictionary<any> {
-            /**
-                * A unique name for the form type instance.
-                * This may also serve as the form elements `name` attribute,
-                * where applicable.
-                */
-            name: string;
-            type: string;
-            /**
-                * HTML tag name for the form element.
-                */
-            tagName: string;
-            /**
-                * Attributes to apply to the HTML element
-                */
-            attrs: _.Dictionary<string>;
-            /**
-                * Child form elements.
-                */
-            children: FormContextInterface[];
+      /**
+       * A unique name for the form type instance.
+       * This may also serve as the form elements `name` attribute,
+       * where applicable.
+       */
+      name: string;
+      type: string;
+      /**
+       * HTML tag name for the form element.
+       */
+      tagName: string;
+      /**
+       * Attributes to apply to the HTML element
+       */
+      attrs: _.Dictionary<string>;
+      /**
+       * Child form elements.
+       */
+      children: FormContextInterface[];
     }
     export = FormContextInterface;
-}
+  }
 
-declare module 'FormTypes/Options/FieldTypeOptionsInterface' {
+  declare module 'FormTypes/Options/FieldTypeOptionsInterface' {
     import FormTypeOptionsInterface = require('FormTypes/Options/FormTypeOptionsInterface');
     import _ = require('underscore');
     interface FieldTypeOptionsInterface extends FormTypeOptionsInterface {
-        label?: string;
-        labelAttrs?: _.Dictionary<string>;
+      label?: string;
+      labelAttrs?: _.Dictionary<string>;
     }
     export = FieldTypeOptionsInterface;
-}
+  }
 
-declare module 'FormTypes/Options/ChoiceTypeOptionsInterface' {
+  declare module 'FormTypes/Options/ChoiceTypeOptionsInterface' {
     import FieldTypeOptionsInterface = require('FormTypes/Options/FieldTypeOptionsInterface');
     interface ChoiceTypeOptionsInterface extends FieldTypeOptionsInterface {
-        /**
-          * A hash of choice values -> labels
-          * eg.
-          * {
+      /**
+       * A hash of choice values -> labels
+       * eg.
+       * {
           *  us: 'United States',
           *  ca: 'Canada'
           * }
-          */
-        choices?: _.Dictionary<string>;
-}
-
-declare module 'FormTypes/Options/OptionTypeOptionsInterface' {
-  import FieldTypeOptionsInterface = require('FormTypes/Options/FieldTypeOptionsInterface');
-  interface OptionTypeOptionsInterface extends FieldTypeOptionsInterface {
-  }
-
-  declare module 'FormTypes/View/Template/TemplateCollectionInterface' {
-    interface TemplateCollectionInterface extends _.Dictionary<any> {
+       */
+      choices?: _.Dictionary<string>;
     }
-    export = TemplateCollectionInterface;
-  }
 
-  declare module 'FormTypes/View/Template/TemplateInterface' {
-    interface TemplateInterface {
-      (context:any, options?:any): string;
+    declare module 'FormTypes/Options/OptionTypeOptionsInterface' {
+      import FieldTypeOptionsInterface = require('FormTypes/Options/FieldTypeOptionsInterface');
+      interface OptionTypeOptionsInterface extends FieldTypeOptionsInterface {
+      }
+
+      declare module 'FormTypes/View/Template/TemplateCollectionInterface' {
+        interface TemplateCollectionInterface extends _.Dictionary<any> {
+        }
+        export = TemplateCollectionInterface;
+      }
+
+      declare module 'FormTypes/View/Template/TemplateInterface' {
+        interface TemplateInterface {
+          (context:any, options?:any): string;
+        }
+        export = TemplateInterface;
+      }
     }
-    export = TemplateInterface;
   }
 }
