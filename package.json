@@ -6,11 +6,13 @@
   "scripts": {
     "test": "grunt test"
   },
-  "authors": [{
-    "name": "Edan Schwartz",
-    "email": "edanschwartz@gmail.com",
-    "url": "http://www.edanschwartz.com"
-  }],
+  "authors": [
+    {
+      "name": "Edan Schwartz",
+      "email": "edanschwartz@gmail.com",
+      "url": "http://www.edanschwartz.com"
+    }
+  ],
   "license": "BSD",
   "dependencies": {
     "handlebars": "^3.0.0",
