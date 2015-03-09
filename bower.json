@@ -1,0 +1,25 @@
+{
+  "name": "form-types",
+  "version": "1.0.0",
+  "authors": [
+    "Edan Schwartz <edanschwartz@gmail.com>"
+  ],
+  "description": "Forms in Javascript. For Real.",
+  "main": "dist/FormTypes.js",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "forms"
+  ],
+  "license": "BSD",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
