@@ -1,4 +1,6 @@
 var Gruntfile = function(grunt) {
+  var isQuick = grunt.option('quick');
+
   grunt.initConfig({
     // Typescript compiler
     ts: {
@@ -11,7 +13,7 @@ var Gruntfile = function(grunt) {
         // because browserify creates source maps, too
         sourceMap: false
       },
-      build: {
+      dist: {
         src: [
           'src/**/*.ts',
           'typings/**/*.d.ts'
@@ -54,6 +56,15 @@ var Gruntfile = function(grunt) {
         ],
         compile: false,
         reference: 'typings/generated/ref.d.ts'
+      }
+    },
+    // Typescript definition file manager (Definitely Typed)
+    tsd: {
+      dist: {
+        options: {
+          command: 'reinstall',
+          config: './tsd.json'
+        }
       }
     },
     // Typescript Linter
@@ -121,18 +132,27 @@ var Gruntfile = function(grunt) {
   grunt.loadNpmTasks('grunt-ts');
   grunt.loadNpmTasks('grunt-tslint');
   grunt.loadNpmTasks('grunt-browserify');
-  grunt.registerTask('build', [
-    'tslint',
-    'ts:build',
+  grunt.loadNpmTasks('grunt-tsd');
+
+  grunt.registerTask('default', ['build']);
+  grunt.registerTask('build', ['build/dist']);
+
+  grunt.registerTask('build/dist', [
+    isQuick ? 'noop' : 'tsd:dist',
+    isQuick ? 'noop' : 'tslint',
+    'ts:dist',
     'browserify:dist'
   ]);
-  grunt.registerTask('build-tests', [
+  grunt.registerTask('build/tests', [
+    isQuick ? 'noop' : 'tsd:dist',
     'ts:tests',
     'browserify:tests'
   ]);
-  grunt.registerTask('build-vendor', [
+  grunt.registerTask('build/vendor', [
     'browserify:vendor',
     'browserify:vendor-tests'
   ]);
+
+  grunt.registerTask('noop', []);
 };
 module.exports = Gruntfile;
