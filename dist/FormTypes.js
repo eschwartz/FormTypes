@@ -895,12 +895,14 @@ var PartialWidgetHelper = (function () {
 module.exports = PartialWidgetHelper;
 
 },{"handlebars":"handlebars"}],11:[function(require,module,exports){
+var AbstractFormType = require('./FormType/AbstractFormType');
 var FormType = require('./FormType/FormType');
 var FieldType = require('./FormType/FieldType');
 var TextType = require('./FormType/TextType');
 var ChoiceType = require('./FormType/ChoiceType');
 var OptionType = require('./FormType/OptionType');
 var FormTypeExports = {
+    AbstractFormType: AbstractFormType,
     FormType: FormType,
     FieldType: FieldType,
     TextType: TextType,
@@ -909,5 +911,5 @@ var FormTypeExports = {
 };
 module.exports = FormTypeExports;
 
-},{"./FormType/ChoiceType":3,"./FormType/FieldType":4,"./FormType/FormType":5,"./FormType/OptionType":6,"./FormType/TextType":7}]},{},[11])(11)
+},{"./FormType/AbstractFormType":2,"./FormType/ChoiceType":3,"./FormType/FieldType":4,"./FormType/FormType":5,"./FormType/OptionType":6,"./FormType/TextType":7}]},{},[11])(11)
 });
