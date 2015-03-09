@@ -85,7 +85,10 @@ var Gruntfile = function(grunt) {
       },
       dist: {
         options: {
-          external: ['jquery', 'underscore', 'handlebars']
+          external: ['jquery', 'underscore', 'handlebars'],
+          browserifyOptions: {
+            standalone: 'FormTypes'
+          }
         },
         files: {
           'build/FormTypes.js': ['src/exports.js']

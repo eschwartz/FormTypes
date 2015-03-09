@@ -6,10 +6,11 @@ import TextType = require('./FormType/TextType');
 import ChoiceType = require('./FormType/ChoiceType');
 import OptionType = require('./FormType/OptionType');
 
-global.window.FormTypes = {
+var FormTypeExports = {
   FormType: FormType,
   FieldType: FieldType,
   TextType: TextType,
   ChoiceType: ChoiceType,
   OptionType: OptionType
 };
+export = FormTypeExports;
