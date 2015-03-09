@@ -131,12 +131,26 @@ var Gruntfile = function(grunt) {
           'dist/tests.js': ['test/spec/**/*Test.js']
         }
       }
+    },
+    // Generates a definition file for
+    // all FormTypes library components (exludes vendor references)
+    //https://github.com/TypeStrong/grunt-dts-bundle
+    dts_bundle: {
+      dist: {
+        options: {
+          name: 'FormTypes',
+          main: 'src/exports.d.ts',
+          out: '../dist/FormTypes.d.ts',
+          prefix: ''
+        }
+      }
     }
   });
   grunt.loadNpmTasks('grunt-ts');
   grunt.loadNpmTasks('grunt-tslint');
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-tsd');
+  grunt.loadNpmTasks('grunt-dts-bundle');
 
   grunt.registerTask('default', ['build']);
   grunt.registerTask('build', ['build/dist']);
@@ -145,6 +159,7 @@ var Gruntfile = function(grunt) {
     isQuick ? 'noop' : 'tsd:dist',
     isQuick ? 'noop' : 'tslint',
     'ts:dist',
+    'dts_bundle:dist',
     'browserify:dist'
   ]);
   grunt.registerTask('build/tests', [
