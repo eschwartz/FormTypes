@@ -12,7 +12,6 @@ node_modules/
 *.js
 *.js.map
 !Gruntfile.js
-typings/generated/
 
 # created by grunt-ts
 tscommand-*.tmp.txt
