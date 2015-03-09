@@ -269,7 +269,7 @@ class AbstractFormType {
    */
   public removeAllListenersById(listenerId) {
     this.listeners[listenerId].forEach((listener:any) => {
-      this.removeListener(listener.event, listener.listener)
+      this.removeListener(listener.event, listener.listener);
     });
   }
 }
