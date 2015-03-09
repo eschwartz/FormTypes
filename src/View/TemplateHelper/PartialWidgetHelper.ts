@@ -1,7 +1,7 @@
 ///ts:ref=handlebars.ext.d.ts
 /// <reference path="../../../typings/handlebars/handlebars.ext.d.ts"/> ///ts:ref:generated
 import FormContextInterface = require('../Context/FormContextInterface');
-import Handlebars = require('handlebars');
+import Handlebars = require('Handlebars');
 
 class PartialWidgetHelper {
   public static register(HandlebarsEnv:HandlebarsStatic = Handlebars) {

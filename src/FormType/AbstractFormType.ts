@@ -12,7 +12,7 @@ import FormTemplateCollection = require('../View/Template/FormTemplateCollection
 import _ = require('underscore');
 import PartialWidgetHelperFactory = require('../View/TemplateHelper/PartialWidgetHelper');
 import FormContextInterface = require('../View/Context/FormContextInterface');
-import Handlebars = require('handlebars');
+import Handlebars = require('Handlebars');
 import Events = require('events');
 
 

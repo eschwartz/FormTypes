@@ -8,3 +8,7 @@ interface HandlebarsStatic extends HandlebarsCommon {
   create():HandlebarsStatic;
   partials:_.Dictionary<HandlebarsTemplateDelegate>;
 }
+
+declare module 'Handlebars' {
+  export = Handlebars;
+}

@@ -4,7 +4,7 @@
 /// <reference path="../../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
 import FormTemplateCollectionInterface = require('./FormTemplateCollectionInterface');
 import TemplateInterface = require('./TemplateInterface');
-import Handlebars = require('handlebars');
+import Handlebars = require('Handlebars');
 import fs = require('fs');
 import PartialWidgetHelper = require('../TemplateHelper/PartialWidgetHelper');
 
