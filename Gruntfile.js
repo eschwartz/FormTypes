@@ -67,20 +67,6 @@ var Gruntfile = function(grunt) {
         }
       }
     },
-    // Generate FormTypes.d.ts
-    // with AMD compatible module names
-    'lib-typings': {
-      'form-types': {
-        files: {
-          'typings/FormTypes/FormTypes.d.ts': ['src/**/*.ts']
-        },
-        options: {
-          paths: {
-            'FormTypes': 'src'
-          }
-        }
-      }
-    },
     // Typescript Linter
     tslint: {
       src: {
@@ -169,8 +155,6 @@ var Gruntfile = function(grunt) {
     'browserify:vendor',
     'browserify:vendor-tests'
   ]);
-
-  grunt.loadTasks('./tasks');
 
   grunt.registerTask('noop', []);
 };
