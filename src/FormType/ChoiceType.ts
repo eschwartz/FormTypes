@@ -1,10 +1,16 @@
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
+///ts:ref=handlebars.d.ts
+/// <reference path="../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
+///ts:ref=node.d.ts
+/// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 import AbstractFormType = require('./AbstractFormType');
 import FieldType = require('./FieldType');
 import OptionType = require('./OptionType');
 import ChoiceTypeOptionsInterface = require('../Options/ChoiceTypeOptionsInterface');
 import _ = require('underscore');
+import Handlebars = require('Handlebars');
+import fs = require('fs');
 
 class ChoiceType extends FieldType {
 
@@ -27,7 +33,10 @@ class ChoiceType extends FieldType {
     _.defaults(options, {
       tagName: 'select',
       type: 'choice',
-      choices: {}
+      choices: {},
+      template: this.Handlebars.compile(
+        fs.readFileSync(__dirname + '/../View/form/choice_widget.html.hbs', 'utf8')
+      )
     });
 
     options.children = [];

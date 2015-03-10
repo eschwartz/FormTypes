@@ -1,30 +1,29 @@
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
-import AbstractFormType = require('./AbstractFormType');
+///ts:ref=handlebars.d.ts
+/// <reference path="../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
+///ts:ref=node.d.ts
+/// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
+import GroupType = require('./GroupType');
 import _ = require('underscore');
+import FormTypeOptionsInterface = require('../Options/FormTypeOptionsInterface');
+import Handlebars = require('Handlebars');
+import fs = require('fs');
 
-class FormType extends AbstractFormType {
-  public getData():_.Dictionary<any> {
-    var data:_.Dictionary<any> = {};
+class FormType extends GroupType {
 
-    this.children.forEach((formType:AbstractFormType) => {
-      data[formType.getName()] = formType.getData();
+  protected setDefaultOptions(options:FormTypeOptionsInterface):FormTypeOptionsInterface {
+    _.defaults(options, {
+      tagName: 'form',
+      type: 'form',
+      template: this.Handlebars.compile(
+        fs.readFileSync(__dirname + '/../View/form/form_widget.html.hbs', 'utf8')
+      )
     });
 
-    return data;
+    return options;
   }
 
-  public setData(data:_.Dictionary<any>):void {
-    _.each(data, (val, key) => {
-      var child = this.getChild(key);
-
-      if (!child) {
-        return;
-      }
-
-      child.setData(data[key]);
-    });
-  }
 }
 
 export = FormType;

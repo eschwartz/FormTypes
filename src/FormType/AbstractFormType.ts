@@ -5,22 +5,19 @@
 ///ts:ref=handlebars.ext.d.ts
 /// <reference path="../../typings/handlebars/handlebars.ext.d.ts"/> ///ts:ref:generated
 import FormTypeOptionsInterface = require('../Options/FormTypeOptionsInterface');
-import TemplateInterface = require('../View/Template/TemplateInterface');
-import FormTemplateCollectionInterface = require('../View/Template/FormTemplateCollectionInterface');
-import TemplateCollectionInterface = require('../View/Template/TemplateCollectionInterface');
-import FormTemplateCollection = require('../View/Template/FormTemplateCollection');
 import _ = require('underscore');
-import PartialWidgetHelperFactory = require('../View/TemplateHelper/PartialWidgetHelper');
-import FormContextInterface = require('../View/Context/FormContextInterface');
+import fs = require('fs');
 import Handlebars = require('Handlebars');
+import FormContextInterface = require('../View/Context/FormContextInterface');
+import TemplateInterface = require('../View/Template/TemplateInterface');
+import PartialWidgetHelper = require('../View/TemplateHelper/PartialWidgetHelper');
 import Events = require('events');
-
 
 class AbstractFormType {
   public el:HTMLElement;
 
   protected options:FormTypeOptionsInterface;
-  protected templates:FormTemplateCollectionInterface;
+  protected template:TemplateInterface;
   protected children:AbstractFormType[];
   protected Handlebars:HandlebarsStatic;
   protected eventEmitter:NodeJS.EventEmitter;
@@ -33,16 +30,16 @@ class AbstractFormType {
     this.eventEmitter = new Events.EventEmitter();
     this.listeners = {};
     this.listenerId = _.uniqueId('form_type_');
-    this.el = this.createElementFromString('<div></div>');
+
     this.options = this.setDefaultOptions(_.clone(options));
     this.children = [];
     if (this.options.children) {
       this.options.children.forEach(this.addChild, this);
     }
 
-    this.el = this.createElementFromString('<div></div>');
-
-    this.setDefaultTemplates(options.templates);
+    this.template = this.options.template;
+    this.prepareTemplateEnvironment();
+    this.el = null;
   }
 
   public addChild(child:AbstractFormType) {
@@ -84,7 +81,7 @@ class AbstractFormType {
 
   public render():AbstractFormType {
     var context = this.createTemplateContext();
-    var html:string = this.templates.form({
+    var html:string = this.template({
       form: context
     });
 
@@ -105,8 +102,29 @@ class AbstractFormType {
     return this;
   }
 
+  public setTemplate(template:TemplateInterface) {
+    this.template = template;
+  }
+
   protected appendChildType(childType:AbstractFormType) {
     this.el.appendChild(childType.el);
+  }
+
+  protected prepareTemplateEnvironment():void {
+    var partials:_.Dictionary<TemplateInterface> = {
+      html_attrs: this.Handlebars.compile(
+        fs.readFileSync(__dirname + '/../View/form/html_attrs.html.hbs', 'utf8')
+      ),
+      field_widget: this.Handlebars.compile(
+        fs.readFileSync(__dirname + '/../View/form/field_widget.html.hbs', 'utf8')
+      )
+    };
+
+    _.each(partials, (template:TemplateInterface, name:string) => {
+      this.Handlebars.registerPartial(name, template);
+    });
+
+    PartialWidgetHelper.register(this.Handlebars);
   }
 
   /**
@@ -115,33 +133,6 @@ class AbstractFormType {
    */
   protected removeChildType(childType:AbstractFormType) {
     this.el.removeChild(childType.el);
-  }
-
-  public setTemplates(templates:FormTemplateCollectionInterface) {
-    _.each(templates, (template:TemplateInterface, name:string) => {
-      this.Handlebars.registerPartial(name, template);
-    });
-
-    this.templates = templates;
-  }
-
-  protected setDefaultTemplates(templates?:FormTemplateCollectionInterface) {
-    var defaultTemplates = new FormTemplateCollection(this.Handlebars);
-
-    templates = _.defaults({}, templates || {}, {
-      form: defaultTemplates.form,
-      form_widget: defaultTemplates.form_widget,
-      form_start: defaultTemplates.form_start,
-      form_end: defaultTemplates.form_end,
-      form_rows: defaultTemplates.form_rows,
-      html_attrs: defaultTemplates.html_attrs,
-      field_widget: defaultTemplates.field_widget,
-      text_widget: defaultTemplates.text_widget,
-      choice_widget: defaultTemplates.choice_widget,
-      option_widget: defaultTemplates.option_widget
-    });
-
-    this.setTemplates(templates);
   }
 
   protected createTemplateContext():FormContextInterface {
@@ -164,8 +155,8 @@ class AbstractFormType {
    */
   protected setDefaultOptions(options:FormTypeOptionsInterface):FormTypeOptionsInterface {
     var defaults = {
-      tagName: 'form',
-      type: 'form',
+      tagName: 'div',
+      type: 'form_type',
       name: _.uniqueId('form_'),
       attrs: {},
       data: null,
@@ -199,12 +190,16 @@ class AbstractFormType {
    * element.
    */
   public getFormElement():HTMLElement {
-    var tagName = this.options.tagName;
-    var isInputTopLevelElement = this.el.tagName.toLowerCase() === tagName;
+    var isInputTopLevelElement:boolean;
+
+    if (!this.el) {
+      return null;
+    }
+    isInputTopLevelElement = this.el.tagName.toLowerCase() === this.options.tagName;
 
     return <HTMLElement>(
       isInputTopLevelElement ?
-        this.el : this.el.getElementsByTagName(tagName).item(0)
+        this.el : this.el.getElementsByTagName(this.options.tagName).item(0)
     );
   }
 

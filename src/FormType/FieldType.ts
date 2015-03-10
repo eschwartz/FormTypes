@@ -1,10 +1,15 @@
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
+///ts:ref=handlebars.d.ts
+/// <reference path="../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
+///ts:ref=node.d.ts
+/// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 import AbstractFormType = require('./AbstractFormType');
 import FieldTypeOptionsInterface = require('../Options/FieldTypeOptionsInterface');
 import StringUtil = require('../Util/StringUtil');
 import _ = require('underscore');
-
+import Handlebars = require('Handlebars');
+import fs = require('fs');
 
 /**
  * Base class for all form fields
@@ -18,7 +23,10 @@ class FieldType extends AbstractFormType {
       tagName: 'input',
       type: 'field',
       label: null,   // to be defaulted below, after we have name option
-      labelAttrs: {}
+      labelAttrs: {},
+      template: this.Handlebars.compile(
+        fs.readFileSync(__dirname + '/../View/form/field_widget.html.hbs', 'utf8')
+      )
     });
 
     options = super.setDefaultOptions(options);

@@ -303,9 +303,10 @@ function isUndefined(arg) {
 
 },{}],2:[function(require,module,exports){
 (function (global){
-var FormTemplateCollection = require('../View/Template/FormTemplateCollection');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+
 var Handlebars = (typeof window !== "undefined" ? window.Handlebars : typeof global !== "undefined" ? global.Handlebars : null);
+var PartialWidgetHelper = require('../View/TemplateHelper/PartialWidgetHelper');
 var Events = require('events');
 var AbstractFormType = (function () {
     function AbstractFormType(options) {
@@ -315,14 +316,14 @@ var AbstractFormType = (function () {
         this.eventEmitter = new Events.EventEmitter();
         this.listeners = {};
         this.listenerId = _.uniqueId('form_type_');
-        this.el = this.createElementFromString('<div></div>');
         this.options = this.setDefaultOptions(_.clone(options));
         this.children = [];
         if (this.options.children) {
             this.options.children.forEach(this.addChild, this);
         }
-        this.el = this.createElementFromString('<div></div>');
-        this.setDefaultTemplates(options.templates);
+        this.template = this.options.template;
+        this.prepareTemplateEnvironment();
+        this.el = null;
     }
     AbstractFormType.prototype.addChild = function (child) {
         var _this = this;
@@ -356,7 +357,7 @@ var AbstractFormType = (function () {
     AbstractFormType.prototype.render = function () {
         var _this = this;
         var context = this.createTemplateContext();
-        var html = this.templates.form({
+        var html = this.template({
             form: context
         });
         this.el = this.createElementFromString(html);
@@ -370,8 +371,22 @@ var AbstractFormType = (function () {
         this.isRenderedFlag = true;
         return this;
     };
+    AbstractFormType.prototype.setTemplate = function (template) {
+        this.template = template;
+    };
     AbstractFormType.prototype.appendChildType = function (childType) {
         this.el.appendChild(childType.el);
+    };
+    AbstractFormType.prototype.prepareTemplateEnvironment = function () {
+        var _this = this;
+        var partials = {
+            html_attrs: this.Handlebars.compile("{{#each this}}\n  {{@key}}=\"{{this}}\"\n{{/each}}"),
+            field_widget: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<{{form.tagName}} {{>html_attrs form.attrs}} />\n")
+        };
+        _.each(partials, function (template, name) {
+            _this.Handlebars.registerPartial(name, template);
+        });
+        PartialWidgetHelper.register(this.Handlebars);
     };
     /**
      * Remove a childType from the form's element
@@ -379,29 +394,6 @@ var AbstractFormType = (function () {
      */
     AbstractFormType.prototype.removeChildType = function (childType) {
         this.el.removeChild(childType.el);
-    };
-    AbstractFormType.prototype.setTemplates = function (templates) {
-        var _this = this;
-        _.each(templates, function (template, name) {
-            _this.Handlebars.registerPartial(name, template);
-        });
-        this.templates = templates;
-    };
-    AbstractFormType.prototype.setDefaultTemplates = function (templates) {
-        var defaultTemplates = new FormTemplateCollection(this.Handlebars);
-        templates = _.defaults({}, templates || {}, {
-            form: defaultTemplates.form,
-            form_widget: defaultTemplates.form_widget,
-            form_start: defaultTemplates.form_start,
-            form_end: defaultTemplates.form_end,
-            form_rows: defaultTemplates.form_rows,
-            html_attrs: defaultTemplates.html_attrs,
-            field_widget: defaultTemplates.field_widget,
-            text_widget: defaultTemplates.text_widget,
-            choice_widget: defaultTemplates.choice_widget,
-            option_widget: defaultTemplates.option_widget
-        });
-        this.setTemplates(templates);
     };
     AbstractFormType.prototype.createTemplateContext = function () {
         var formContext = _.extend({}, this.options, {
@@ -419,8 +411,8 @@ var AbstractFormType = (function () {
      */
     AbstractFormType.prototype.setDefaultOptions = function (options) {
         var defaults = {
-            tagName: 'form',
-            type: 'form',
+            tagName: 'div',
+            type: 'form_type',
             name: _.uniqueId('form_'),
             attrs: {},
             data: null,
@@ -446,9 +438,12 @@ var AbstractFormType = (function () {
      * element.
      */
     AbstractFormType.prototype.getFormElement = function () {
-        var tagName = this.options.tagName;
-        var isInputTopLevelElement = this.el.tagName.toLowerCase() === tagName;
-        return (isInputTopLevelElement ? this.el : this.el.getElementsByTagName(tagName).item(0));
+        var isInputTopLevelElement;
+        if (!this.el) {
+            return null;
+        }
+        isInputTopLevelElement = this.el.tagName.toLowerCase() === this.options.tagName;
+        return (isInputTopLevelElement ? this.el : this.el.getElementsByTagName(this.options.tagName).item(0));
     };
     AbstractFormType.prototype.isRendered = function () {
         return this.isRenderedFlag;
@@ -505,7 +500,7 @@ var AbstractFormType = (function () {
 module.exports = AbstractFormType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../View/Template/FormTemplateCollection":9,"events":1}],3:[function(require,module,exports){
+},{"../View/TemplateHelper/PartialWidgetHelper":10,"events":1}],3:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -516,6 +511,7 @@ var __extends = this.__extends || function (d, b) {
 var FieldType = require('./FieldType');
 var OptionType = require('./OptionType');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+
 var ChoiceType = (function (_super) {
     __extends(ChoiceType, _super);
     function ChoiceType() {
@@ -536,7 +532,8 @@ var ChoiceType = (function (_super) {
         _.defaults(options, {
             tagName: 'select',
             type: 'choice',
-            choices: {}
+            choices: {},
+            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<select {{>html_attrs form.attrs}}></select>\n")
         });
         options.children = [];
         _.each(options.choices, function (value, key) {
@@ -572,7 +569,7 @@ var ChoiceType = (function (_super) {
 module.exports = ChoiceType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FieldType":4,"./OptionType":6}],4:[function(require,module,exports){
+},{"./FieldType":4,"./OptionType":7}],4:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -582,9 +579,14 @@ var __extends = this.__extends || function (d, b) {
 };
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
+///ts:ref=handlebars.d.ts
+/// <reference path="../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
+///ts:ref=node.d.ts
+/// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 var AbstractFormType = require('./AbstractFormType');
 var StringUtil = require('../Util/StringUtil');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+
 /**
  * Base class for all form fields
  */
@@ -599,7 +601,8 @@ var FieldType = (function (_super) {
             tagName: 'input',
             type: 'field',
             label: null,
-            labelAttrs: {}
+            labelAttrs: {},
+            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<{{form.tagName}} {{>html_attrs form.attrs}} />\n")
         });
         options = _super.prototype.setDefaultOptions.call(this, options);
         options.label || (options.label = StringUtil.camelCaseToWords(options.name));
@@ -618,7 +621,7 @@ var FieldType = (function (_super) {
 module.exports = FieldType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/StringUtil":8,"./AbstractFormType":2}],5:[function(require,module,exports){
+},{"../Util/StringUtil":9,"./AbstractFormType":2}],5:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -628,21 +631,69 @@ var __extends = this.__extends || function (d, b) {
 };
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
-var AbstractFormType = require('./AbstractFormType');
+///ts:ref=handlebars.d.ts
+/// <reference path="../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
+///ts:ref=node.d.ts
+/// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
+var GroupType = require('./GroupType');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+
 var FormType = (function (_super) {
     __extends(FormType, _super);
     function FormType() {
         _super.apply(this, arguments);
     }
-    FormType.prototype.getData = function () {
+    FormType.prototype.setDefaultOptions = function (options) {
+        _.defaults(options, {
+            tagName: 'form',
+            type: 'form',
+            template: this.Handlebars.compile("<form {{>html_attrs form.attrs}}></form>")
+        });
+        return options;
+    };
+    return FormType;
+})(GroupType);
+module.exports = FormType;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./GroupType":6}],6:[function(require,module,exports){
+(function (global){
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+///ts:ref=underscore.d.ts
+/// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
+///ts:ref=handlebars.d.ts
+/// <reference path="../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
+///ts:ref=node.d.ts
+/// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
+var AbstractFormType = require('./AbstractFormType');
+var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+
+var GroupType = (function (_super) {
+    __extends(GroupType, _super);
+    function GroupType() {
+        _super.apply(this, arguments);
+    }
+    GroupType.prototype.setDefaultOptions = function (options) {
+        _.defaults(options, {
+            type: 'group',
+            tagName: 'div',
+            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<{{form.tagName}} {{>html_attrs form.attrs}} />\n")
+        });
+        return options;
+    };
+    GroupType.prototype.getData = function () {
         var data = {};
         this.children.forEach(function (formType) {
             data[formType.getName()] = formType.getData();
         });
         return data;
     };
-    FormType.prototype.setData = function (data) {
+    GroupType.prototype.setData = function (data) {
         var _this = this;
         _.each(data, function (val, key) {
             var child = _this.getChild(key);
@@ -652,12 +703,12 @@ var FormType = (function (_super) {
             child.setData(data[key]);
         });
     };
-    return FormType;
+    return GroupType;
 })(AbstractFormType);
-module.exports = FormType;
+module.exports = GroupType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./AbstractFormType":2}],6:[function(require,module,exports){
+},{"./AbstractFormType":2}],7:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -667,9 +718,14 @@ var __extends = this.__extends || function (d, b) {
 };
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
+///ts:ref=handlebars.d.ts
+/// <reference path="../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
+///ts:ref=node.d.ts
+/// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 var FieldType = require('./FieldType');
 var StringUtil = require('../Util/StringUtil');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+
 var OptionType = (function (_super) {
     __extends(OptionType, _super);
     function OptionType() {
@@ -679,7 +735,8 @@ var OptionType = (function (_super) {
         _.defaults(options, {
             tagName: 'option',
             type: 'option',
-            data: ''
+            data: '',
+            template: this.Handlebars.compile("<option value=\"{{form.data}}\"\n  {{#if form.selected}}selected{{/if}}>\n    {{form.label}}\n</option>")
         });
         if (!options.label) {
             options.label = StringUtil.camelCaseToWords(options.data);
@@ -697,7 +754,7 @@ var OptionType = (function (_super) {
 module.exports = OptionType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/StringUtil":8,"./FieldType":4}],7:[function(require,module,exports){
+},{"../Util/StringUtil":9,"./FieldType":4}],8:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -707,8 +764,13 @@ var __extends = this.__extends || function (d, b) {
 };
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
+///ts:ref=handlebars.d.ts
+/// <reference path="../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
+///ts:ref=node.d.ts
+/// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 var FieldType = require('./FieldType');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+
 var TextType = (function (_super) {
     __extends(TextType, _super);
     function TextType() {
@@ -727,7 +789,8 @@ var TextType = (function (_super) {
         _.defaults(options, {
             tagName: 'input',
             type: 'text',
-            data: ''
+            data: '',
+            template: this.Handlebars.compile("{{>field_widget}}")
         });
         options = _super.prototype.setDefaultOptions.call(this, options);
         _.defaults(options.attrs, {
@@ -758,7 +821,7 @@ var TextType = (function (_super) {
 module.exports = TextType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FieldType":4}],8:[function(require,module,exports){
+},{"./FieldType":4}],9:[function(require,module,exports){
 var StringUtil = (function () {
     function StringUtil() {
     }
@@ -773,119 +836,7 @@ var StringUtil = (function () {
 })();
 module.exports = StringUtil;
 
-},{}],9:[function(require,module,exports){
-(function (global){
-var Handlebars = (typeof window !== "undefined" ? window.Handlebars : typeof global !== "undefined" ? global.Handlebars : null);
-
-var PartialWidgetHelper = require('../TemplateHelper/PartialWidgetHelper');
-/**
- * Default form templates.
- */
-var FormTemplateCollection = (function () {
-    function FormTemplateCollection(HandlebarsEnv) {
-        if (HandlebarsEnv === void 0) { HandlebarsEnv = Handlebars; }
-        this.Handlebars = HandlebarsEnv;
-        this.templateCache = [];
-        this.registerDefaultHelpers();
-    }
-    Object.defineProperty(FormTemplateCollection.prototype, "form", {
-        get: function () {
-            var templateString = "{{partial_widget form}}";
-            return this.getTemplate('form', templateString);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(FormTemplateCollection.prototype, "form_widget", {
-        get: function () {
-            var templateString = "<form {{>html_attrs form.attrs}}></form>";
-            return this.getTemplate('form_widget', templateString);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(FormTemplateCollection.prototype, "form_start", {
-        get: function () {
-            var templateString = "<form {{>html_attrs form.attrs}}>";
-            return this.getTemplate('form_start', templateString);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(FormTemplateCollection.prototype, "form_end", {
-        get: function () {
-            var templateString = "</form>";
-            return this.getTemplate('form_end', templateString);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(FormTemplateCollection.prototype, "form_rows", {
-        get: function () {
-            var templateString = "{{#each form.children }}\n  {{partial_widget this}}\n{{/each}}";
-            return this.getTemplate('form_rows', templateString);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(FormTemplateCollection.prototype, "html_attrs", {
-        get: function () {
-            var templateString = "{{#each this}}\n  {{@key}}=\"{{this}}\"\n{{/each}}";
-            return this.getTemplate('html_attrs', templateString);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(FormTemplateCollection.prototype, "field_widget", {
-        get: function () {
-            var templateString = "{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<{{form.tagName}} {{>html_attrs form.attrs}} />\n";
-            return this.getTemplate('field_widget', templateString);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(FormTemplateCollection.prototype, "text_widget", {
-        get: function () {
-            var templateString = "{{>field_widget}}";
-            return this.getTemplate('text_widget', templateString);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(FormTemplateCollection.prototype, "option_widget", {
-        get: function () {
-            var templateString = "<option value=\"{{form.data}}\"\n  {{#if form.selected}}selected{{/if}}>\n    {{form.label}}\n</option>";
-            return this.getTemplate('option_widget', templateString);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(FormTemplateCollection.prototype, "choice_widget", {
-        get: function () {
-            var templateString = "{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<select {{>html_attrs form.attrs}}></select>\n";
-            return this.getTemplate('choice_widget', templateString);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    FormTemplateCollection.prototype.getTemplate = function (name, templateString) {
-        if (this.templateCache[name]) {
-            return this.templateCache[name];
-        }
-        return this.templateCache[name] = this.Handlebars.compile(templateString);
-    };
-    FormTemplateCollection.prototype.registerDefaultHelpers = function () {
-        PartialWidgetHelper.register(this.Handlebars);
-    };
-    FormTemplateCollection.prototype.setHandlebars = function (HandleBars) {
-        this.Handlebars = HandleBars;
-    };
-    return FormTemplateCollection;
-})();
-module.exports = FormTemplateCollection;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../TemplateHelper/PartialWidgetHelper":10}],10:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function (global){
 var Handlebars = (typeof window !== "undefined" ? window.Handlebars : typeof global !== "undefined" ? global.Handlebars : null);
 var PartialWidgetHelper = (function () {
@@ -914,6 +865,7 @@ module.exports = PartialWidgetHelper;
 (function (global){
 //ts:ref=node.d.ts
 var AbstractFormType = require('./FormType/AbstractFormType');
+var GroupType = require('./FormType/GroupType');
 var FormType = require('./FormType/FormType');
 var FieldType = require('./FormType/FieldType');
 var TextType = require('./FormType/TextType');
@@ -921,6 +873,7 @@ var ChoiceType = require('./FormType/ChoiceType');
 var OptionType = require('./FormType/OptionType');
 var FormTypeExports = {
     AbstractFormType: AbstractFormType,
+    GroupType: GroupType,
     FormType: FormType,
     FieldType: FieldType,
     TextType: TextType,
@@ -931,5 +884,5 @@ global.FormTypes = FormTypeExports;
 module.exports = FormTypeExports;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FormType/AbstractFormType":2,"./FormType/ChoiceType":3,"./FormType/FieldType":4,"./FormType/FormType":5,"./FormType/OptionType":6,"./FormType/TextType":7}]},{},[11])(11)
+},{"./FormType/AbstractFormType":2,"./FormType/ChoiceType":3,"./FormType/FieldType":4,"./FormType/FormType":5,"./FormType/GroupType":6,"./FormType/OptionType":7,"./FormType/TextType":8}]},{},[11])(11)
 });
