@@ -54,9 +54,9 @@ class ChoiceType extends FieldType {
   }
 
   public getData():string {
-    var $select = <HTMLSelectElement>this.getFormElement();
+    var select = <HTMLSelectElement>this.getFormElement();
 
-    return $select ? $select.value : this.options.data;
+    return select ? select.value : this.options.data;
   }
 
   public setData(data:string):void {
