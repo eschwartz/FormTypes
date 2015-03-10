@@ -1,13 +1,10 @@
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
-///ts:ref=handlebars.d.ts
-/// <reference path="../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
 ///ts:ref=node.d.ts
 /// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 import FieldType = require('./FieldType');
 import FieldTypeOptionsInterface = require('../Options/FieldTypeOptionsInterface');
 import _ = require('underscore');
-import Handlebars = require('Handlebars');
 import fs = require('fs');
 
 class TextType extends FieldType {
