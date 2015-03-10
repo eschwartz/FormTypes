@@ -4,6 +4,7 @@
 /// <reference path="../../src/FormType/FieldType.ts" />
 /// <reference path="../../src/FormType/FormType.ts" />
 /// <reference path="../../src/FormType/GroupType.ts" />
+/// <reference path="../../src/FormType/LabelType.ts" />
 /// <reference path="../../src/FormType/OptionType.ts" />
 /// <reference path="../../src/FormType/TextType.ts" />
 /// <reference path="../../src/Options/ChoiceTypeOptionsInterface.ts" />

@@ -500,7 +500,7 @@ var AbstractFormType = (function () {
 module.exports = AbstractFormType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../View/TemplateHelper/PartialWidgetHelper":10,"events":1}],3:[function(require,module,exports){
+},{"../View/TemplateHelper/PartialWidgetHelper":11,"events":1}],3:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -547,8 +547,8 @@ var ChoiceType = (function (_super) {
         return _super.prototype.setDefaultOptions.call(this, options);
     };
     ChoiceType.prototype.getData = function () {
-        var $select = this.getFormElement();
-        return $select ? $select.value : this.options.data;
+        var select = this.getFormElement();
+        return select ? select.value : this.options.data;
     };
     ChoiceType.prototype.setData = function (data) {
         var select = this.getFormElement();
@@ -569,7 +569,7 @@ var ChoiceType = (function (_super) {
 module.exports = ChoiceType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FieldType":4,"./OptionType":7}],4:[function(require,module,exports){
+},{"./FieldType":4,"./OptionType":8}],4:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -624,7 +624,7 @@ var FieldType = (function (_super) {
 module.exports = FieldType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/StringUtil":9,"./AbstractFormType":2}],5:[function(require,module,exports){
+},{"../Util/StringUtil":10,"./AbstractFormType":2}],5:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -721,6 +721,58 @@ var __extends = this.__extends || function (d, b) {
 };
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
+///ts:ref=node.d.ts
+/// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
+var AbstractFormType = require('./AbstractFormType');
+var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+
+var LabelType = (function (_super) {
+    __extends(LabelType, _super);
+    function LabelType() {
+        _super.apply(this, arguments);
+    }
+    LabelType.prototype.setDefaultOptions = function (options) {
+        _.defaults(options, {
+            tagName: 'label',
+            type: 'label',
+            data: '',
+            template: this.Handlebars.compile("<{{form.tagName}} {{>html_attrs form.attrs}}>{{form.data}}</{{form.tagName}}>")
+        });
+        return _super.prototype.setDefaultOptions.call(this, options);
+    };
+    LabelType.prototype.getData = function () {
+        var label = this.getFormElement();
+        return label ? label.textContent : this.options.data;
+    };
+    LabelType.prototype.setData = function (data) {
+        var label = this.getFormElement();
+        var isSameData = data === this.getData();
+        if (isSameData) {
+            return;
+        }
+        if (!label) {
+            this.options.data = data;
+        }
+        else {
+            label.textContent = data;
+        }
+        this.eventEmitter.emit('change');
+    };
+    return LabelType;
+})(AbstractFormType);
+module.exports = LabelType;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./AbstractFormType":2}],8:[function(require,module,exports){
+(function (global){
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+///ts:ref=underscore.d.ts
+/// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
 ///ts:ref=handlebars.d.ts
 /// <reference path="../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
 ///ts:ref=node.d.ts
@@ -757,7 +809,7 @@ var OptionType = (function (_super) {
 module.exports = OptionType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/StringUtil":9,"./FieldType":4}],8:[function(require,module,exports){
+},{"../Util/StringUtil":10,"./FieldType":4}],9:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -824,7 +876,7 @@ var TextType = (function (_super) {
 module.exports = TextType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FieldType":4}],9:[function(require,module,exports){
+},{"./FieldType":4}],10:[function(require,module,exports){
 var StringUtil = (function () {
     function StringUtil() {
     }
@@ -839,7 +891,7 @@ var StringUtil = (function () {
 })();
 module.exports = StringUtil;
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function (global){
 var Handlebars = (typeof window !== "undefined" ? window.Handlebars : typeof global !== "undefined" ? global.Handlebars : null);
 var PartialWidgetHelper = (function () {
@@ -864,7 +916,7 @@ var PartialWidgetHelper = (function () {
 module.exports = PartialWidgetHelper;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function (global){
 //ts:ref=node.d.ts
 var AbstractFormType = require('./FormType/AbstractFormType');
@@ -874,6 +926,7 @@ var FieldType = require('./FormType/FieldType');
 var TextType = require('./FormType/TextType');
 var ChoiceType = require('./FormType/ChoiceType');
 var OptionType = require('./FormType/OptionType');
+var LabelType = require('./FormType/LabelType');
 var FormTypeExports = {
     AbstractFormType: AbstractFormType,
     GroupType: GroupType,
@@ -881,11 +934,12 @@ var FormTypeExports = {
     FieldType: FieldType,
     TextType: TextType,
     ChoiceType: ChoiceType,
-    OptionType: OptionType
+    OptionType: OptionType,
+    LabelType: LabelType
 };
 global.FormTypes = FormTypeExports;
 module.exports = FormTypeExports;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FormType/AbstractFormType":2,"./FormType/ChoiceType":3,"./FormType/FieldType":4,"./FormType/FormType":5,"./FormType/GroupType":6,"./FormType/OptionType":7,"./FormType/TextType":8}]},{},[11])(11)
+},{"./FormType/AbstractFormType":2,"./FormType/ChoiceType":3,"./FormType/FieldType":4,"./FormType/FormType":5,"./FormType/GroupType":6,"./FormType/LabelType":7,"./FormType/OptionType":8,"./FormType/TextType":9}]},{},[12])(12)
 });
