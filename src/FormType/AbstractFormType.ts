@@ -111,17 +111,13 @@ class AbstractFormType {
   }
 
   protected prepareTemplateEnvironment():void {
-    var partials:_.Dictionary<TemplateInterface> = {
-      html_attrs: this.Handlebars.compile(
-        fs.readFileSync(__dirname + '/../View/form/html_attrs.html.hbs', 'utf8')
-      ),
-      field_widget: this.Handlebars.compile(
-        fs.readFileSync(__dirname + '/../View/form/field_widget.html.hbs', 'utf8')
-      )
+    var partials:_.Dictionary<string> = {
+      html_attrs: fs.readFileSync(__dirname + '/../View/form/html_attrs.html.hbs', 'utf8'),
+      field_widget: fs.readFileSync(__dirname + '/../View/form/field_widget.html.hbs', 'utf8')
     };
 
-    _.each(partials, (template:TemplateInterface, name:string) => {
-      this.Handlebars.registerPartial(name, template);
+    _.each(partials, (partial:string, name: string) => {
+      this.Handlebars.registerPartial(name, partial);
     });
 
     PartialWidgetHelper.register(this.Handlebars);
