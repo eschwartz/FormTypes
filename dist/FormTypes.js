@@ -380,11 +380,11 @@ var AbstractFormType = (function () {
     AbstractFormType.prototype.prepareTemplateEnvironment = function () {
         var _this = this;
         var partials = {
-            html_attrs: this.Handlebars.compile("{{#each this}}\n  {{@key}}=\"{{this}}\"\n{{/each}}"),
-            field_widget: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<{{form.tagName}} {{>html_attrs form.attrs}} />\n")
+            html_attrs: "{{#each this}}\n  {{@key}}=\"{{this}}\"\n{{/each}}",
+            field_widget: "{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<{{form.tagName}} {{>html_attrs form.attrs}} />\n"
         };
-        _.each(partials, function (template, name) {
-            _this.Handlebars.registerPartial(name, template);
+        _.each(partials, function (partial, name) {
+            _this.Handlebars.registerPartial(name, partial);
         });
         PartialWidgetHelper.register(this.Handlebars);
     };
