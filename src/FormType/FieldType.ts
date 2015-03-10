@@ -33,7 +33,7 @@ class FieldType extends AbstractFormType {
 
     // set default label
     if (_.isNull(options.label)) {
-      options.label = StringUtil.camelCaseToWords(options.name)
+      options.label = StringUtil.camelCaseToWords(options.name);
     }
 
     // Set the `for`/`id` matching attributes

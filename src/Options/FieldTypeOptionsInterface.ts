@@ -3,7 +3,7 @@ import FormTypeOptionsInterface = require('./FormTypeOptionsInterface');
 import _ = require('underscore');
 
 interface FieldTypeOptionsInterface extends FormTypeOptionsInterface {
-  label?:string;
+  label?:string|Boolean;
   labelAttrs?:_.Dictionary<string>;
 }
 

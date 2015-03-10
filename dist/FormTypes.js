@@ -605,7 +605,10 @@ var FieldType = (function (_super) {
             template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<{{form.tagName}} {{>html_attrs form.attrs}} />\n")
         });
         options = _super.prototype.setDefaultOptions.call(this, options);
-        options.label || (options.label = StringUtil.camelCaseToWords(options.name));
+        // set default label
+        if (_.isNull(options.label)) {
+            options.label = StringUtil.camelCaseToWords(options.name);
+        }
         // Set the `for`/`id` matching attributes
         uniqueId = _.uniqueId(options.name + '_');
         _.defaults(options.attrs, {

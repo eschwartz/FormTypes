@@ -37,10 +37,4 @@
 /// <reference path="underscore/underscore.d.ts" />
 /// <reference path="../handlebars/handlebars.ext.d.ts" />
 /// <reference path="../mocha-jsdom/mocha-jsdom.d.ts" />
-/// <reference path="../../test/Util/DomEvents.ts" />
-/// <reference path="../../test/spec/FormType/ChoiceTypeTest.ts" />
-/// <reference path="../../test/spec/FormType/FormTypeTest.ts" />
-/// <reference path="../../test/spec/FormType/GroupTypeTest.ts" />
-/// <reference path="../../test/spec/FormType/TextTypeTest.ts" />
-/// <reference path="../../test/spec/test/Util/DomEventsTest.ts" />
 //grunt-end

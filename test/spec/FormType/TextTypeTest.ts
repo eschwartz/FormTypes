@@ -133,6 +133,16 @@ describe('TextType', () => {
         'Expected label to have attributes from `labelAttrs` option.');
     });
 
+    it('should render without a label', () => {
+      var textType = new TextType({
+        label: false
+      });
+
+      textType.render();
+
+      assert.equal($(textType.el).find('label').length, 0);
+    });
+
   });
 
   describe('getData', () => {
