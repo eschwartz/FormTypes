@@ -5,6 +5,13 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="mocha.css" />
+
+    <!--
+    Because we're using the browserify-shim transform,
+    our browserify is expecting these to be in the global scope.
+    -->
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.0/handlebars.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.2/underscore-min.js"></script>
   </head>
   <body>
     <a href="index.html">Run All</a>

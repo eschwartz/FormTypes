@@ -11,7 +11,7 @@ var Gruntfile = function(grunt) {
         compiler: './node_modules/.bin/tsc',
         // Source maps don't work so well,
         // because browserify creates source maps, too
-        sourceMap: false,
+        sourceMap: false
       },
       dist: {
         src: [
@@ -78,41 +78,39 @@ var Gruntfile = function(grunt) {
         }
       }
     },
+
+    exec: {
+      'browserify/dist': {
+        command: './node_modules/.bin/browserify src/exports.js \
+        --standalone FormTypes \
+        -x Handlebars \
+        -x underscore \
+        -o dist/FormTypes.js'
+      },
+      'browserify/vendor': {
+        command: './node_modules/.bin/browserify \
+          -r underscore \
+          -r Handlebars \
+          -o dist/vendor.js'
+      },
+      'tests': {
+        command: './node_modules/.bin/mocha test/spec/**/*Test.js'
+      }
+    },
+
     // Browserify compiler
+
+    // NOTE:
+    // The grunt-browserify task does not work with
+    // the browserify-shim transform. For this reason,
+    // DO NOT USE this for distribution builds.
+    // (ok for tests)
     browserify: {
-      options: {
-        transform: ['brfs']
-      },
-      dist: {
-        options: {
-          external: ['jquery', 'underscore', 'handlebars'],
-          browserifyOptions: {
-            standalone: 'FormTypes'
-          }
-        },
-        files: {
-          'dist/FormTypes.js': ['src/exports.js']
-        }
-      },
-      vendor: {
-        options: {
-          require: [
-            'jquery',
-            'underscore',
-            'handlebars'
-          ]
-        },
-        files: {
-          'dist/vendor.js': []
-        }
-      },
       // Vendor bundle for tests
-      'vendor-tests': {
+      'vendor/tests': {
         options: {
           require: [
             'jquery',
-            'underscore',
-            'handlebars',
             'jsdom',
             'mocha-jsdom',
             'sinon'
@@ -124,7 +122,7 @@ var Gruntfile = function(grunt) {
       },
       tests: {
         options: {
-          external: ['jquery', 'underscore', 'handlebars', 'jsdom', 'mocha-jsdom', 'sinon']
+          external: ['jquery', 'underscore', 'Handlebars', 'jsdom', 'mocha-jsdom', 'sinon']
         },
         files: {
           'dist/tests.js': ['test/spec/**/*Test.js']
@@ -136,24 +134,31 @@ var Gruntfile = function(grunt) {
   grunt.loadNpmTasks('grunt-tslint');
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-tsd');
+  grunt.loadNpmTasks('grunt-exec');
 
-  grunt.registerTask('default', ['build']);
+  grunt.registerTask('default', ['test', 'build']);
   grunt.registerTask('build', ['build/dist']);
 
+  // Creates a distribution build
   grunt.registerTask('build/dist', [
     isQuick ? 'noop' : 'tsd:dist',
-    isQuick ? 'noop' : 'tslint',
     'ts:dist',
-    'browserify:dist'
+    'exec:browserify/dist'
   ]);
-  grunt.registerTask('build/tests', [
+
+  // Creates an HTML test file for browser-environment testing
+  grunt.registerTask('test/browser', [
     isQuick ? 'noop' : 'tsd:dist',
+    isQuick ? 'noop' : 'browserify:vendor/tests',
     'ts:tests',
     'browserify:tests'
   ]);
-  grunt.registerTask('build/vendor', [
-    'browserify:vendor',
-    'browserify:vendor-tests'
+
+  // Runs test specs using mocha in a node environment
+  grunt.registerTask('test', [
+    isQuick ? 'noop' : 'tslint',
+    'ts:tests',
+    'exec:tests'
   ]);
 
   grunt.registerTask('noop', []);

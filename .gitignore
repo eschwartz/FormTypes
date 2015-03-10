@@ -16,7 +16,8 @@ node_modules/
 # created by grunt-ts
 tscommand-*.tmp.txt
 
-# Do not ignore /dist files.
+# Do not ignore distribution build
 # I hate to do this, but this is the
 # easiest way to make the library bower-compatible
-!/dist/*.js
+dist/*
+!dist/FormTypes.js
