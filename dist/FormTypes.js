@@ -534,6 +534,9 @@ var ChoiceType = (function (_super) {
         });
         return this;
     };
+    ChoiceType.prototype.getFormElement = function () {
+        return _super.prototype.getFormElement.call(this);
+    };
     ChoiceType.prototype.addChildElement = function (childType) {
         this.getFormElement().appendChild(childType.el);
     };
@@ -572,6 +575,32 @@ var ChoiceType = (function (_super) {
             select.value = data;
         }
         this.eventEmitter.emit('change');
+    };
+    ChoiceType.prototype.disableOption = function (optionValue) {
+        var option = this.getOptionElement(optionValue);
+        if (!option) {
+            throw new Error('Unable to disable option ' + optionValue + ': the option does not exist');
+        }
+        option.disabled = true;
+        if (option.selected) {
+            option.selected = false;
+            this.getFormElement().selectedIndex = -1;
+        }
+    };
+    ChoiceType.prototype.enableOption = function (optionValue) {
+        var option = this.getOptionElement(optionValue);
+        if (!option) {
+            throw new Error('Unable to enable option ' + optionValue + ': the option does not exist');
+        }
+        option.disabled = false;
+    };
+    ChoiceType.prototype.getOptionElement = function (value) {
+        var selectEl = this.getFormElement();
+        var filterOpts = Array.prototype.filter.bind(selectEl.childNodes);
+        var matchingOptions = filterOpts(function (option) {
+            return option.value === value;
+        });
+        return matchingOptions.length ? matchingOptions[0] : null;
     };
     return ChoiceType;
 })(FieldType);

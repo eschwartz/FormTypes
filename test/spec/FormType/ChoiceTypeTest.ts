@@ -259,4 +259,72 @@ describe('ChoiceType', () => {
 
   });
 
+  describe('disableOption', () => {
+
+    it('should disabled an option element', () => {
+      var $options:JQuery, $chickenOpt:JQuery;
+      var choiceType = new ChoiceType({
+        choices: {
+          chicken: 'The Chicken',
+          egg: 'The Egg'
+        },
+        data: 'egg'
+      });
+      choiceType.render();
+
+      choiceType.disableOption('chicken');
+
+      $options = $(choiceType.getFormElement()).children();
+      $chickenOpt = $options.filter('[value="chicken"]');
+
+      // Check that chicken is disabled
+      assert($chickenOpt.is(':disabled'));
+
+      // egg should not be disabled
+      assert(!$options.filter('[value="egg"]').is(':disabled'));
+    });
+
+    it('should unset a disabled option as the selected value', () => {
+      var $select:JQuery;
+      var choiceType = new ChoiceType({
+        choices: {
+          chicken: 'The Chicken',
+          egg: 'The Egg'
+        },
+        data: 'egg'
+      });
+      choiceType.render();
+
+      choiceType.disableOption('egg');
+
+      $select = $(choiceType.getFormElement());
+
+      assert(!$select.children('[value="egg"]').is(':selected'));
+    });
+
+  });
+
+  describe('enableOption', () => {
+
+    it('should re-enable a disabled option', () => {
+      var $select:JQuery;
+      var choiceType = new ChoiceType({
+        choices: {
+          chicken: 'The Chicken',
+          egg: 'The Egg'
+        },
+        data: 'egg'
+      });
+      choiceType.render();
+
+      choiceType.disableOption('chicken');
+      choiceType.enableOption('chicken');
+
+      $select = $(choiceType.el);
+
+      assert(!$select.find('[value="chicken"]').is(':disabled'));
+    });
+
+  });
+
 });

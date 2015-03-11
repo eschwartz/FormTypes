@@ -25,6 +25,10 @@ class ChoiceType extends FieldType {
     return this;
   }
 
+  public getFormElement():HTMLSelectElement {
+    return <HTMLSelectElement>super.getFormElement();
+  }
+
   protected addChildElement(childType:AbstractFormType) {
     this.getFormElement().appendChild(childType.el);
   }
@@ -75,6 +79,44 @@ class ChoiceType extends FieldType {
     }
 
     this.eventEmitter.emit('change');
+  }
+
+  public disableOption(optionValue:string) {
+    var option = this.getOptionElement(optionValue);
+
+    if (!option) {
+      throw new Error('Unable to disable option ' + optionValue +
+      ': the option does not exist');
+    }
+
+    option.disabled = true;
+
+    if (option.selected) {
+      option.selected = false;
+      this.getFormElement().selectedIndex = -1;
+    }
+  }
+
+  public enableOption(optionValue:string) {
+    var option = this.getOptionElement(optionValue);
+
+    if (!option) {
+      throw new Error('Unable to enable option ' + optionValue +
+      ': the option does not exist');
+    }
+
+    option.disabled = false;
+  }
+
+  protected getOptionElement(value:string):HTMLOptionElement {
+    var selectEl = this.getFormElement();
+    var filterOpts = Array.prototype.filter.bind(selectEl.childNodes);
+
+    var matchingOptions = filterOpts((option:HTMLOptionElement) => {
+      return option.value === value;
+    });
+
+    return matchingOptions.length ? matchingOptions[0] : null;
   }
 
 }
