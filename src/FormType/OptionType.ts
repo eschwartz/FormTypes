@@ -12,6 +12,8 @@ import Handlebars = require('Handlebars');
 import fs = require('fs');
 
 class OptionType extends FieldType {
+  protected options:OptionTypeOptionsInterface;
+
   protected setDefaultOptions(options:OptionTypeOptionsInterface) {
     _.defaults(options, {
       tagName: 'option',
@@ -37,6 +39,10 @@ class OptionType extends FieldType {
     return options;
   }
 
+  public getFormElement():HTMLOptionElement {
+    return <HTMLOptionElement>super.getFormElement();
+  }
+
   public getData():string {
     var formEl = <HTMLOptionElement>this.getFormElement();
 
@@ -57,6 +63,27 @@ class OptionType extends FieldType {
     if (!isSame) {
       this.eventEmitter.emit('change');
     }
+  }
+
+  public select() {
+    if (this.getFormElement()) {
+      this.getFormElement().selected = true;
+    }
+
+    this.options.selected = true;
+  }
+
+  public deselect() {
+    if (this.getFormElement()) {
+      this.getFormElement().selected = false;
+    }
+
+    this.options.selected = false;
+  }
+
+  public isSelected():boolean {
+    return this.getFormElement() ?
+      this.getFormElement().selected : this.options.selected;
   }
 }
 

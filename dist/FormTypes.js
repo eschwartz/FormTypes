@@ -559,22 +559,26 @@ var ChoiceType = (function (_super) {
         return _super.prototype.setDefaultOptions.call(this, options);
     };
     ChoiceType.prototype.getData = function () {
-        var select = this.getFormElement();
-        return select ? select.value : this.options.data;
+        var selectedChild = _.find(this.children, function (child) { return child.isSelected(); });
+        return selectedChild ? selectedChild.getData() : this.options.data;
     };
     ChoiceType.prototype.setData = function (data) {
-        var select = this.getFormElement();
         var isSameData = data === this.getData();
         if (isSameData) {
             return;
         }
-        if (!select) {
-            this.options.data = data;
+        this.children.forEach(function (child) {
+            if (child.getData() === data) {
+                child.select();
+            }
+            else {
+                child.deselect();
+            }
+        });
+        this.options.data = data;
+        if (!isSameData) {
+            this.eventEmitter.emit('change');
         }
-        else {
-            select.value = data;
-        }
-        this.eventEmitter.emit('change');
     };
     ChoiceType.prototype.disableOption = function (optionValue) {
         var option = this.getOptionElement(optionValue);
@@ -834,7 +838,7 @@ var ListType = (function (_super) {
             tagName: 'ul',
             data: [],
             template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>{{label}}</label>\n{{/if}}\n<{{form.tagName}} {{>html_attrs form.attrs}}></{{form.tagName}}>"),
-            itemTemplate: this.Handlebars.compile("<li data-form-types-item-container></li>"),
+            itemTemplate: this.Handlebars.compile("<li></li>"),
             itemContainerSelector: 'li'
         });
         internalOptions = [
@@ -957,6 +961,9 @@ var OptionType = (function (_super) {
         }
         return options;
     };
+    OptionType.prototype.getFormElement = function () {
+        return _super.prototype.getFormElement.call(this);
+    };
     OptionType.prototype.getData = function () {
         var formEl = this.getFormElement();
         return formEl ? formEl.value : this.options.data;
@@ -973,6 +980,21 @@ var OptionType = (function (_super) {
         if (!isSame) {
             this.eventEmitter.emit('change');
         }
+    };
+    OptionType.prototype.select = function () {
+        if (this.getFormElement()) {
+            this.getFormElement().selected = true;
+        }
+        this.options.selected = true;
+    };
+    OptionType.prototype.deselect = function () {
+        if (this.getFormElement()) {
+            this.getFormElement().selected = false;
+        }
+        this.options.selected = false;
+    };
+    OptionType.prototype.isSelected = function () {
+        return this.getFormElement() ? this.getFormElement().selected : this.options.selected;
     };
     return OptionType;
 })(FieldType);

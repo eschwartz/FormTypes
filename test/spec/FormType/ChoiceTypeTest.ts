@@ -196,6 +196,26 @@ describe('ChoiceType', () => {
       assert.equal(choiceType.getData(), 'chicken');
     });
 
+    it('should set the eventual rendered value of the select element - before render', () => {
+      var $select:JQuery, $options:JQuery;
+      var choiceType = new ChoiceType({
+        choices: {
+          chicken: 'The Chicken',
+          egg: 'The Egg'
+        },
+        data: 'egg'
+      });
+
+      choiceType.setData('chicken');
+      choiceType.render();
+
+      $select = $(choiceType.getFormElement());
+      $options = $select.find('option');
+
+      assert.equal($select.val(), 'chicken');
+      assert.equal($options.filter(':selected').val(), 'chicken');
+    });
+
     it('should trigger a change event', () => {
       var onChange = sinon.spy();
       var choiceType = new ChoiceType({

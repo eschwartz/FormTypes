@@ -13,6 +13,7 @@ import Handlebars = require('Handlebars');
 import fs = require('fs');
 
 class ChoiceType extends FieldType {
+  protected children:OptionType[];
 
   public render():ChoiceType {
     super.render();
@@ -58,27 +59,32 @@ class ChoiceType extends FieldType {
   }
 
   public getData():string {
-    var select = <HTMLSelectElement>this.getFormElement();
+    var selectedChild = _.find(this.children, (child:OptionType) => child.isSelected());
 
-    return select ? select.value : this.options.data;
+    return selectedChild ? selectedChild.getData() : this.options.data;
   }
 
   public setData(data:string):void {
-    var select = <HTMLSelectElement>this.getFormElement();
     var isSameData = data === this.getData();
 
     if (isSameData) {
       return;
     }
 
-    if (!select) {
-      this.options.data = data;
-    }
-    else {
-      select.value = data;
-    }
+    this.children.forEach((child:OptionType) => {
+      if (child.getData() === data) {
+        child.select();
+      }
+      else {
+        child.deselect();
+      }
+    });
 
-    this.eventEmitter.emit('change');
+    this.options.data = data;
+
+    if (!isSameData) {
+      this.eventEmitter.emit('change');
+    }
   }
 
   public disableOption(optionValue:string) {
