@@ -70,7 +70,6 @@ class ChoiceType extends FieldType {
 
   public setData(data:string):void {
     var isSameData = data === this.getData();
-    var areAnySelected:boolean;
 
     data = data ? data.toString() : data;
 
@@ -91,39 +90,35 @@ class ChoiceType extends FieldType {
   }
 
   public disableOption(optionValue:string) {
-    var option = this.getOptionElement(optionValue);
+    var option = this.getOption(optionValue);
 
     if (!option) {
       throw new Error('Unable to disable option ' + optionValue +
       ': the option does not exist');
     }
 
-    option.disabled = true;
+    option.disable();
 
-    if (option.selected) {
-      option.selected = false;
+    if (option.isSelected()) {
+      option.deselect();
       this.getFormElement().selectedIndex = -1;
     }
   }
 
   public enableOption(optionValue:string) {
-    var option = this.getOptionElement(optionValue);
+    var option = this.getOption(optionValue);
 
     if (!option) {
       throw new Error('Unable to enable option ' + optionValue +
       ': the option does not exist');
     }
 
-    option.disabled = false;
+    option.enable();
   }
 
-  protected getOptionElement(value:string):HTMLOptionElement {
-    var selectEl = this.getFormElement();
-    var filterOpts = Array.prototype.filter.bind(selectEl.childNodes);
-
-    var matchingOptions = filterOpts((option:HTMLOptionElement) => {
-      return option.value === value;
-    });
+  protected getOption(value:string):OptionType {
+    var matchingOptions = this.children.
+      filter((child:OptionType) => child.getData() === value);
 
     return matchingOptions.length ? matchingOptions[0] : null;
   }

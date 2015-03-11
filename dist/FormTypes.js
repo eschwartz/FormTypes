@@ -566,7 +566,6 @@ var ChoiceType = (function (_super) {
     };
     ChoiceType.prototype.setData = function (data) {
         var isSameData = data === this.getData();
-        var areAnySelected;
         data = data ? data.toString() : data;
         this.children.forEach(function (child) {
             if (child.getData() === data) {
@@ -582,29 +581,25 @@ var ChoiceType = (function (_super) {
         }
     };
     ChoiceType.prototype.disableOption = function (optionValue) {
-        var option = this.getOptionElement(optionValue);
+        var option = this.getOption(optionValue);
         if (!option) {
             throw new Error('Unable to disable option ' + optionValue + ': the option does not exist');
         }
-        option.disabled = true;
-        if (option.selected) {
-            option.selected = false;
+        option.disable();
+        if (option.isSelected()) {
+            option.deselect();
             this.getFormElement().selectedIndex = -1;
         }
     };
     ChoiceType.prototype.enableOption = function (optionValue) {
-        var option = this.getOptionElement(optionValue);
+        var option = this.getOption(optionValue);
         if (!option) {
             throw new Error('Unable to enable option ' + optionValue + ': the option does not exist');
         }
-        option.disabled = false;
+        option.enable();
     };
-    ChoiceType.prototype.getOptionElement = function (value) {
-        var selectEl = this.getFormElement();
-        var filterOpts = Array.prototype.filter.bind(selectEl.childNodes);
-        var matchingOptions = filterOpts(function (option) {
-            return option.value === value;
-        });
+    ChoiceType.prototype.getOption = function (value) {
+        var matchingOptions = this.children.filter(function (child) { return child.getData() === value; });
         return matchingOptions.length ? matchingOptions[0] : null;
     };
     return ChoiceType;
@@ -949,7 +944,7 @@ var OptionType = (function (_super) {
             tagName: 'option',
             type: 'option',
             data: '',
-            template: this.Handlebars.compile("<option value=\"{{form.data}}\"\n  {{#if form.selected}}selected{{/if}}>\n    {{form.label}}\n</option>")
+            template: this.Handlebars.compile("<option value=\"{{form.data}}\"\n        {{>html_attrs form.attrs}}>\n    {{form.label}}\n</option>")
         });
         if (!options.label) {
             options.label = StringUtil.camelCaseToWords(options.data);
@@ -986,16 +981,28 @@ var OptionType = (function (_super) {
         if (this.getFormElement()) {
             this.getFormElement().selected = true;
         }
-        this.options.selected = true;
+        this.options.attrs['selected'] = true;
     };
     OptionType.prototype.deselect = function () {
         if (this.getFormElement()) {
-            this.getFormElement().selected = false;
+            this.getFormElement().removeAttribute('disabled');
         }
-        this.options.selected = false;
+        delete this.options.attrs['selected'];
+    };
+    OptionType.prototype.enable = function () {
+        if (this.getFormElement()) {
+            this.getFormElement().removeAttribute('disabled');
+        }
+        delete this.options.attrs['disabled'];
+    };
+    OptionType.prototype.disable = function () {
+        if (this.getFormElement()) {
+            this.getFormElement().disabled = true;
+        }
+        this.options.attrs['disabled'] = true;
     };
     OptionType.prototype.isSelected = function () {
-        return this.getFormElement() ? this.getFormElement().selected : this.options.selected;
+        return this.getFormElement() ? this.getFormElement().selected : !!this.options.attrs['selected'];
     };
     return OptionType;
 })(FieldType);

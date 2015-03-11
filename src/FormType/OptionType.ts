@@ -70,20 +70,36 @@ class OptionType extends FieldType {
       this.getFormElement().selected = true;
     }
 
-    this.options.selected = true;
+    this.options.attrs['selected'] = true;
   }
 
   public deselect() {
     if (this.getFormElement()) {
-      this.getFormElement().selected = false;
+      this.getFormElement().removeAttribute('disabled');
     }
 
-    this.options.selected = false;
+    delete this.options.attrs['selected'];
+  }
+
+  public enable() {
+    if (this.getFormElement()) {
+      this.getFormElement().removeAttribute('disabled');
+    }
+
+    delete this.options.attrs['disabled'];
+  }
+
+  public disable() {
+    if (this.getFormElement()) {
+      this.getFormElement().disabled = true;
+    }
+
+    this.options.attrs['disabled'] = true;
   }
 
   public isSelected():boolean {
     return this.getFormElement() ?
-      this.getFormElement().selected : this.options.selected;
+      this.getFormElement().selected : !!this.options.attrs['selected'];
   }
 }
 

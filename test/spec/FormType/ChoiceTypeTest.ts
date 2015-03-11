@@ -354,6 +354,29 @@ describe('ChoiceType', () => {
       assert(!$select.children('[value="egg"]').is(':selected'));
     });
 
+    it('before render - should disable once rendered', () => {
+      var $options:JQuery, $chickenOpt:JQuery;
+      var choiceType = new ChoiceType({
+        choices: {
+          chicken: 'The Chicken',
+          egg: 'The Egg'
+        },
+        data: 'egg'
+      });
+
+      choiceType.disableOption('chicken');
+
+      choiceType.render();
+      $options = $(choiceType.getFormElement()).children();
+      $chickenOpt = $options.filter('[value="chicken"]');
+
+      // Check that chicken is disabled
+      assert($chickenOpt.is(':disabled'));
+
+      // egg should not be disabled
+      assert(!$options.filter('[value="egg"]').is(':disabled'));
+    });
+
   });
 
   describe('enableOption', () => {
