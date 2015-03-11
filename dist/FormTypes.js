@@ -340,7 +340,7 @@ var AbstractFormType = (function () {
             this.appendChildType(child);
         }
     };
-    AbstractFormType.prototype.removeChild = function (name) {
+    AbstractFormType.prototype.removeChildByName = function (name) {
         var child = this.getChild(name);
         if (!child) {
             return void 0;

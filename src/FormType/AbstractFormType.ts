@@ -59,7 +59,7 @@ class AbstractFormType {
     }
   }
 
-  public removeChild(name:string):void {
+  public removeChildByName(name:string):void {
     var child:AbstractFormType = this.getChild(name);
 
     if (!child) {

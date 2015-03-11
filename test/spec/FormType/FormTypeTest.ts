@@ -119,11 +119,11 @@ describe('FormType', () => {
       formType.on('change:country', () => {
         var selectedCountry = formType.getData()['country'];
         if (selectedCountry === 'us') {
-          formType.removeChild('franceForm');
+          formType.removeChildByName('franceForm');
           formType.addChild(usForm)
         }
         else if (selectedCountry = 'fr') {
-          formType.removeChild('usForm');
+          formType.removeChildByName('usForm');
           formType.addChild(franceForm);
         }
       });
