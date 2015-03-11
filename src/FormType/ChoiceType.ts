@@ -25,7 +25,7 @@ class ChoiceType extends FieldType {
     return this;
   }
 
-  protected appendChildType(childType:AbstractFormType) {
+  protected addChildElement(childType:AbstractFormType) {
     this.getFormElement().appendChild(childType.el);
   }
 

@@ -58,12 +58,12 @@ class AbstractFormType {
       if (!child.isRendered()) {
         child.render();
       }
-      this.appendChildType(child);
+      this.addChildElement(child);
     }
   }
 
   public removeChild(child:AbstractFormType) {
-    this.removeChildElement(child.el);
+    this.removeChildElement(child);
 
     child.removeAllListenersById(this.listenerId);
 
@@ -101,7 +101,7 @@ class AbstractFormType {
         formType.render();
       }
 
-      this.appendChildType(formType);
+      this.addChildElement(formType);
     });
 
     this.isRenderedFlag = true;
@@ -113,7 +113,7 @@ class AbstractFormType {
     this.template = template;
   }
 
-  protected appendChildType(childType:AbstractFormType) {
+  protected addChildElement(childType:AbstractFormType) {
     this.el.appendChild(childType.el);
   }
 
@@ -133,13 +133,17 @@ class AbstractFormType {
   /**
    * Remove a childType's element from parent form's element
    */
-  protected removeChildElement(el:HTMLElement) {
-    this.el.removeChild(el);
+  protected removeChildElement(child:AbstractFormType) {
+    child.el.parentElement.removeChild(child.el);
   }
 
   protected createTemplateContext():FormContextInterface {
+    var blacklist = [
+      'template'
+    ];
+    var cleanOptions = _.omit(this.options, blacklist);
     var formContext:FormContextInterface = _.extend({},
-      this.options, {
+      cleanOptions, {
         children: this.children.
           map((childForm:AbstractFormType) => {
             var childContext = childForm.createTemplateContext();
