@@ -59,6 +59,14 @@ class AbstractFormType {
     }
   }
 
+  public removeChild(child:AbstractFormType) {
+    this.removeChildElement(child.el);
+
+    child.removeAllListenersById(this.listenerId);
+
+    this.children = _.without(this.children, child);
+  }
+
   public removeChildByName(name:string):void {
     var child:AbstractFormType = this.getChild(name);
 
@@ -66,11 +74,7 @@ class AbstractFormType {
       return void 0;
     }
 
-    this.removeChildType(child);
-
-    child.removeAllListenersById(this.listenerId);
-
-    this.children = _.without(this.children, child);
+    this.removeChild(child);
   }
 
   public getChild(name:string):AbstractFormType {
@@ -124,11 +128,10 @@ class AbstractFormType {
   }
 
   /**
-   * Remove a childType from the form's element
-   * @param childType
+   * Remove a childType's element from parent form's element
    */
-  protected removeChildType(childType:AbstractFormType) {
-    this.el.removeChild(childType.el);
+  protected removeChildElement(el:HTMLElement) {
+    this.el.removeChild(el);
   }
 
   protected createTemplateContext():FormContextInterface {

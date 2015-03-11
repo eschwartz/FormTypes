@@ -345,7 +345,7 @@ var AbstractFormType = (function () {
         if (!child) {
             return void 0;
         }
-        this.removeChildType(child);
+        this.removeChildElement(child);
         child.removeAllListenersById(this.listenerId);
         this.children = _.without(this.children, child);
     };
@@ -392,7 +392,7 @@ var AbstractFormType = (function () {
      * Remove a childType from the form's element
      * @param childType
      */
-    AbstractFormType.prototype.removeChildType = function (childType) {
+    AbstractFormType.prototype.removeChildElement = function (childType) {
         this.el.removeChild(childType.el);
     };
     AbstractFormType.prototype.createTemplateContext = function () {
