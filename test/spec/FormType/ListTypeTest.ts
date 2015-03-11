@@ -1,0 +1,206 @@
+///ts:ref=mocha.d.ts
+/// <reference path="../../../typings/generated/mocha/mocha.d.ts"/> ///ts:ref:generated
+///ts:ref=mocha-jsdom.d.ts
+/// <reference path="../../../typings/mocha-jsdom/mocha-jsdom.d.ts"/> ///ts:ref:generated
+///ts:ref=jquery.d.ts
+/// <reference path="../../../typings/generated/jquery/jquery.d.ts"/> ///ts:ref:generated
+///ts:ref=sinon.d.ts
+/// <reference path="../../../typings/generated/sinon/sinon.d.ts"/> ///ts:ref:generated
+///ts:ref=underscore.d.ts
+/// <reference path="../../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
+import _ = require('underscore');
+import assert = require('assert');
+import ListType = require('../../../src/FormType/ListType');
+import TextType = require('../../../src/FormType/TextType');
+import sinon = require('sinon');
+import DomEvents = require('../../Util/DomEvents');
+var jsdom:jsdom = require('mocha-jsdom');
+
+describe('ListType', () => {
+  var $:JQueryStatic;
+
+  if (typeof window === 'undefined') {
+    jsdom();
+  }
+
+  before(() => {
+    $ = require('jquery');
+  });
+
+  describe('initialization', function () {
+
+    it('should create children of the ItemType', () => {
+      var listType = new ListType({
+        ItemType: TextType,
+        data: [
+          'foo',
+          'bar'
+        ]
+      });
+
+      var children = listType.getChildren();
+
+      assert.equal(children.length, 2);
+      assert(children[0] instanceof TextType);
+      assert(children[1] instanceof TextType);
+    });
+
+  });
+
+  describe('render', () => {
+
+    it('should render an empty list', () => {
+      var listType = new ListType();
+      listType.render();
+
+      assert.equal(listType.el.tagName.toLowerCase(), 'ul');
+      assert.equal(listType.el.childNodes.length, 0);
+    });
+
+    it('should render a list of form types', () => {
+      var $list:JQuery, $items:JQuery, $inputs;
+      var listType = new ListType({
+        ItemType: TextType,
+        data: [
+          'foo',
+          'bar'
+        ]
+      });
+      listType.render();
+
+      $list = $(listType.el);
+      $items = $list.children();
+      $inputs = $items.find('input');
+
+      assert.equal($items.length, 2);
+      assert.equal($items.prop('tagName').toLowerCase(), 'li');
+
+      assert.equal($inputs.length, 2);
+      assert.equal($inputs.prop('tagName').toLowerCase(), 'input');
+
+      assert.equal($inputs.eq(0).val().trim(), 'foo');
+      assert.equal($inputs.eq(1).val().trim(), 'bar');
+    });
+
+  });
+
+  describe('getData', () => {
+
+    it('should return initial data', () => {
+      var listType = new ListType({
+        ItemType: TextType,
+        data: [
+          'foo',
+          'bar'
+        ]
+      });
+
+      assert(_.isEqual(listType.getData(), ['foo', 'bar']));
+    });
+
+    it('should get modified data for each child type', () => {
+      var $list:JQuery, $items:JQuery, $inputs;
+      var listType = new ListType({
+        ItemType: TextType,
+        data: [
+          'foo',
+          'bar'
+        ]
+      });
+      listType.render();
+
+      $list = $(listType.el);
+      $items = $list.children();
+      $inputs = $items.find('input');
+
+      // Modify a child type object
+      listType.getChildren()[0].setData('shazaam');
+
+      // Modify a child's form element
+      $inputs.eq(1).val('kablooey');
+
+      assert(_.isEqual(listType.getData(), ['shazaam', 'kablooey']));
+    });
+
+  });
+
+  describe('setData', () => {
+
+    it('should update the child form elements', () => {
+      var $list:JQuery, $items:JQuery, $inputs;
+      var listType = new ListType({
+        ItemType: TextType,
+        data: [
+          'foo',
+          'bar'
+        ]
+      });
+      listType.render();
+
+      listType.setData(['shazaam', 'kablooey']);
+
+      $list = $(listType.el);
+      $items = $list.children();
+      $inputs = $items.find('input');
+
+
+      assert.equal($inputs.eq(0).val(), 'shazaam');
+      assert.equal($inputs.eq(1).val(), 'kablooey');
+    });
+
+  });
+
+  describe('addItem', () => {
+
+    it('should add a new list item', () => {
+      var $list:JQuery, $items:JQuery, $inputs:JQuery;
+      var listType = new ListType({
+        ItemType: TextType,
+        data: [
+          'foo',
+          'bar'
+        ]
+      });
+      listType.render();
+
+      listType.addData('shazaam');
+
+      $list = $(listType.el);
+      $items = $list.children();
+      $inputs = $items.find('input');
+
+      assert.equal($items.length, 3);
+      assert.equal($inputs.eq(2).val().trim(), 'shazaam');
+    });
+
+  });
+
+  describe('removeChild', () => {
+
+    it('should remove a child element', () => {
+      var $list:JQuery, $items:JQuery, $inputs:JQuery;
+      var fooItem:TextType;
+      var listType = new ListType({
+        ItemType: TextType,
+        data: [
+          'foo',
+          'bar'
+        ]
+      });
+      listType.render();
+
+      fooItem = <TextType>listType.getChildren()[1];
+      listType.removeChild(fooItem);
+
+      $list = $(listType.el);
+      $items = $list.children();
+      $inputs = $items.find('input');
+
+      assert.equal($items.length, 1);
+      assert.equal($inputs.eq(0).val().trim(), 'foo');
+    });
+
+  });
+
+
+});
