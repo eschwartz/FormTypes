@@ -328,6 +328,75 @@ var AbstractFormType = (function () {
         this.prepareTemplateEnvironment();
         this.el = null;
     }
+    /**
+     * Apply defaults to the options object.
+     *
+     * The returned object is set to this.options.
+     */
+    AbstractFormType.prototype.setDefaultOptions = function (options) {
+        var defaults = {
+            tagName: 'div',
+            type: 'form_type',
+            name: _.uniqueId('form_'),
+            attrs: {},
+            data: null,
+            children: []
+        };
+        _.defaults(options, defaults);
+        _.defaults(options.attrs, {
+            name: options.name
+        });
+        return options;
+    };
+    AbstractFormType.prototype.render = function () {
+        var _this = this;
+        var context = this.createTemplateContext();
+        var html = this.template({
+            form: context
+        });
+        this.el = this.createElementFromString(html);
+        this.children.forEach(function (formType) {
+            formType.render();
+            if (!formType.isRendered()) {
+                formType.render();
+            }
+            _this.addChildElement(formType);
+        });
+        this.isRenderedFlag = true;
+        return this;
+    };
+    AbstractFormType.prototype.setTemplate = function (template) {
+        this.template = template;
+    };
+    AbstractFormType.prototype.prepareTemplateEnvironment = function () {
+        var _this = this;
+        var partials = {
+            html_attrs: "{{#each this}}\n  {{@key}}=\"{{this}}\"\n{{/each}}",
+            field_widget: "{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<{{form.tagName}} {{>html_attrs form.attrs}} />\n"
+        };
+        _.each(partials, function (partial, name) {
+            _this.Handlebars.registerPartial(name, partial);
+        });
+        PartialWidgetHelper.register(this.Handlebars);
+    };
+    AbstractFormType.prototype.createTemplateContext = function () {
+        var blacklist = [
+            'template'
+        ];
+        var cleanOptions = _.omit(this.options, blacklist);
+        var formContext = _.extend({}, cleanOptions, {
+            children: this.children.map(function (childForm) {
+                var childContext = childForm.createTemplateContext();
+                return childContext;
+            })
+        });
+        return formContext;
+    };
+    AbstractFormType.prototype.createElementFromString = function (htmlString) {
+        var container = document.createElement('div');
+        container.innerHTML = htmlString.trim();
+        return container.childNodes.length === 1 ? container.firstChild : container;
+    };
     AbstractFormType.prototype.addChild = function (child) {
         var _this = this;
         this.children.push(child);
@@ -360,83 +429,14 @@ var AbstractFormType = (function () {
             return child.getName() === name;
         });
     };
-    AbstractFormType.prototype.render = function () {
-        var _this = this;
-        var context = this.createTemplateContext();
-        var html = this.template({
-            form: context
-        });
-        this.el = this.createElementFromString(html);
-        this.children.forEach(function (formType) {
-            formType.render();
-            if (!formType.isRendered()) {
-                formType.render();
-            }
-            _this.addChildElement(formType);
-        });
-        this.isRenderedFlag = true;
-        return this;
-    };
-    AbstractFormType.prototype.setTemplate = function (template) {
-        this.template = template;
-    };
     AbstractFormType.prototype.addChildElement = function (childType) {
         this.el.appendChild(childType.el);
-    };
-    AbstractFormType.prototype.prepareTemplateEnvironment = function () {
-        var _this = this;
-        var partials = {
-            html_attrs: "{{#each this}}\n  {{@key}}=\"{{this}}\"\n{{/each}}",
-            field_widget: "{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<{{form.tagName}} {{>html_attrs form.attrs}} />\n"
-        };
-        _.each(partials, function (partial, name) {
-            _this.Handlebars.registerPartial(name, partial);
-        });
-        PartialWidgetHelper.register(this.Handlebars);
     };
     /**
      * Remove a childType's element from parent form's element
      */
     AbstractFormType.prototype.removeChildElement = function (child) {
         child.el.parentElement.removeChild(child.el);
-    };
-    AbstractFormType.prototype.createTemplateContext = function () {
-        var blacklist = [
-            'template'
-        ];
-        var cleanOptions = _.omit(this.options, blacklist);
-        var formContext = _.extend({}, cleanOptions, {
-            children: this.children.map(function (childForm) {
-                var childContext = childForm.createTemplateContext();
-                return childContext;
-            })
-        });
-        return formContext;
-    };
-    /**
-     * Apply defaults to the options object.
-     *
-     * The returned object is set to this.options.
-     */
-    AbstractFormType.prototype.setDefaultOptions = function (options) {
-        var defaults = {
-            tagName: 'div',
-            type: 'form_type',
-            name: _.uniqueId('form_'),
-            attrs: {},
-            data: null,
-            children: []
-        };
-        _.defaults(options, defaults);
-        _.defaults(options.attrs, {
-            name: options.name
-        });
-        return options;
-    };
-    AbstractFormType.prototype.createElementFromString = function (htmlString) {
-        var container = document.createElement('div');
-        container.innerHTML = htmlString.trim();
-        return container.childNodes.length === 1 ? container.firstChild : container;
     };
     AbstractFormType.prototype.getName = function () {
         return this.options.name;

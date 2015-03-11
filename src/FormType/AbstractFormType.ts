@@ -45,6 +45,95 @@ class AbstractFormType {
     this.el = null;
   }
 
+  /**
+   * Apply defaults to the options object.
+   *
+   * The returned object is set to this.options.
+   */
+  protected setDefaultOptions(options:FormTypeOptionsInterface):FormTypeOptionsInterface {
+    var defaults = {
+      tagName: 'div',
+      type: 'form_type',
+      name: _.uniqueId('form_'),
+      attrs: {},
+      data: null,
+      children: []
+    };
+
+    _.defaults(options, defaults);
+
+    _.defaults(options.attrs, {
+      name: options.name
+    });
+
+    return options;
+  }
+
+  public render():AbstractFormType {
+    var context = this.createTemplateContext();
+    var html:string = this.template({
+      form: context
+    });
+
+    this.el = this.createElementFromString(html);
+
+    this.children.forEach((formType:AbstractFormType) => {
+      formType.render();
+
+      if (!formType.isRendered()) {
+        formType.render();
+      }
+
+      this.addChildElement(formType);
+    });
+
+    this.isRenderedFlag = true;
+
+    return this;
+  }
+
+  public setTemplate(template:TemplateInterface) {
+    this.template = template;
+  }
+
+  protected prepareTemplateEnvironment():void {
+    var partials:_.Dictionary<string> = {
+      html_attrs: fs.readFileSync(__dirname + '/../View/form/html_attrs.html.hbs', 'utf8'),
+      field_widget: fs.readFileSync(__dirname + '/../View/form/field_widget.html.hbs', 'utf8')
+    };
+
+    _.each(partials, (partial:string, name: string) => {
+      this.Handlebars.registerPartial(name, partial);
+    });
+
+    PartialWidgetHelper.register(this.Handlebars);
+  }
+
+  protected createTemplateContext():FormContextInterface {
+    var blacklist = [
+      'template'
+    ];
+    var cleanOptions = _.omit(this.options, blacklist);
+    var formContext:FormContextInterface = _.extend({},
+      cleanOptions, {
+        children: this.children.
+          map((childForm:AbstractFormType) => {
+            var childContext = childForm.createTemplateContext();
+            return childContext;
+          })
+      });
+
+    return formContext;
+  }
+
+  protected createElementFromString(htmlString:string):HTMLElement {
+    var container:HTMLElement = document.createElement('div');
+    container.innerHTML = htmlString.trim();
+
+    return container.childNodes.length === 1 ?
+      <HTMLElement>container.firstChild : container;
+  }
+
   public addChild(child:AbstractFormType) {
     this.children.push(child);
 
@@ -86,48 +175,8 @@ class AbstractFormType {
     });
   }
 
-  public render():AbstractFormType {
-    var context = this.createTemplateContext();
-    var html:string = this.template({
-      form: context
-    });
-
-    this.el = this.createElementFromString(html);
-
-    this.children.forEach((formType:AbstractFormType) => {
-      formType.render();
-
-      if (!formType.isRendered()) {
-        formType.render();
-      }
-
-      this.addChildElement(formType);
-    });
-
-    this.isRenderedFlag = true;
-
-    return this;
-  }
-
-  public setTemplate(template:TemplateInterface) {
-    this.template = template;
-  }
-
   protected addChildElement(childType:AbstractFormType) {
     this.el.appendChild(childType.el);
-  }
-
-  protected prepareTemplateEnvironment():void {
-    var partials:_.Dictionary<string> = {
-      html_attrs: fs.readFileSync(__dirname + '/../View/form/html_attrs.html.hbs', 'utf8'),
-      field_widget: fs.readFileSync(__dirname + '/../View/form/field_widget.html.hbs', 'utf8')
-    };
-
-    _.each(partials, (partial:string, name: string) => {
-      this.Handlebars.registerPartial(name, partial);
-    });
-
-    PartialWidgetHelper.register(this.Handlebars);
   }
 
   /**
@@ -135,55 +184,6 @@ class AbstractFormType {
    */
   protected removeChildElement(child:AbstractFormType) {
     child.el.parentElement.removeChild(child.el);
-  }
-
-  protected createTemplateContext():FormContextInterface {
-    var blacklist = [
-      'template'
-    ];
-    var cleanOptions = _.omit(this.options, blacklist);
-    var formContext:FormContextInterface = _.extend({},
-      cleanOptions, {
-        children: this.children.
-          map((childForm:AbstractFormType) => {
-            var childContext = childForm.createTemplateContext();
-            return childContext;
-          })
-      });
-
-    return formContext;
-  }
-
-  /**
-   * Apply defaults to the options object.
-   *
-   * The returned object is set to this.options.
-   */
-  protected setDefaultOptions(options:FormTypeOptionsInterface):FormTypeOptionsInterface {
-    var defaults = {
-      tagName: 'div',
-      type: 'form_type',
-      name: _.uniqueId('form_'),
-      attrs: {},
-      data: null,
-      children: []
-    };
-
-    _.defaults(options, defaults);
-
-    _.defaults(options.attrs, {
-      name: options.name
-    });
-
-    return options;
-  }
-
-  protected createElementFromString(htmlString:string):HTMLElement {
-    var container:HTMLElement = document.createElement('div');
-    container.innerHTML = htmlString.trim();
-
-    return container.childNodes.length === 1 ?
-      <HTMLElement>container.firstChild : container;
   }
 
   public getName():string {
