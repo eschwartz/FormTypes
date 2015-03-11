@@ -321,6 +321,9 @@ var AbstractFormType = (function () {
         if (this.options.children) {
             this.options.children.forEach(this.addChild, this);
         }
+        if (this.options.data) {
+            this.setData(this.options.data);
+        }
         this.template = this.options.template;
         this.prepareTemplateEnvironment();
         this.el = null;
