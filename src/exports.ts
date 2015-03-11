@@ -7,6 +7,7 @@ import TextType = require('./FormType/TextType');
 import ChoiceType = require('./FormType/ChoiceType');
 import OptionType = require('./FormType/OptionType');
 import LabelType = require('./FormType/LabelType');
+import ListType = require('./FormType/ListType');
 
 var FormTypeExports = {
   AbstractFormType: AbstractFormType,
@@ -16,7 +17,8 @@ var FormTypeExports = {
   TextType: TextType,
   ChoiceType: ChoiceType,
   OptionType: OptionType,
-  LabelType: LabelType
+  LabelType: LabelType,
+  ListType: ListType
 };
 global.FormTypes = FormTypeExports;
 export = FormTypeExports;

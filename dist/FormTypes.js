@@ -509,7 +509,7 @@ var AbstractFormType = (function () {
 module.exports = AbstractFormType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../View/TemplateHelper/PartialWidgetHelper":11,"events":1}],3:[function(require,module,exports){
+},{"../View/TemplateHelper/PartialWidgetHelper":12,"events":1}],3:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -607,7 +607,7 @@ var ChoiceType = (function (_super) {
 module.exports = ChoiceType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FieldType":4,"./OptionType":8}],4:[function(require,module,exports){
+},{"./FieldType":4,"./OptionType":9}],4:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -662,7 +662,7 @@ var FieldType = (function (_super) {
 module.exports = FieldType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/StringUtil":10,"./AbstractFormType":2}],5:[function(require,module,exports){
+},{"../Util/StringUtil":11,"./AbstractFormType":2}],5:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -811,6 +811,121 @@ var __extends = this.__extends || function (d, b) {
 };
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
+///ts:ref=node.d.ts
+/// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
+///ts:ref=web-api.ext.d.ts
+/// <reference path="../../typings/web-api/web-api.ext.d.ts"/> ///ts:ref:generated
+var FieldType = require('./FieldType');
+var TextType = require('./TextType');
+
+var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+var ListType = (function (_super) {
+    __extends(ListType, _super);
+    function ListType(options) {
+        _super.call(this, options);
+        this.itemElements = [];
+        this.itemElements = [];
+    }
+    ListType.prototype.setDefaultOptions = function (options) {
+        var internalOptions;
+        _.defaults(options, {
+            ItemType: TextType,
+            itemTypeOptions: {},
+            tagName: 'ul',
+            data: [],
+            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>{{label}}</label>\n{{/if}}\n<{{form.tagName}} {{>html_attrs form.attrs}}></{{form.tagName}}>"),
+            itemTemplate: this.Handlebars.compile("<li data-form-types-item-container></li>"),
+            itemContainerSelector: 'li'
+        });
+        internalOptions = [
+            'itemTemplate',
+            'itemContainerSelector',
+            'ItemType',
+            'itemTypeOptions'
+        ];
+        _.extend(this, _.pick(options, internalOptions));
+        options = _.omit(options, internalOptions);
+        return options;
+    };
+    /**
+     * Note that this will remove any existing child form items.
+     * Use `addData()` if you want to to keep existing form items.
+     */
+    ListType.prototype.setData = function (data) {
+        // We're actually resetting the data, so we'll
+        // remove what we've got, first.
+        this.children.forEach(this.removeChild, this);
+        data.forEach(this.addData, this);
+    };
+    ListType.prototype.addData = function (data) {
+        var childType = this.createItemType(data);
+        this.addChild(childType);
+    };
+    ListType.prototype.createItemType = function (data) {
+        var hasDataArg = data === void 0;
+        var itemTypeOptions = _.extend({}, this.itemTypeOptions);
+        if (!hasDataArg) {
+            _.extend(itemTypeOptions, { data: data });
+        }
+        return new this.ItemType(itemTypeOptions);
+    };
+    ListType.prototype.getData = function () {
+        return this.children.map(function (child) {
+            return child.getData();
+        });
+    };
+    ListType.prototype.addChildElement = function (childType) {
+        var itemEl = this.renderItem(childType);
+        this.itemElements.push(itemEl);
+        this.getFormElement().appendChild(itemEl);
+    };
+    ListType.prototype.removeChildElement = function (childType) {
+        // find the matching item element
+        var childIndex = this.children.indexOf(childType);
+        var itemEl = this.itemElements[childIndex];
+        this.el.removeChild(itemEl);
+        this.itemElements.splice(childIndex, 1);
+    };
+    ListType.prototype.renderItem = function (childType) {
+        var itemContainerHtml = this.itemTemplate({
+            form: this.createTemplateContext()
+        });
+        var itemEl = this.createElementFromString(itemContainerHtml);
+        var itemContainer = this.findItemContainer(itemEl);
+        itemContainer.appendChild(childType.el);
+        return itemContainer;
+    };
+    ListType.prototype.findItemContainer = function (itemEl) {
+        var matchingContainers;
+        // https://developer.mozilla.org/en-US/docs/Web/API/Element/matches#Browser_compatibility
+        var itemElMatches = (itemEl.matches || itemEl.msMatchesSelector || itemEl.mozMatchesSelector || itemEl.webkitMatchesSelector).bind(itemEl);
+        if (itemElMatches(this.itemContainerSelector)) {
+            return itemEl;
+        }
+        matchingContainers = itemEl.querySelectorAll(this.itemContainerSelector);
+        if (!matchingContainers.length) {
+            throw new Error('Unable to find item container matching selector ' + this.itemContainerSelector);
+        }
+        return matchingContainers.item(0);
+    };
+    ListType.prototype.getChildren = function () {
+        return this.children;
+    };
+    return ListType;
+})(FieldType);
+module.exports = ListType;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./FieldType":4,"./TextType":10}],9:[function(require,module,exports){
+(function (global){
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+///ts:ref=underscore.d.ts
+/// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
 ///ts:ref=handlebars.d.ts
 /// <reference path="../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
 ///ts:ref=node.d.ts
@@ -864,7 +979,7 @@ var OptionType = (function (_super) {
 module.exports = OptionType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/StringUtil":10,"./FieldType":4}],9:[function(require,module,exports){
+},{"../Util/StringUtil":11,"./FieldType":4}],10:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -929,7 +1044,7 @@ var TextType = (function (_super) {
 module.exports = TextType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FieldType":4}],10:[function(require,module,exports){
+},{"./FieldType":4}],11:[function(require,module,exports){
 var StringUtil = (function () {
     function StringUtil() {
     }
@@ -944,7 +1059,7 @@ var StringUtil = (function () {
 })();
 module.exports = StringUtil;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function (global){
 var Handlebars = (typeof window !== "undefined" ? window.Handlebars : typeof global !== "undefined" ? global.Handlebars : null);
 var PartialWidgetHelper = (function () {
@@ -969,7 +1084,7 @@ var PartialWidgetHelper = (function () {
 module.exports = PartialWidgetHelper;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function (global){
 //ts:ref=node.d.ts
 var AbstractFormType = require('./FormType/AbstractFormType');
@@ -980,6 +1095,7 @@ var TextType = require('./FormType/TextType');
 var ChoiceType = require('./FormType/ChoiceType');
 var OptionType = require('./FormType/OptionType');
 var LabelType = require('./FormType/LabelType');
+var ListType = require('./FormType/ListType');
 var FormTypeExports = {
     AbstractFormType: AbstractFormType,
     GroupType: GroupType,
@@ -988,11 +1104,12 @@ var FormTypeExports = {
     TextType: TextType,
     ChoiceType: ChoiceType,
     OptionType: OptionType,
-    LabelType: LabelType
+    LabelType: LabelType,
+    ListType: ListType
 };
 global.FormTypes = FormTypeExports;
 module.exports = FormTypeExports;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FormType/AbstractFormType":2,"./FormType/ChoiceType":3,"./FormType/FieldType":4,"./FormType/FormType":5,"./FormType/GroupType":6,"./FormType/LabelType":7,"./FormType/OptionType":8,"./FormType/TextType":9}]},{},[12])(12)
+},{"./FormType/AbstractFormType":2,"./FormType/ChoiceType":3,"./FormType/FieldType":4,"./FormType/FormType":5,"./FormType/GroupType":6,"./FormType/LabelType":7,"./FormType/ListType":8,"./FormType/OptionType":9,"./FormType/TextType":10}]},{},[13])(13)
 });
