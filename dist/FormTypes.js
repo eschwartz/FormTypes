@@ -340,17 +340,20 @@ var AbstractFormType = (function () {
             if (!child.isRendered()) {
                 child.render();
             }
-            this.appendChildType(child);
+            this.addChildElement(child);
         }
+    };
+    AbstractFormType.prototype.removeChild = function (child) {
+        this.removeChildElement(child);
+        child.removeAllListenersById(this.listenerId);
+        this.children = _.without(this.children, child);
     };
     AbstractFormType.prototype.removeChildByName = function (name) {
         var child = this.getChild(name);
         if (!child) {
             return void 0;
         }
-        this.removeChildElement(child);
-        child.removeAllListenersById(this.listenerId);
-        this.children = _.without(this.children, child);
+        this.removeChild(child);
     };
     AbstractFormType.prototype.getChild = function (name) {
         return _.find(this.children, function (child) {
@@ -369,7 +372,7 @@ var AbstractFormType = (function () {
             if (!formType.isRendered()) {
                 formType.render();
             }
-            _this.appendChildType(formType);
+            _this.addChildElement(formType);
         });
         this.isRenderedFlag = true;
         return this;
@@ -377,7 +380,7 @@ var AbstractFormType = (function () {
     AbstractFormType.prototype.setTemplate = function (template) {
         this.template = template;
     };
-    AbstractFormType.prototype.appendChildType = function (childType) {
+    AbstractFormType.prototype.addChildElement = function (childType) {
         this.el.appendChild(childType.el);
     };
     AbstractFormType.prototype.prepareTemplateEnvironment = function () {
@@ -392,14 +395,17 @@ var AbstractFormType = (function () {
         PartialWidgetHelper.register(this.Handlebars);
     };
     /**
-     * Remove a childType from the form's element
-     * @param childType
+     * Remove a childType's element from parent form's element
      */
-    AbstractFormType.prototype.removeChildElement = function (childType) {
-        this.el.removeChild(childType.el);
+    AbstractFormType.prototype.removeChildElement = function (child) {
+        child.el.parentElement.removeChild(child.el);
     };
     AbstractFormType.prototype.createTemplateContext = function () {
-        var formContext = _.extend({}, this.options, {
+        var blacklist = [
+            'template'
+        ];
+        var cleanOptions = _.omit(this.options, blacklist);
+        var formContext = _.extend({}, cleanOptions, {
             children: this.children.map(function (childForm) {
                 var childContext = childForm.createTemplateContext();
                 return childContext;
@@ -528,7 +534,7 @@ var ChoiceType = (function (_super) {
         });
         return this;
     };
-    ChoiceType.prototype.appendChildType = function (childType) {
+    ChoiceType.prototype.addChildElement = function (childType) {
         this.getFormElement().appendChild(childType.el);
     };
     ChoiceType.prototype.setDefaultOptions = function (options) {
@@ -807,6 +813,23 @@ var OptionType = (function (_super) {
         }
         return options;
     };
+    OptionType.prototype.getData = function () {
+        var formEl = this.getFormElement();
+        return formEl ? formEl.value : this.options.data;
+    };
+    OptionType.prototype.setData = function (data) {
+        var formEl = this.getFormElement();
+        var isSame = data === this.getData();
+        if (!formEl) {
+            this.options.data = data;
+        }
+        else {
+            formEl.value = data;
+        }
+        if (!isSame) {
+            this.eventEmitter.emit('change');
+        }
+    };
     return OptionType;
 })(FieldType);
 module.exports = OptionType;
@@ -822,8 +845,6 @@ var __extends = this.__extends || function (d, b) {
 };
 ///ts:ref=underscore.d.ts
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
-///ts:ref=handlebars.d.ts
-/// <reference path="../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
 ///ts:ref=node.d.ts
 /// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 var FieldType = require('./FieldType');
