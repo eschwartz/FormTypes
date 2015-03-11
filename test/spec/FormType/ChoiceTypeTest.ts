@@ -216,6 +216,22 @@ describe('ChoiceType', () => {
       assert.equal($options.filter(':selected').val(), 'chicken');
     });
 
+    it('should work with numeric data', () => {
+      var $select:JQuery;
+      var choiceType = new ChoiceType({
+        choices: {
+          100: 'one-hunny',
+          200: 'two-hunny'
+        },
+        data: 200
+      });
+      choiceType.render();
+
+      $select = $(choiceType.getFormElement());
+
+      assert($select.find('[value="200"]').is(':selected'));
+    });
+
     it('should trigger a change event', () => {
       var onChange = sinon.spy();
       var choiceType = new ChoiceType({

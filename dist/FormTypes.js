@@ -564,11 +564,8 @@ var ChoiceType = (function (_super) {
     };
     ChoiceType.prototype.setData = function (data) {
         var isSameData = data === this.getData();
-        if (isSameData) {
-            return;
-        }
         this.children.forEach(function (child) {
-            if (child.getData() === data) {
+            if (child.getData() === data.toString()) {
                 child.select();
             }
             else {

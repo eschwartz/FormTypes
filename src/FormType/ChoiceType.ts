@@ -67,12 +67,8 @@ class ChoiceType extends FieldType {
   public setData(data:string):void {
     var isSameData = data === this.getData();
 
-    if (isSameData) {
-      return;
-    }
-
     this.children.forEach((child:OptionType) => {
-      if (child.getData() === data) {
+      if (child.getData() === data.toString()) {
         child.select();
       }
       else {
