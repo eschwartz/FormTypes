@@ -13,7 +13,10 @@ interface ChoiceTypeOptionsInterface extends FieldTypeOptionsInterface {
    */
   choices?: _.Dictionary<string>;
 
-  /** The value of the selected choice */
+  /**
+   * The value of the selected choice.
+   * Set to null to have no option selected.
+   */
   data?:string;
 }
 

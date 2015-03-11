@@ -216,6 +216,22 @@ describe('ChoiceType', () => {
       assert.equal($options.filter(':selected').val(), 'chicken');
     });
 
+    it('should select none for falsey data values', () => {
+      var $options:JQuery;
+      var choiceType = new ChoiceType({
+        choices: {
+          chicken: 'The Chicken',
+          egg: 'The Egg'
+        },
+        data: null
+      });
+      choiceType.render();
+
+      $options = $(choiceType.el).find('options');
+
+      assert(!$options.filter(':selected').length);
+    });
+
     it('should work with numeric data', () => {
       var $select:JQuery;
       var choiceType = new ChoiceType({

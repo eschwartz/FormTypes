@@ -321,7 +321,7 @@ var AbstractFormType = (function () {
         if (this.options.children) {
             this.options.children.forEach(this.addChild, this);
         }
-        if (this.options.data) {
+        if ('data' in this.options) {
             this.setData(this.options.data);
         }
         this.template = this.options.template;
@@ -339,7 +339,6 @@ var AbstractFormType = (function () {
             type: 'form_type',
             name: _.uniqueId('form_'),
             attrs: {},
-            data: null,
             children: []
         };
         _.defaults(options, defaults);
@@ -529,6 +528,9 @@ var ChoiceType = (function (_super) {
     ChoiceType.prototype.render = function () {
         var _this = this;
         _super.prototype.render.call(this);
+        if (_.isNull(this.options.data)) {
+            this.getFormElement().selectedIndex = -1;
+        }
         this.getFormElement().addEventListener('change', function () {
             _this.eventEmitter.emit('change');
         });
@@ -564,8 +566,10 @@ var ChoiceType = (function (_super) {
     };
     ChoiceType.prototype.setData = function (data) {
         var isSameData = data === this.getData();
+        var areAnySelected;
+        data = data ? data.toString() : data;
         this.children.forEach(function (child) {
-            if (child.getData() === data.toString()) {
+            if (child.getData() === data) {
                 child.select();
             }
             else {

@@ -36,7 +36,7 @@ class AbstractFormType {
     if (this.options.children) {
       this.options.children.forEach(this.addChild, this);
     }
-    if (this.options.data) {
+    if ('data' in this.options) {
       this.setData(this.options.data);
     }
 
@@ -56,7 +56,6 @@ class AbstractFormType {
       type: 'form_type',
       name: _.uniqueId('form_'),
       attrs: {},
-      data: null,
       children: []
     };
 

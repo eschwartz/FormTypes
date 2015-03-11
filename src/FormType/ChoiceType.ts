@@ -18,6 +18,10 @@ class ChoiceType extends FieldType {
   public render():ChoiceType {
     super.render();
 
+    if (_.isNull(this.options.data)) {
+      this.getFormElement().selectedIndex = -1;
+    }
+
     this.getFormElement().
       addEventListener('change', () => {
         this.eventEmitter.emit('change');
@@ -66,9 +70,12 @@ class ChoiceType extends FieldType {
 
   public setData(data:string):void {
     var isSameData = data === this.getData();
+    var areAnySelected:boolean;
+
+    data = data ? data.toString() : data;
 
     this.children.forEach((child:OptionType) => {
-      if (child.getData() === data.toString()) {
+      if (child.getData() === data) {
         child.select();
       }
       else {
