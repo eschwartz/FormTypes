@@ -36,6 +36,28 @@ class OptionType extends FieldType {
 
     return options;
   }
+
+  public getData():string {
+    var formEl = <HTMLOptionElement>this.getFormElement();
+
+    return formEl ? formEl.value : this.options.data;
+  }
+
+  public setData(data:string):void {
+    var formEl = <HTMLOptionElement>this.getFormElement();
+    var isSame = data === this.getData();
+
+    if (!formEl) {
+      this.options.data = data;
+    }
+    else {
+      formEl.value = data;
+    }
+
+    if (!isSame) {
+      this.eventEmitter.emit('change');
+    }
+  }
 }
 
 export = OptionType;
