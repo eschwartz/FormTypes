@@ -12,12 +12,12 @@ import sinon = require('sinon');
 import _ = require('underscore');
 import assert = require('assert');
 var jsdom:jsdom = require('mocha-jsdom');
-
+var isNodeEnv = typeof window === 'undefined';
 
 describe('UiManager', () => {
   var $:JQueryStatic;
 
-  if (typeof window === 'undefined') {
+  if (isNodeEnv) {
     jsdom();
   }
 
@@ -62,75 +62,140 @@ describe('UiManager', () => {
 
   });
 
-  describe('delegateEvents', () => {
+  // unfortunately, the events test suite
+  // does not work very well in a node env.
+  if (!isNodeEnv) {
+    describe('events', () => {
+      var $scope:JQuery;
 
-    // This one works in browser tests,
-    // but fails in node env
-    /*it('should delegate events to the scope element', () => {
-      var onClick = sinon.spy();
-      var $scope = $('<div></div>');
-      var uiManager = new UiManager($scope[0]);
-
-      uiManager.delegateEvents({
-        click: onClick
-      });
-
-      $scope.click();
-      assert(onClick.called);
-    });*/
-
-    // I can get this to work IRL,
-    // but I cannot figure out how to simulate click
-    // which propagate to the parent element
-    // in test environment
-    /*it('should delegate events to named UI elements', () => {
-      var onChildAClick = sinon.spy();
-      var onChildBClick = sinon.spy();
-      var $scope = $('\
+      beforeEach(() => {
+        $scope = $('\
 <div>\
   <div class="child-a" style="width:10px; height:10px;"></div>\
   <div class="child-b"></div>\
 </div>\
       ');
-      var uiManager = new UiManager($scope[0], {
-        childA: '.child-a',
-        childB: '.child-b'
+
+        // IMPORTANT:
+        // $scope must be in the actual dom for events to work properly.
+        $('body').append($scope);
       });
 
-      uiManager.delegateEvents({
-        'click childA': onChildAClick,
-        'click childB': onChildBClick
+      afterEach(() => {
+        $scope.remove();
       });
 
+      describe('delegateEvents', () => {
 
-      $scope.children('.child-a').click();
+        // This one works in browser tests,
+        // but fails in node env
+        it('should delegate events to the scope element', () => {
+          var onClick = sinon.spy();
+          var uiManager = new UiManager($scope[0]);
+
+          uiManager.delegateEvents({
+            click: onClick
+          });
+
+          $scope.click();
+          assert(onClick.called);
+        });
+
+        // I can get this to work IRL,
+        // but I cannot figure out how to simulate click
+        // which propagate to the parent element
+        // in test environment
+        it('should delegate events to named UI elements', () => {
+          var onChildAClick = sinon.spy();
+          var onChildBClick = sinon.spy();
+          var uiManager = new UiManager($scope[0], {
+            childA: '.child-a',
+            childB: '.child-b'
+          });
+
+          uiManager.delegateEvents({
+            'click childA': onChildAClick,
+            'click childB': onChildBClick
+          });
+
+          $scope.children('.child-a').click();
 
 
-      assert(onChildAClick.called, 'Expected childA onClick listener to have been called');
-      assert(!onChildBClick.called, 'Expected childB onClick listener to not yet have been called');
+          assert(onChildAClick.called, 'Expected childA onClick listener to have been called');
+          assert(!onChildBClick.called, 'Expected childB onClick listener to not yet have been called');
 
-      $scope.children('.child-b').click();
-      assert(onChildBClick.called, 'Expected childB onClick listener to have been called');
-      assert.equal(onChildAClick.callCount, 1)
-    });*/
-  });
-
-  describe('undelegateEvent', () => {
-
-    it('should undelegate scope events', () => {
-      var onClick = sinon.spy();
-      var $scope = $('<div></div>');
-      var uiManager = new UiManager($scope[0]);
-
-      uiManager.delegateEvents({
-        click: onClick
+          $scope.children('.child-b').click();
+          assert(onChildBClick.called, 'Expected childB onClick listener to have been called');
+          assert.equal(onChildAClick.callCount, 1)
+        });
       });
-      uiManager.undelegateEvent('click');
 
-      $scope.click();
-      assert(!onClick.called);
+      describe('undelegateEvent', () => {
+
+        it('should undelegate scope events', () => {
+          var onClick = sinon.spy();
+          var uiManager = new UiManager($scope[0]);
+
+          uiManager.delegateEvents({
+            click: onClick
+          });
+          uiManager.undelegateEvent('click');
+
+          $scope.click();
+          assert(!onClick.called);
+        });
+
+        it('should undelegate child UI events', () => {
+          var onChildAClick = sinon.spy();
+          var onChildBClick = sinon.spy();
+          var uiManager = new UiManager($scope[0], {
+            childA: '.child-a',
+            childB: '.child-b'
+          });
+
+          uiManager.delegateEvents({
+            'click childA': onChildAClick,
+            'click childB': onChildBClick
+          });
+
+          uiManager.undelegateEvent('click childA');
+
+          $scope.find('.child-a').click();
+          assert(!onChildAClick.called);
+
+          $scope.find('.child-b').click();
+          assert(onChildBClick.called, "childB listener should still exist");
+        });
+
+      });
+
+      describe('undelegateAllEvents', () => {
+
+        it('should undelegate all events', () => {
+          var onChildAClick = sinon.spy();
+          var onChildBClick = sinon.spy();
+          var uiManager = new UiManager($scope[0], {
+            childA: '.child-a',
+            childB: '.child-b'
+          });
+
+          uiManager.delegateEvents({
+            'click childA': onChildAClick,
+            'click childB': onChildBClick
+          });
+
+          uiManager.undelegateAllEvents();
+
+          $scope.find('.child-a').click();
+          assert(!onChildAClick.called);
+
+          $scope.find('.child-b').click();
+          assert(!onChildBClick.called);
+        });
+
+      });
+
     });
+  }
 
-  });
-})
-;
+});
