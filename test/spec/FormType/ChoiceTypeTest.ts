@@ -351,7 +351,8 @@ describe('ChoiceType', () => {
 
       $select = $(choiceType.getFormElement());
 
-      assert(!$select.children('[value="egg"]').is(':selected'));
+      assert(!$select.children('[value="egg"]').is(':selected'), 'Egg should not be selected');
+      assert($select.children('[value="egg"]').is(':disabled'), 'Egg should be disabled')
     });
 
     it('before render - should disable once rendered', () => {

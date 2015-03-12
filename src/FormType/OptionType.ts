@@ -75,7 +75,7 @@ class OptionType extends FieldType {
 
   public deselect() {
     if (this.getFormElement()) {
-      this.getFormElement().removeAttribute('disabled');
+      this.getFormElement().removeAttribute('selected');
     }
 
     delete this.options.attrs['selected'];

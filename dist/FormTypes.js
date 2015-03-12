@@ -985,7 +985,7 @@ var OptionType = (function (_super) {
     };
     OptionType.prototype.deselect = function () {
         if (this.getFormElement()) {
-            this.getFormElement().removeAttribute('disabled');
+            this.getFormElement().removeAttribute('selected');
         }
         delete this.options.attrs['selected'];
     };
