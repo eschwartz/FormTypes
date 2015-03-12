@@ -308,6 +308,7 @@ var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined
 var Handlebars = (typeof window !== "undefined" ? window.Handlebars : typeof global !== "undefined" ? global.Handlebars : null);
 var PartialWidgetHelper = require('../View/TemplateHelper/PartialWidgetHelper');
 var Events = require('events');
+var UiManager = require('../Util/UiManager');
 var AbstractFormType = (function () {
     function AbstractFormType(options) {
         if (options === void 0) { options = {}; }
@@ -339,12 +340,15 @@ var AbstractFormType = (function () {
             type: 'form_type',
             name: _.uniqueId('form_'),
             attrs: {},
-            children: []
+            children: [],
+            ui: {}
         };
         _.defaults(options, defaults);
         _.defaults(options.attrs, {
             name: options.name
         });
+        this.ui = options.ui;
+        delete options.ui;
         return options;
     };
     AbstractFormType.prototype.render = function () {
@@ -354,6 +358,7 @@ var AbstractFormType = (function () {
             form: context
         });
         this.el = this.createElementFromString(html);
+        this.initUiManager();
         this.children.forEach(function (formType) {
             formType.render();
             if (!formType.isRendered()) {
@@ -363,6 +368,12 @@ var AbstractFormType = (function () {
         });
         this.isRenderedFlag = true;
         return this;
+    };
+    AbstractFormType.prototype.initUiManager = function () {
+        if (this.uiManager) {
+            this.uiManager.undelegateAllEvents();
+        }
+        return this.uiManager = new UiManager(this.el, this.ui);
     };
     AbstractFormType.prototype.close = function () {
         this.children.forEach(function (child) { return child.close(); });
@@ -521,7 +532,7 @@ var AbstractFormType = (function () {
 module.exports = AbstractFormType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../View/TemplateHelper/PartialWidgetHelper":13,"events":1}],3:[function(require,module,exports){
+},{"../Util/UiManager":12,"../View/TemplateHelper/PartialWidgetHelper":13,"events":1}],3:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];

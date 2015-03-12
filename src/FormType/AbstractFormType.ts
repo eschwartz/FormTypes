@@ -26,6 +26,7 @@ class AbstractFormType {
   protected listeners:_.Dictionary<any>;
   protected listenerId:string;
   protected uiManager:UiManager;
+  protected ui:_.Dictionary<any>;
 
   constructor(options:FormTypeOptionsInterface = {}) {
     this.Handlebars = Handlebars.create();

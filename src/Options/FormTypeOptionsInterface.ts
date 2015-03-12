@@ -35,7 +35,7 @@ interface FormTypeOptionsInterface extends _.Dictionary<any> {
    * A hash of named ui elements to CSS selectors.
    * Used internally by some FormTypes.
    */
-  ui: _.Dictionary<string>;
+  ui?: _.Dictionary<string>;
 }
 
 export = FormTypeOptionsInterface;
