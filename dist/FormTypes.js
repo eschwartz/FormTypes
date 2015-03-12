@@ -364,6 +364,14 @@ var AbstractFormType = (function () {
         this.isRenderedFlag = true;
         return this;
     };
+    AbstractFormType.prototype.close = function () {
+        this.children.forEach(function (child) { return child.close(); });
+        this.el.parentElement.removeChild(this.el);
+        this.removeAllListenersById(this.listenerId);
+        this.isRenderedFlag = false;
+        this.el = null;
+        this.eventEmitter.emit('close', this);
+    };
     AbstractFormType.prototype.setTemplate = function (template) {
         this.template = template;
     };
@@ -403,6 +411,7 @@ var AbstractFormType = (function () {
             _this.eventEmitter.emit('change');
             _this.eventEmitter.emit('change:' + child.getName());
         }, this.listenerId);
+        child.on('close', function () { return _this.removeChild(child); });
         if (this.isRendered()) {
             // Render child, if necessary
             if (!child.isRendered()) {
@@ -499,6 +508,10 @@ var AbstractFormType = (function () {
      */
     AbstractFormType.prototype.removeAllListenersById = function (listenerId) {
         var _this = this;
+        var listeners = this.listeners[listenerId];
+        if (!listeners) {
+            return;
+        }
         this.listeners[listenerId].forEach(function (listener) {
             _this.removeListener(listener.event, listener.listener);
         });

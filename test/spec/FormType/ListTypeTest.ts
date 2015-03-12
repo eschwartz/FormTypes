@@ -11,6 +11,7 @@
 import _ = require('underscore');
 import assert = require('assert');
 import ListType = require('../../../src/FormType/ListType');
+import AbstractFormType = require('../../../src/FormType/AbstractFormType');
 import TextType = require('../../../src/FormType/TextType');
 import sinon = require('sinon');
 import DomEvents = require('../../Util/DomEvents');
@@ -150,7 +151,7 @@ describe('ListType', () => {
 
   });
 
-  describe('addItem', () => {
+  describe('addData', () => {
 
     it('should add a new list item', () => {
       var $list:JQuery, $items:JQuery, $inputs:JQuery;
@@ -202,5 +203,49 @@ describe('ListType', () => {
 
   });
 
+  describe('on child close', () => {
+
+    it('should remove the child view', () => {
+      var $list:JQuery, $items:JQuery, $inputs;
+      var fooChild:AbstractFormType;
+      var listType = new ListType({
+        ItemType: TextType,
+        data: [
+          'foo',
+          'bar'
+        ]
+      });
+      listType.render();
+
+      fooChild = listType.getChildren()[0];
+      fooChild.close();
+
+      $list = $(listType.el);
+      $items = $list.children();
+      $inputs = $items.find('input');
+
+      assert.equal($items.length, 1);
+      assert.equal($inputs.eq(0).val(), 'bar');
+    });
+
+    it('should remove the child object', () => {
+      var fooChild:AbstractFormType;
+      var listType = new ListType({
+        ItemType: TextType,
+        data: [
+          'foo',
+          'bar'
+        ]
+      });
+      listType.render();
+
+      fooChild = listType.getChildren()[0];
+      fooChild.close();
+
+      assert.equal(listType.getChildren().length, 1);
+      assert.equal(listType.getChildren()[0].getData(), 'bar');
+    });
+
+  });
 
 });

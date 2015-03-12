@@ -91,6 +91,19 @@ class AbstractFormType {
     return this;
   }
 
+  public close() {
+    this.children.forEach((child:AbstractFormType) => child.close());
+
+    this.el.parentElement.removeChild(this.el);
+
+    this.removeAllListenersById(this.listenerId);
+
+    this.isRenderedFlag = false;
+    this.el = null;
+
+    this.eventEmitter.emit('close', this);
+  }
+
   public setTemplate(template:TemplateInterface) {
     this.template = template;
   }
@@ -101,7 +114,7 @@ class AbstractFormType {
       field_widget: fs.readFileSync(__dirname + '/../View/form/field_widget.html.hbs', 'utf8')
     };
 
-    _.each(partials, (partial:string, name: string) => {
+    _.each(partials, (partial:string, name:string) => {
       this.Handlebars.registerPartial(name, partial);
     });
 
@@ -140,6 +153,8 @@ class AbstractFormType {
       this.eventEmitter.emit('change');
       this.eventEmitter.emit('change:' + child.getName());
     }, this.listenerId);
+
+    child.on('close', () => this.removeChild(child));
 
     if (this.isRendered()) {
       // Render child, if necessary
@@ -268,6 +283,12 @@ class AbstractFormType {
    * @param listenerId
    */
   public removeAllListenersById(listenerId) {
+    var listeners = this.listeners[listenerId];
+
+    if (!listeners) {
+      return;
+    }
+
     this.listeners[listenerId].forEach((listener:any) => {
       this.removeListener(listener.event, listener.listener);
     });
