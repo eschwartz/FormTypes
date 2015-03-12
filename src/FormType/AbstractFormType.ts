@@ -115,6 +115,8 @@ class AbstractFormType {
 
     this.removeAllListenersById(this.listenerId);
 
+    this.uiManager.undelegateAllEvents();
+
     this.isRenderedFlag = false;
     this.el = null;
 

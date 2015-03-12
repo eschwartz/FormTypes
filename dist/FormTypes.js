@@ -379,6 +379,7 @@ var AbstractFormType = (function () {
         this.children.forEach(function (child) { return child.close(); });
         this.el.parentElement.removeChild(this.el);
         this.removeAllListenersById(this.listenerId);
+        this.uiManager.undelegateAllEvents();
         this.isRenderedFlag = false;
         this.el = null;
         this.eventEmitter.emit('close', this);
