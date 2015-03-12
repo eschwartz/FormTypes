@@ -72,7 +72,7 @@ class ListType extends FieldType {
     this.addChild(childType);
   }
 
-  protected createItemType(data?:string):AbstractFormType {
+  protected createItemType(data?:any):AbstractFormType {
     var hasDataArg = data === void 0;
     var itemTypeOptions = _.extend({}, this.itemTypeOptions);
 
