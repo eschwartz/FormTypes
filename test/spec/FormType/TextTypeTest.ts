@@ -217,6 +217,18 @@ describe('TextType', () => {
       assert.equal(textType.getData(), 'foo');
     });
 
+    it('should set the value of the input element, once rendered', () => {
+      var input:HTMLInputElement;
+      var textType = new TextType();
+      textType.setData('foo');
+
+      textType.render();
+
+
+      input = <HTMLInputElement>textType.getFormElement();
+      assert.equal(input.value, 'foo');
+    });
+
     it('should trigger a change event', () => {
       var onChange = sinon.spy();
       var textType = new TextType();

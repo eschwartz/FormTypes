@@ -41,6 +41,13 @@ class TextType extends FieldType {
     return options;
   }
 
+  protected createTemplateContext() {
+    var context = super.createTemplateContext();
+    context.attrs['value'] = this.getData();
+
+    return context;
+  }
+
 
   public getData():string {
     var input = <HTMLInputElement>this.getFormElement();

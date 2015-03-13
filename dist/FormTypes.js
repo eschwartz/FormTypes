@@ -1066,6 +1066,11 @@ var TextType = (function (_super) {
         });
         return options;
     };
+    TextType.prototype.createTemplateContext = function () {
+        var context = _super.prototype.createTemplateContext.call(this);
+        context.attrs['value'] = this.getData();
+        return context;
+    };
     TextType.prototype.getData = function () {
         var input = this.getFormElement();
         return input ? input.value : this.options.data;
