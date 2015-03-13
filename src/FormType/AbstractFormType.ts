@@ -12,7 +12,6 @@ import FormContextInterface = require('../View/Context/FormContextInterface');
 import TemplateInterface = require('../View/Template/TemplateInterface');
 import PartialWidgetHelper = require('../View/TemplateHelper/PartialWidgetHelper');
 import Events = require('events');
-import UiManager = require('../Util/UiManager');
 
 class AbstractFormType {
   public el:HTMLElement;
@@ -25,8 +24,6 @@ class AbstractFormType {
   protected isRenderedFlag:boolean = false;
   protected listeners:_.Dictionary<any>;
   protected listenerId:string;
-  protected uiManager:UiManager;
-  protected ui:_.Dictionary<any>;
 
   constructor(options:FormTypeOptionsInterface = {}) {
     this.Handlebars = Handlebars.create();
@@ -59,8 +56,7 @@ class AbstractFormType {
       type: 'form_type',
       name: _.uniqueId('form_'),
       attrs: {},
-      children: [],
-      ui: {}
+      children: []
     };
 
     _.defaults(options, defaults);
@@ -68,9 +64,6 @@ class AbstractFormType {
     _.defaults(options.attrs, {
       name: options.name
     });
-
-    this.ui = options.ui;
-    delete options.ui;
 
     return options;
   }
@@ -82,8 +75,6 @@ class AbstractFormType {
     });
 
     this.el = this.createElementFromString(html);
-
-    this.initUiManager();
 
     this.children.forEach((formType:AbstractFormType) => {
       formType.render();
@@ -100,22 +91,12 @@ class AbstractFormType {
     return this;
   }
 
-  protected initUiManager():UiManager {
-    if (this.uiManager) {
-      this.uiManager.undelegateAllEvents();
-    }
-
-    return this.uiManager = new UiManager(this.el, this.ui);
-  }
-
   public close() {
     this.children.forEach((child:AbstractFormType) => child.close());
 
     this.el.parentElement.removeChild(this.el);
 
     this.removeAllListenersById(this.listenerId);
-
-    this.uiManager.undelegateAllEvents();
 
     this.isRenderedFlag = false;
     this.el = null;

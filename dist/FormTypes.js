@@ -308,7 +308,6 @@ var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined
 var Handlebars = (typeof window !== "undefined" ? window.Handlebars : typeof global !== "undefined" ? global.Handlebars : null);
 var PartialWidgetHelper = require('../View/TemplateHelper/PartialWidgetHelper');
 var Events = require('events');
-var UiManager = require('../Util/UiManager');
 var AbstractFormType = (function () {
     function AbstractFormType(options) {
         if (options === void 0) { options = {}; }
@@ -340,15 +339,12 @@ var AbstractFormType = (function () {
             type: 'form_type',
             name: _.uniqueId('form_'),
             attrs: {},
-            children: [],
-            ui: {}
+            children: []
         };
         _.defaults(options, defaults);
         _.defaults(options.attrs, {
             name: options.name
         });
-        this.ui = options.ui;
-        delete options.ui;
         return options;
     };
     AbstractFormType.prototype.render = function () {
@@ -358,7 +354,6 @@ var AbstractFormType = (function () {
             form: context
         });
         this.el = this.createElementFromString(html);
-        this.initUiManager();
         this.children.forEach(function (formType) {
             formType.render();
             if (!formType.isRendered()) {
@@ -369,17 +364,10 @@ var AbstractFormType = (function () {
         this.isRenderedFlag = true;
         return this;
     };
-    AbstractFormType.prototype.initUiManager = function () {
-        if (this.uiManager) {
-            this.uiManager.undelegateAllEvents();
-        }
-        return this.uiManager = new UiManager(this.el, this.ui);
-    };
     AbstractFormType.prototype.close = function () {
         this.children.forEach(function (child) { return child.close(); });
         this.el.parentElement.removeChild(this.el);
         this.removeAllListenersById(this.listenerId);
-        this.uiManager.undelegateAllEvents();
         this.isRenderedFlag = false;
         this.el = null;
         this.eventEmitter.emit('close', this);
@@ -533,7 +521,7 @@ var AbstractFormType = (function () {
 module.exports = AbstractFormType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/UiManager":12,"../View/TemplateHelper/PartialWidgetHelper":13,"events":1}],3:[function(require,module,exports){
+},{"../View/TemplateHelper/PartialWidgetHelper":12,"events":1}],3:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -1116,86 +1104,6 @@ module.exports = StringUtil;
 
 },{}],12:[function(require,module,exports){
 (function (global){
-///ts:ref=underscore.d.ts
-/// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
-var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
-var UiManager = (function () {
-    function UiManager(scopeEl, uiHash) {
-        this.scopeEl = scopeEl;
-        this.uiHash = uiHash;
-        this.listeners = {};
-    }
-    UiManager.prototype.set = function (uiHash) {
-        this.uiHash = uiHash;
-    };
-    UiManager.prototype.get = function (uiName) {
-        if (!this.uiHash[uiName]) {
-            return undefined;
-        }
-        return this.scopeEl.querySelector(this.getUiSelector(uiName));
-    };
-    UiManager.prototype.delegateEvents = function (events) {
-        var _this = this;
-        _.each(events, function (listener, eventStr) {
-            var delegateListener;
-            var eventParts = _this.parseEventString(eventStr);
-            var eventType = eventParts[0];
-            var targetUiName = eventParts[1];
-            // No target ui: use scope element
-            if (!targetUiName) {
-                _this.scopeEl.addEventListener(eventType, listener);
-                // Save the listener, so we can remove it later
-                _this.listeners[eventStr] = listener;
-            }
-            else {
-                targetUiName = eventParts[1];
-                _this.scopeEl.addEventListener(eventType, delegateListener = function (evt) {
-                    var target = _this.get(targetUiName);
-                    if (evt.target.isEqualNode(target)) {
-                        listener(evt);
-                    }
-                });
-                _this.listeners[eventStr] = delegateListener;
-            }
-        });
-    };
-    /**
-     * Return eg: ['click', 'myNamedUi'], or ['click', null] (for scopeEl)
-     */
-    UiManager.prototype.parseEventString = function (eventString) {
-        var eventType, targetUiName;
-        var eventParts = eventString.split(' ');
-        eventType = eventParts[0];
-        targetUiName = eventParts[1] ? eventParts[1] : null;
-        return [eventType, targetUiName];
-    };
-    UiManager.prototype.undelegateEvent = function (eventStr) {
-        var listener = this.listeners[eventStr];
-        var eventType = this.parseEventString(eventStr)[0];
-        if (!listener) {
-            return;
-        }
-        this.scopeEl.removeEventListener(eventType, listener);
-        delete listener[eventStr];
-    };
-    UiManager.prototype.undelegateAllEvents = function () {
-        var _this = this;
-        var eventStrings = Object.keys(this.listeners);
-        eventStrings.forEach(function (evtStr) { return _this.undelegateEvent(evtStr); });
-    };
-    UiManager.prototype.getUiSelector = function (uiName) {
-        if (!this.uiHash[uiName]) {
-            throw new Error('UiManager: unable to find ui element ' + uiName + '. Available ui: ' + Object.keys(this.uiHash).join(', ') + '.');
-        }
-        return this.uiHash[uiName];
-    };
-    return UiManager;
-})();
-module.exports = UiManager;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],13:[function(require,module,exports){
-(function (global){
 var Handlebars = (typeof window !== "undefined" ? window.Handlebars : typeof global !== "undefined" ? global.Handlebars : null);
 var PartialWidgetHelper = (function () {
     function PartialWidgetHelper() {
@@ -1219,7 +1127,7 @@ var PartialWidgetHelper = (function () {
 module.exports = PartialWidgetHelper;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],14:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function (global){
 //ts:ref=node.d.ts
 var AbstractFormType = require('./FormType/AbstractFormType');
@@ -1231,7 +1139,6 @@ var ChoiceType = require('./FormType/ChoiceType');
 var OptionType = require('./FormType/OptionType');
 var LabelType = require('./FormType/LabelType');
 var ListType = require('./FormType/ListType');
-var UiManager = require('./Util/UiManager');
 var FormTypeExports = {
     AbstractFormType: AbstractFormType,
     GroupType: GroupType,
@@ -1241,14 +1148,11 @@ var FormTypeExports = {
     ChoiceType: ChoiceType,
     OptionType: OptionType,
     LabelType: LabelType,
-    ListType: ListType,
-    Util: {
-        UiManager: UiManager
-    }
+    ListType: ListType
 };
 global.FormTypes = FormTypeExports;
 module.exports = FormTypeExports;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FormType/AbstractFormType":2,"./FormType/ChoiceType":3,"./FormType/FieldType":4,"./FormType/FormType":5,"./FormType/GroupType":6,"./FormType/LabelType":7,"./FormType/ListType":8,"./FormType/OptionType":9,"./FormType/TextType":10,"./Util/UiManager":12}]},{},[14])(14)
+},{"./FormType/AbstractFormType":2,"./FormType/ChoiceType":3,"./FormType/FieldType":4,"./FormType/FormType":5,"./FormType/GroupType":6,"./FormType/LabelType":7,"./FormType/ListType":8,"./FormType/OptionType":9,"./FormType/TextType":10}]},{},[13])(13)
 });

@@ -14,7 +14,6 @@
 /// <reference path="../../src/Options/ListTypeOptionsInterface.ts" />
 /// <reference path="../../src/Options/OptionTypeOptionsInterface.ts" />
 /// <reference path="../../src/Util/StringUtil.ts" />
-/// <reference path="../../src/Util/UiManager.ts" />
 /// <reference path="../../src/View/Context/FormContextInterface.d.ts" />
 /// <reference path="../../src/View/Context/FormContextInterface.ts" />
 /// <reference path="../../src/View/Template/FormTemplateCollection.d.ts" />
