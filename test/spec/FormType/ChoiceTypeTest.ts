@@ -89,6 +89,27 @@ describe('ChoiceType', () => {
     });
   });
 
+  describe('close', () => {
+
+    it('should remove the select and option views from the DOM', () => {
+      var $scope:JQuery = $('<div></div>');
+      var choiceType = new ChoiceType({
+        choices: {
+          us: 'United States',
+          ca: 'Canada'
+        }
+      });
+
+      choiceType.render();
+      $scope.append(choiceType.el);
+
+      choiceType.close();
+
+      assert.equal($scope.children().length, 0, 'Expect all views to be removed from the documents');
+    });
+
+  });
+
   describe('getData', () => {
 
     it('should return the initial data value, before rendering the type', () => {

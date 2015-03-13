@@ -444,7 +444,9 @@ var AbstractFormType = (function () {
      * Remove a childType's element from parent form's element
      */
     AbstractFormType.prototype.removeChildElement = function (child) {
-        child.el.parentElement.removeChild(child.el);
+        if (child.el && child.el.parentNode === this.el) {
+            child.el.parentElement.removeChild(child.el);
+        }
     };
     AbstractFormType.prototype.getName = function () {
         return this.options.name;

@@ -197,7 +197,9 @@ class AbstractFormType {
    * Remove a childType's element from parent form's element
    */
   protected removeChildElement(child:AbstractFormType) {
-    child.el.parentElement.removeChild(child.el);
+    if (child.el && child.el.parentNode === this.el) {
+      child.el.parentElement.removeChild(child.el);
+    }
   }
 
   public getName():string {
