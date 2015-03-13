@@ -898,7 +898,7 @@ var ListType = (function (_super) {
         // find the matching item element
         var childIndex = this.children.indexOf(childType);
         var itemEl = this.itemElements[childIndex];
-        this.el.removeChild(itemEl);
+        itemEl.parentElement.removeChild(itemEl);
         this.itemElements.splice(childIndex, 1);
     };
     ListType.prototype.renderItem = function (childType) {

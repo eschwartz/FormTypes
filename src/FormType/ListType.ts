@@ -103,7 +103,7 @@ class ListType extends FieldType {
     var childIndex = this.children.indexOf(childType);
     var itemEl = this.itemElements[childIndex];
 
-    this.el.removeChild(itemEl);
+    itemEl.parentElement.removeChild(itemEl);
 
     this.itemElements.splice(childIndex, 1);
   }

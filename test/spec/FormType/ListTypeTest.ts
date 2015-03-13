@@ -228,6 +228,34 @@ describe('ListType', () => {
       assert.equal($inputs.eq(0).val(), 'bar');
     });
 
+    it('should remove the child view, when the list view is nested', () => {
+      var $list:JQuery, $items:JQuery, $inputs;
+      var fooChild:AbstractFormType;
+      var listType = new ListType({
+        ItemType: TextType,
+        data: [
+          'foo',
+          'bar'
+        ],
+        template: () => '\
+<div>\
+  <ul></ul>\
+</div>\
+        '
+      });
+      listType.render();
+
+      fooChild = listType.getChildren()[0];
+      fooChild.close();
+
+      $list = $(listType.el);
+      $items = $list.children();
+      $inputs = $items.find('input');
+
+      assert.equal($items.length, 1);
+      assert.equal($inputs.eq(0).val(), 'bar');
+    });
+
     it('should remove the child object', () => {
       var fooChild:AbstractFormType;
       var listType = new ListType({
