@@ -14,6 +14,13 @@ import fs = require('fs');
 
 class ChoiceType extends FieldType {
   protected children:OptionType[];
+  protected options:ChoiceTypeOptionsInterface;
+
+  public constructor(options?:ChoiceTypeOptionsInterface) {
+    super(options);
+
+    this.setChoices(this.options.choices);
+  }
 
   public render():ChoiceType {
     super.render();
@@ -48,17 +55,6 @@ class ChoiceType extends FieldType {
       )
     });
 
-    options.children = [];
-    _.each(options.choices, (value:string, key:string) => {
-      var optionType = new OptionType({
-        data: key,
-        label: value,
-        selected: options.data === key
-      });
-
-      options.children.push(optionType);
-    });
-
     return super.setDefaultOptions(options);
   }
 
@@ -87,6 +83,21 @@ class ChoiceType extends FieldType {
     if (!isSameData) {
       this.eventEmitter.emit('change');
     }
+  }
+
+  public setChoices(choices:_.Dictionary<string>):void {
+    var currVal = this.getData();
+    this.children.forEach((child:AbstractFormType) => this.removeChild(child));
+
+    _.each(choices, (value:string, key:string) => {
+      var optionType = new OptionType({
+        data: key,
+        label: value,
+        selected: currVal === key
+      });
+
+      this.addChild(optionType);
+    });
   }
 
   public disableOption(optionValue:string) {

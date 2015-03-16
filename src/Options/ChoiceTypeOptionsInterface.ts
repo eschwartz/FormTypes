@@ -17,7 +17,7 @@ interface ChoiceTypeOptionsInterface extends FieldTypeOptionsInterface {
    * The value of the selected choice.
    * Set to null to have no option selected.
    */
-  data?:string;
+  data?:any;
 }
 
 export = ChoiceTypeOptionsInterface;

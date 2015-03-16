@@ -444,7 +444,7 @@ var AbstractFormType = (function () {
      * Remove a childType's element from parent form's element
      */
     AbstractFormType.prototype.removeChildElement = function (child) {
-        if (child.el && child.el.parentNode === this.el) {
+        if (child.el) {
             child.el.parentElement.removeChild(child.el);
         }
     };
@@ -537,8 +537,9 @@ var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined
 
 var ChoiceType = (function (_super) {
     __extends(ChoiceType, _super);
-    function ChoiceType() {
-        _super.apply(this, arguments);
+    function ChoiceType(options) {
+        _super.call(this, options);
+        this.setChoices(this.options.choices);
     }
     ChoiceType.prototype.render = function () {
         var _this = this;
@@ -564,15 +565,6 @@ var ChoiceType = (function (_super) {
             choices: {},
             template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<select {{>html_attrs form.attrs}}></select>\n")
         });
-        options.children = [];
-        _.each(options.choices, function (value, key) {
-            var optionType = new OptionType({
-                data: key,
-                label: value,
-                selected: options.data === key
-            });
-            options.children.push(optionType);
-        });
         return _super.prototype.setDefaultOptions.call(this, options);
     };
     ChoiceType.prototype.getData = function () {
@@ -594,6 +586,19 @@ var ChoiceType = (function (_super) {
         if (!isSameData) {
             this.eventEmitter.emit('change');
         }
+    };
+    ChoiceType.prototype.setChoices = function (choices) {
+        var _this = this;
+        var currVal = this.getData();
+        this.children.forEach(function (child) { return _this.removeChild(child); });
+        _.each(choices, function (value, key) {
+            var optionType = new OptionType({
+                data: key,
+                label: value,
+                selected: currVal === key
+            });
+            _this.addChild(optionType);
+        });
     };
     ChoiceType.prototype.disableOption = function (optionValue) {
         var option = this.getOption(optionValue);
