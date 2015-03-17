@@ -381,7 +381,7 @@ var AbstractFormType = (function () {
         var _this = this;
         var partials = {
             html_attrs: "{{#each this}}\n  {{@key}}=\"{{this}}\"\n{{/each}}",
-            field_widget: "{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n{{>simple_widget form=form}}\n",
+            field_widget: "{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n{{>simple_widget this}}\n",
             simple_widget: "<{{form.tagName}} {{>html_attrs form.attrs}} />"
         };
         _.each(partials, function (partial, name) {
@@ -693,7 +693,7 @@ var FieldType = (function (_super) {
             type: 'field',
             label: null,
             labelAttrs: {},
-            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n{{>simple_widget form=form}}\n")
+            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n{{>simple_widget this}}\n")
         });
         options = _super.prototype.setDefaultOptions.call(this, options);
         // set default label
@@ -782,7 +782,7 @@ var GroupType = (function (_super) {
         _.defaults(options, {
             type: 'group',
             tagName: 'div',
-            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n{{>simple_widget form=form}}\n")
+            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n{{>simple_widget this}}\n")
         });
         return options;
     };
