@@ -11,6 +11,8 @@ import Handlebars = require('Handlebars');
 import FormContextInterface = require('../View/Context/FormContextInterface');
 import TemplateInterface = require('../View/Template/TemplateInterface');
 import PartialWidgetHelper = require('../View/TemplateHelper/PartialWidgetHelper');
+import HtmlEvents = require('../Util/HtmlEvents');
+import HtmlEventsInterface = require('../Util/HtmlEventsInterface');
 import Events = require('events');
 
 class AbstractFormType {
@@ -24,8 +26,10 @@ class AbstractFormType {
   protected isRenderedFlag:boolean = false;
   protected listeners:_.Dictionary<any>;
   protected listenerId:string;
+  protected HtmlEvents:HtmlEventsInterface;
 
   constructor(options:FormTypeOptionsInterface = {}) {
+    this.HtmlEvents = HtmlEvents;
     this.Handlebars = Handlebars.create();
     this.eventEmitter = new Events.EventEmitter();
     this.listeners = {};
@@ -310,6 +314,10 @@ class AbstractFormType {
     this.listeners[listenerId].forEach((listener:any) => {
       this.removeListener(listener.event, listener.listener);
     });
+  }
+
+  public setHtmlEvents(HtmlEvents:HtmlEventsInterface) {
+    this.HtmlEvents = HtmlEvents;
   }
 }
 
