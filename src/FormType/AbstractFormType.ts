@@ -162,6 +162,13 @@ class AbstractFormType {
 
     child.on('close', () => this.removeChild(child));
 
+    child.on('all', (evt:AllEvent) => {
+      var isChildEvent = evt.type.indexOf('child:') === 0;
+      var proxyEventType = isChildEvent ? evt.type : 'child:' + evt.type;
+
+      this.emit(proxyEventType, evt);
+    });
+
     if (this.isRendered()) {
       // Render child, if necessary
       if (!child.isRendered()) {
