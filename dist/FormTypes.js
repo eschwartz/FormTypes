@@ -307,11 +307,13 @@ var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined
 
 var Handlebars = (typeof window !== "undefined" ? window.Handlebars : typeof global !== "undefined" ? global.Handlebars : null);
 var PartialWidgetHelper = require('../View/TemplateHelper/PartialWidgetHelper');
+var HtmlEvents = require('../Util/HtmlEvents');
 var Events = require('events');
 var AbstractFormType = (function () {
     function AbstractFormType(options) {
         if (options === void 0) { options = {}; }
         this.isRenderedFlag = false;
+        this.HtmlEvents = HtmlEvents;
         this.Handlebars = Handlebars.create();
         this.eventEmitter = new Events.EventEmitter();
         this.listeners = {};
@@ -370,7 +372,7 @@ var AbstractFormType = (function () {
         this.removeAllListenersById(this.listenerId);
         this.isRenderedFlag = false;
         this.el = null;
-        this.eventEmitter.emit('close', this);
+        this.emit('close', this);
     };
     AbstractFormType.prototype.setTemplate = function (template) {
         this.template = template;
@@ -409,10 +411,15 @@ var AbstractFormType = (function () {
         var _this = this;
         this.children.push(child);
         child.on('change', function () {
-            _this.eventEmitter.emit('change');
-            _this.eventEmitter.emit('change:' + child.getName());
+            _this.emit('change');
+            _this.emit('change:' + child.getName());
         }, this.listenerId);
         child.on('close', function () { return _this.removeChild(child); });
+        child.on('all', function (evt) {
+            var isChildEvent = evt.type.indexOf('child:') === 0;
+            var proxyEventType = isChildEvent ? evt.type : 'child:' + evt.type;
+            _this.emit(proxyEventType, evt);
+        });
         if (this.isRendered()) {
             // Render child, if necessary
             if (!child.isRendered()) {
@@ -533,12 +540,23 @@ var AbstractFormType = (function () {
             _this.removeListener(listener.event, listener.listener);
         });
     };
+    AbstractFormType.prototype.emit = function (eventType, arg) {
+        var allEvent;
+        this.eventEmitter.emit(eventType, arg);
+        this.eventEmitter.emit('all', allEvent = {
+            type: eventType,
+            args: arg === void 0 ? [] : [arg]
+        });
+    };
+    AbstractFormType.prototype.setHtmlEvents = function (HtmlEvents) {
+        this.HtmlEvents = HtmlEvents;
+    };
     return AbstractFormType;
 })();
 module.exports = AbstractFormType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../View/TemplateHelper/PartialWidgetHelper":12,"events":1}],3:[function(require,module,exports){
+},{"../Util/HtmlEvents":11,"../View/TemplateHelper/PartialWidgetHelper":13,"events":1}],3:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -563,7 +581,7 @@ var ChoiceType = (function (_super) {
             this.getFormElement().selectedIndex = -1;
         }
         this.getFormElement().addEventListener('change', function () {
-            _this.eventEmitter.emit('change');
+            _this.emit('change');
         });
         return this;
     };
@@ -599,7 +617,7 @@ var ChoiceType = (function (_super) {
         });
         this.options.data = data;
         if (!isSameData) {
-            this.eventEmitter.emit('change');
+            this.emit('change');
         }
     };
     ChoiceType.prototype.setChoices = function (choices) {
@@ -697,7 +715,7 @@ var FieldType = (function (_super) {
 module.exports = FieldType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/StringUtil":11,"./AbstractFormType":2}],5:[function(require,module,exports){
+},{"../Util/StringUtil":12,"./AbstractFormType":2}],5:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -719,6 +737,12 @@ var FormType = (function (_super) {
     function FormType() {
         _super.apply(this, arguments);
     }
+    FormType.prototype.addChild = function (child) {
+        var _this = this;
+        _super.prototype.addChild.call(this, child);
+        child.on('submit', function () { return _this.emit('submit'); });
+        child.on('child:submit', function () { return _this.emit('submit'); });
+    };
     FormType.prototype.setDefaultOptions = function (options) {
         _.defaults(options, {
             tagName: 'form',
@@ -831,7 +855,7 @@ var LabelType = (function (_super) {
         else {
             label.textContent = data;
         }
-        this.eventEmitter.emit('change');
+        this.emit('change');
     };
     return LabelType;
 })(AbstractFormType);
@@ -1011,7 +1035,7 @@ var OptionType = (function (_super) {
             formEl.value = data;
         }
         if (!isSame) {
-            this.eventEmitter.emit('change');
+            this.emit('change');
         }
     };
     OptionType.prototype.select = function () {
@@ -1046,7 +1070,7 @@ var OptionType = (function (_super) {
 module.exports = OptionType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/StringUtil":11,"./FieldType":4}],10:[function(require,module,exports){
+},{"../Util/StringUtil":12,"./FieldType":4}],10:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -1071,7 +1095,7 @@ var TextType = (function (_super) {
         _super.prototype.render.call(this);
         // Trigger change on 'input' events.
         this.getFormElement().addEventListener('input', function () {
-            _this.eventEmitter.emit('change');
+            _this.emit('change');
         });
         return this;
     };
@@ -1109,7 +1133,7 @@ var TextType = (function (_super) {
         else {
             input.value = data;
         }
-        this.eventEmitter.emit('change');
+        this.emit('change');
     };
     return TextType;
 })(FieldType);
@@ -1117,6 +1141,14 @@ module.exports = TextType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./FieldType":4}],11:[function(require,module,exports){
+var HtmlEvents = {
+    addEventListener: function (element, type, listener, useCapture) {
+        element.addEventListener(type, listener, useCapture);
+    }
+};
+module.exports = HtmlEvents;
+
+},{}],12:[function(require,module,exports){
 var StringUtil = (function () {
     function StringUtil() {
     }
@@ -1131,7 +1163,7 @@ var StringUtil = (function () {
 })();
 module.exports = StringUtil;
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function (global){
 var Handlebars = (typeof window !== "undefined" ? window.Handlebars : typeof global !== "undefined" ? global.Handlebars : null);
 var PartialWidgetHelper = (function () {
@@ -1156,7 +1188,7 @@ var PartialWidgetHelper = (function () {
 module.exports = PartialWidgetHelper;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 (function (global){
 //ts:ref=node.d.ts
 var AbstractFormType = require('./FormType/AbstractFormType');
@@ -1183,5 +1215,5 @@ global.FormTypes = FormTypeExports;
 module.exports = FormTypeExports;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FormType/AbstractFormType":2,"./FormType/ChoiceType":3,"./FormType/FieldType":4,"./FormType/FormType":5,"./FormType/GroupType":6,"./FormType/LabelType":7,"./FormType/ListType":8,"./FormType/OptionType":9,"./FormType/TextType":10}]},{},[13])(13)
+},{"./FormType/AbstractFormType":2,"./FormType/ChoiceType":3,"./FormType/FieldType":4,"./FormType/FormType":5,"./FormType/GroupType":6,"./FormType/LabelType":7,"./FormType/ListType":8,"./FormType/OptionType":9,"./FormType/TextType":10}]},{},[14])(14)
 });
