@@ -9,8 +9,16 @@ import _ = require('underscore');
 import FormTypeOptionsInterface = require('../Options/FormTypeOptionsInterface');
 import Handlebars = require('Handlebars');
 import fs = require('fs');
+import AbstractFormType = require('./AbstractFormType');
 
 class FormType extends GroupType {
+
+  public addChild(child:AbstractFormType) {
+    super.addChild(child);
+
+    child.on('submit', () => this.emit('submit'));
+    child.on('child:submit', () => this.emit('submit'));
+  }
 
   protected setDefaultOptions(options:FormTypeOptionsInterface):FormTypeOptionsInterface {
     _.defaults(options, {

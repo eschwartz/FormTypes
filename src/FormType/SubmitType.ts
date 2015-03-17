@@ -13,6 +13,18 @@ class SubmitType extends AbstractFormType {
     super(options);
   }
 
+  public render():SubmitType {
+    super.render();
+
+    this.getFormElement().
+      addEventListener('click', (evt:MouseEvent) => {
+        this.emit('submit');
+        evt.preventDefault();
+      });
+
+    return this;
+  }
+
   public hasData():boolean {
     // Prevents parent Types from attempting
     // to parse SubmitType data
