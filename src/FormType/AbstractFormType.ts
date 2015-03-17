@@ -242,6 +242,21 @@ class AbstractFormType {
     );
   }
 
+  /**
+   * Does the form type contain data.
+   *
+   * A FormType is considered to have data even
+   * if the value of the data is falsely.
+   * On the other hand, a LabelType or SubmitType
+   * may not have any data associated with it at all.
+   *
+   * This returns true by default, but can be
+   * overridden in FormType implementations.
+   */
+  public hasData():boolean {
+    return true;
+  }
+
   public on(event:string, listener:Function, listenerId?:string) {
     this.eventEmitter.on(event, listener);
 

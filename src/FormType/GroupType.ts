@@ -29,7 +29,9 @@ class GroupType extends AbstractFormType {
     var data:_.Dictionary<any> = {};
 
     this.children.forEach((formType:AbstractFormType) => {
-      data[formType.getName()] = formType.getData();
+      if (formType.hasData()) {
+        data[formType.getName()] = formType.getData();
+      }
     });
 
     return data;
