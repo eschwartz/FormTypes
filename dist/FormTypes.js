@@ -379,7 +379,8 @@ var AbstractFormType = (function () {
         var _this = this;
         var partials = {
             html_attrs: "{{#each this}}\n  {{@key}}=\"{{this}}\"\n{{/each}}",
-            field_widget: "{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<{{form.tagName}} {{>html_attrs form.attrs}} />\n"
+            field_widget: "{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n{{>simple_widget form=form}}\n",
+            simple_widget: "<{{form.tagName}} {{>html_attrs form.attrs}} />"
         };
         _.each(partials, function (partial, name) {
             _this.Handlebars.registerPartial(name, partial);
@@ -472,6 +473,20 @@ var AbstractFormType = (function () {
     };
     AbstractFormType.prototype.setData = function (data) {
         throw new Error('Form of type "' + this.options.type + '" must implement a setData() method.');
+    };
+    /**
+     * Does the form type contain data.
+     *
+     * A FormType is considered to have data even
+     * if the value of the data is falsely.
+     * On the other hand, a LabelType or SubmitType
+     * may not have any data associated with it at all.
+     *
+     * This returns true by default, but can be
+     * overridden in FormType implementations.
+     */
+    AbstractFormType.prototype.hasData = function () {
+        return true;
     };
     AbstractFormType.prototype.on = function (event, listener, listenerId) {
         this.eventEmitter.on(event, listener);
@@ -660,7 +675,7 @@ var FieldType = (function (_super) {
             type: 'field',
             label: null,
             labelAttrs: {},
-            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<{{form.tagName}} {{>html_attrs form.attrs}} />\n")
+            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n{{>simple_widget form=form}}\n")
         });
         options = _super.prototype.setDefaultOptions.call(this, options);
         // set default label
@@ -743,14 +758,16 @@ var GroupType = (function (_super) {
         _.defaults(options, {
             type: 'group',
             tagName: 'div',
-            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<{{form.tagName}} {{>html_attrs form.attrs}} />\n")
+            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n{{>simple_widget form=form}}\n")
         });
         return options;
     };
     GroupType.prototype.getData = function () {
         var data = {};
         this.children.forEach(function (formType) {
-            data[formType.getName()] = formType.getData();
+            if (formType.hasData()) {
+                data[formType.getName()] = formType.getData();
+            }
         });
         return data;
     };
