@@ -58,64 +58,7 @@ describe('SubmitType', () => {
 
   });
 
-  describe('`submit` event', () => {
-
-    it('should fire when the button is clicked', () => {
-      var $submitBtn:JQuery;
-      var onClick = sinon.spy();
-      var submitType = new SubmitType({
-        label: 'Do it'
-      });
-      submitType.setHtmlEvents(JQueryHtmlEvents);
-      submitType.render();
-
-      submitType.on('submit', onClick);
-
-      $submitBtn = $(submitType.getFormElement());
-      $submitBtn.click();
-
-      assert(onClick.called, 'Expected `submit` event handler to have been called');
-    });
-
-  });
-
   describe('integration', () => {
-
-    it('should fire a submit event on a parent FormType', () => {
-      var submitType:SubmitType;
-      var onSubmit = sinon.spy();
-      var formType = new FormType({
-        children: [
-          submitType = new SubmitType()
-        ]
-      });
-      formType.render();
-
-      formType.on('submit', onSubmit);
-      $(submitType.getFormElement()).click();
-
-      assert(onSubmit.called, 'Expected onSubmit listener to have been called.');
-    });
-
-    it('should fire a submit event on a parent FormType (nested)', () => {
-      var submitType:SubmitType;
-      var onSubmit = sinon.spy();
-      var formType = new FormType({
-        children: [
-          new GroupType({
-            children: [
-              submitType = new SubmitType()
-            ]
-          })
-        ]
-      });
-      formType.render();
-
-      formType.on('submit', onSubmit);
-      $(submitType.getFormElement()).click();
-
-      assert(onSubmit.called, 'Expected onSubmit listener to have been called.');
-    });
 
     it('should not add data properties to a GroupType (before render)', () => {
       var groupType = new GroupType({

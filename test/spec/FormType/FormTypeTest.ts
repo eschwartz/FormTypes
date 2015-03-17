@@ -8,6 +8,7 @@
 /// <reference path="../../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
 ///ts:ref=sinon.d.ts
 /// <reference path="../../../typings/generated/sinon/sinon.d.ts"/> ///ts:ref:generated
+import HtmlEventsInterface = require('../../../src/Util/HtmlEventsInterface');
 import assert = require('assert');
 import FormType = require('../../../src/FormType/FormType');
 import TextType = require('../../../src/FormType/TextType');
@@ -16,6 +17,7 @@ import _ = require('underscore');
 import DomEvents = require('../../Util/DomEvents');
 import sinon = require('sinon');
 var jsdom:jsdom = require('mocha-jsdom');
+var JQueryHtmlEvents:HtmlEventsInterface;
 
 describe('FormType', () => {
   var $:JQueryStatic;
@@ -26,6 +28,7 @@ describe('FormType', () => {
 
   before(() => {
     $ = require('jquery');
+    JQueryHtmlEvents = require('../../Util/JQueryHtmlEvents');
   });
 
   describe('render', () => {
@@ -71,6 +74,27 @@ describe('FormType', () => {
 
   });
 
+  describe('`submit` event', () => {
+
+    it('should emit when you submit the form', () => {
+      var onSubmit = sinon.spy();
+      var $form:JQuery;
+      var formType = new FormType();
+      formType.setHtmlEvents(JQueryHtmlEvents);
+
+      formType.render();
+      $form = $(formType.el);
+
+      $form.on('submit', (evt:JQueryEventObject) => {
+        onSubmit();
+        evt.preventDefault();
+      });
+      $form.submit();
+
+      assert(onSubmit.called, 'Expected onSubmit listener to have been called.');
+    });
+
+  });
 
   describe('functional tests', () => {
 

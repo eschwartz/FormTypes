@@ -13,11 +13,13 @@ import AbstractFormType = require('./AbstractFormType');
 
 class FormType extends GroupType {
 
-  public addChild(child:AbstractFormType) {
-    super.addChild(child);
+  public render() {
+    super.render();
 
-    child.on('submit', () => this.emit('submit'));
-    child.on('child:submit', () => this.emit('submit'));
+    this.HtmlEvents.
+      addEventListener(this.getFormElement(), 'submit', () => this.emit('submit'));
+
+    return this;
   }
 
   protected setDefaultOptions(options:FormTypeOptionsInterface):FormTypeOptionsInterface {

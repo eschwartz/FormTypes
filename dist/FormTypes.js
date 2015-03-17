@@ -737,11 +737,11 @@ var FormType = (function (_super) {
     function FormType() {
         _super.apply(this, arguments);
     }
-    FormType.prototype.addChild = function (child) {
+    FormType.prototype.render = function () {
         var _this = this;
-        _super.prototype.addChild.call(this, child);
-        child.on('submit', function () { return _this.emit('submit'); });
-        child.on('child:submit', function () { return _this.emit('submit'); });
+        _super.prototype.render.call(this);
+        this.HtmlEvents.addEventListener(this.getFormElement(), 'submit', function () { return _this.emit('submit'); });
+        return this;
     };
     FormType.prototype.setDefaultOptions = function (options) {
         _.defaults(options, {
@@ -1090,15 +1090,6 @@ var SubmitType = (function (_super) {
     function SubmitType(options) {
         _super.call(this, options);
     }
-    SubmitType.prototype.render = function () {
-        var _this = this;
-        _super.prototype.render.call(this);
-        this.getFormElement().addEventListener('click', function (evt) {
-            _this.emit('submit');
-            evt.preventDefault();
-        });
-        return this;
-    };
     SubmitType.prototype.hasData = function () {
         // Prevents parent Types from attempting
         // to parse SubmitType data
