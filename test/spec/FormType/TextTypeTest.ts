@@ -35,6 +35,7 @@ describe('TextType', () => {
 
       assert.equal($input.length, 1,
         'Expected a single input element to exist');
+      assert.equal($input.attr('type'), 'text', 'Expect input to be of type "text"');
     });
 
     it('should render the TextType\'s data as the input\'s value', () => {

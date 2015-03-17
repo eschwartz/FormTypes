@@ -24,7 +24,6 @@ class TextType extends FieldType {
   protected setDefaultOptions(options:FieldTypeOptionsInterface):FieldTypeOptionsInterface {
     _.defaults(options, {
       tagName: 'input',
-      type: 'text',
       data: '',
       template: this.Handlebars.compile(
         fs.readFileSync(__dirname + '/../View/form/text_widget.html.hbs', 'utf8')
@@ -35,7 +34,8 @@ class TextType extends FieldType {
     options = super.setDefaultOptions(options);
 
     _.defaults(options.attrs, {
-      value: options.data
+      value: options.data,
+      type: 'text'
     });
 
     return options;

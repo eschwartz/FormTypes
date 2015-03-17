@@ -1148,13 +1148,13 @@ var TextType = (function (_super) {
     TextType.prototype.setDefaultOptions = function (options) {
         _.defaults(options, {
             tagName: 'input',
-            type: 'text',
             data: '',
             template: this.Handlebars.compile("{{>field_widget}}")
         });
         options = _super.prototype.setDefaultOptions.call(this, options);
         _.defaults(options.attrs, {
-            value: options.data
+            value: options.data,
+            type: 'text'
         });
         return options;
     };
