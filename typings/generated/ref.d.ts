@@ -1,4 +1,5 @@
 //grunt-start
+/// <reference path="../../src/Event/AllEvent.ts" />
 /// <reference path="../../src/FormType/AbstractFormType.ts" />
 /// <reference path="../../src/FormType/ChoiceType.ts" />
 /// <reference path="../../src/FormType/FieldType.ts" />
@@ -15,6 +16,8 @@
 /// <reference path="../../src/Options/ListTypeOptionsInterface.ts" />
 /// <reference path="../../src/Options/OptionTypeOptionsInterface.ts" />
 /// <reference path="../../src/Options/SubmitTypeOptionInterface.ts" />
+/// <reference path="../../src/Util/HtmlEvents.ts" />
+/// <reference path="../../src/Util/HtmlEventsInterface.ts" />
 /// <reference path="../../src/Util/StringUtil.ts" />
 /// <reference path="../../src/View/Context/FormContextInterface.d.ts" />
 /// <reference path="../../src/View/Context/FormContextInterface.ts" />

@@ -61,7 +61,7 @@ class OptionType extends FieldType {
     }
 
     if (!isSame) {
-      this.eventEmitter.emit('change');
+      this.emit('change');
     }
   }
 

@@ -13,6 +13,7 @@ import TemplateInterface = require('../View/Template/TemplateInterface');
 import PartialWidgetHelper = require('../View/TemplateHelper/PartialWidgetHelper');
 import HtmlEvents = require('../Util/HtmlEvents');
 import HtmlEventsInterface = require('../Util/HtmlEventsInterface');
+import AllEvent = require('../Event/AllEvent');
 import Events = require('events');
 
 class AbstractFormType {
@@ -105,7 +106,7 @@ class AbstractFormType {
     this.isRenderedFlag = false;
     this.el = null;
 
-    this.eventEmitter.emit('close', this);
+    this.emit('close', this);
   }
 
   public setTemplate(template:TemplateInterface) {
@@ -155,8 +156,8 @@ class AbstractFormType {
     this.children.push(child);
 
     child.on('change', () => {
-      this.eventEmitter.emit('change');
-      this.eventEmitter.emit('change:' + child.getName());
+      this.emit('change');
+      this.emit('change:' + child.getName());
     }, this.listenerId);
 
     child.on('close', () => this.removeChild(child));
@@ -313,6 +314,16 @@ class AbstractFormType {
 
     this.listeners[listenerId].forEach((listener:any) => {
       this.removeListener(listener.event, listener.listener);
+    });
+  }
+
+  protected emit(eventType:string, arg?:any) {
+    var allEvent:AllEvent;
+
+    this.eventEmitter.emit(eventType, arg);
+    this.eventEmitter.emit('all', allEvent = {
+      type: eventType,
+      args: arg === void 0 ? [] : [arg]
     });
   }
 

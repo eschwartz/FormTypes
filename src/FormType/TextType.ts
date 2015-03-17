@@ -15,7 +15,7 @@ class TextType extends FieldType {
     // Trigger change on 'input' events.
     this.getFormElement()
       .addEventListener('input', () => {
-        this.eventEmitter.emit('change');
+        this.emit('change');
       });
 
     return this;
@@ -70,7 +70,7 @@ class TextType extends FieldType {
       input.value = data;
     }
 
-    this.eventEmitter.emit('change');
+    this.emit('change');
   }
 
 }

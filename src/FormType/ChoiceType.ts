@@ -31,7 +31,7 @@ class ChoiceType extends FieldType {
 
     this.getFormElement().
       addEventListener('change', () => {
-        this.eventEmitter.emit('change');
+        this.emit('change');
       });
 
     return this;
@@ -81,7 +81,7 @@ class ChoiceType extends FieldType {
     this.options.data = data;
 
     if (!isSameData) {
-      this.eventEmitter.emit('change');
+      this.emit('change');
     }
   }
 

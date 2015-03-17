@@ -43,7 +43,7 @@ class LabelType extends AbstractFormType {
       label.textContent = data;
     }
 
-    this.eventEmitter.emit('change');
+    this.emit('change');
   }
 
 }
