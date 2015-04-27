@@ -1,3 +1,12 @@
+# 1.1.0
+
+New Form Types:
+
+- MultiChoiceType
+- CheckboxType
+
+See /examples/basic.html for example usage.
+
 # 1.0.0
 
 Initial release
