@@ -556,7 +556,103 @@ var AbstractFormType = (function () {
 module.exports = AbstractFormType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/HtmlEvents":12,"../View/TemplateHelper/PartialWidgetHelper":14,"events":1}],3:[function(require,module,exports){
+},{"../Util/HtmlEvents":14,"../View/TemplateHelper/PartialWidgetHelper":16,"events":1}],3:[function(require,module,exports){
+(function (global){
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+///ts:ref=underscore.d.ts
+/// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
+///ts:ref=handlebars.d.ts
+/// <reference path="../../typings/generated/handlebars/handlebars.d.ts"/> ///ts:ref:generated
+///ts:ref=node.d.ts
+/// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
+var FieldType = require('./FieldType');
+var StringUtil = require('../Util/StringUtil');
+
+var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+var CheckboxType = (function (_super) {
+    __extends(CheckboxType, _super);
+    function CheckboxType() {
+        _super.apply(this, arguments);
+    }
+    CheckboxType.prototype.setDefaultOptions = function (options) {
+        _.defaults(options, {
+            tagName: 'input',
+            type: 'checkbox',
+            data: '',
+            label: StringUtil.camelCaseToWords(options.data || ''),
+            templates: this.Handlebars.compile("<input value=\"{{form.data}}\"\n        {{>html_attrs form.attrs}}>\n</input>{{form.label}}\n")
+        });
+        options = _super.prototype.setDefaultOptions.call(this, options);
+        options.attrs['type'] = 'checkbox';
+        options.attrs['value'] = options.data;
+        if (options.checked) {
+            options.attrs['checked'] = true;
+        }
+        return options;
+    };
+    CheckboxType.prototype.render = function () {
+        var _this = this;
+        _super.prototype.render.call(this);
+        this.getFormElement().addEventListener('change', function () {
+            _this.emit('change');
+        });
+        return this;
+    };
+    CheckboxType.prototype.getFormElement = function () {
+        return _super.prototype.getFormElement.call(this);
+    };
+    CheckboxType.prototype.getData = function () {
+        var formElement = this.getFormElement();
+        return formElement ? formElement.value : this.options.data;
+    };
+    CheckboxType.prototype.setData = function (data) {
+        var isSameData = data = this.getData();
+        if (this.getFormElement()) {
+            this.getFormElement().value = data;
+        }
+        this.options.data = data;
+        if (!isSameData) {
+            this.emit('change');
+        }
+    };
+    CheckboxType.prototype.check = function () {
+        if (this.getFormElement()) {
+            this.getFormElement().checked = true;
+        }
+        this.options.attrs['checked'] = true;
+    };
+    CheckboxType.prototype.unCheck = function () {
+        if (this.getFormElement()) {
+            this.getFormElement().removeAttribute('checked');
+        }
+        delete this.options.attrs['checked'];
+    };
+    CheckboxType.prototype.enable = function () {
+        if (this.getFormElement()) {
+            this.getFormElement().removeAttribute('disabled');
+        }
+        delete this.options.attrs['disabled'];
+    };
+    CheckboxType.prototype.disable = function () {
+        if (this.getFormElement()) {
+            this.getFormElement().disabled = true;
+        }
+        this.options.attrs['disabled'] = true;
+    };
+    CheckboxType.prototype.isChecked = function () {
+        return this.getFormElement() ? this.getFormElement().checked : !!this.options.attrs['checked'];
+    };
+    return CheckboxType;
+})(FieldType);
+module.exports = CheckboxType;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../Util/StringUtil":15,"./FieldType":5}],4:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -660,7 +756,7 @@ var ChoiceType = (function (_super) {
 module.exports = ChoiceType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FieldType":4,"./OptionType":9}],4:[function(require,module,exports){
+},{"./FieldType":5,"./OptionType":11}],5:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -715,7 +811,7 @@ var FieldType = (function (_super) {
 module.exports = FieldType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/StringUtil":13,"./AbstractFormType":2}],5:[function(require,module,exports){
+},{"../Util/StringUtil":15,"./AbstractFormType":2}],6:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -756,7 +852,7 @@ var FormType = (function (_super) {
 module.exports = FormType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./GroupType":6}],6:[function(require,module,exports){
+},{"./GroupType":7}],7:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -810,7 +906,7 @@ var GroupType = (function (_super) {
 module.exports = GroupType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./AbstractFormType":2}],7:[function(require,module,exports){
+},{"./AbstractFormType":2}],8:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -862,7 +958,7 @@ var LabelType = (function (_super) {
 module.exports = LabelType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./AbstractFormType":2}],8:[function(require,module,exports){
+},{"./AbstractFormType":2}],9:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -977,7 +1073,77 @@ var ListType = (function (_super) {
 module.exports = ListType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FieldType":4,"./TextType":11}],9:[function(require,module,exports){
+},{"./FieldType":5,"./TextType":13}],10:[function(require,module,exports){
+(function (global){
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+var FieldType = require('./FieldType');
+var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+var CheckboxType = require('./CheckboxType');
+var MultiChoiceType = (function (_super) {
+    __extends(MultiChoiceType, _super);
+    function MultiChoiceType(options) {
+        _super.call(this, options);
+        this.setChoices(this.options.choices);
+    }
+    MultiChoiceType.prototype.setDefaultOptions = function (options) {
+        _.defaults(options, {
+            tagName: 'div',
+            type: 'multi_choice',
+            choices: {}
+        });
+        return _super.prototype.setDefaultOptions.call(this, options);
+    };
+    MultiChoiceType.prototype.setChoices = function (choices) {
+        var _this = this;
+        var data = this.getData();
+        // Remove all children
+        this.children.forEach(function (child) { return _this.removeChild(child); });
+        // Add new children
+        _.each(choices, function (value, key) {
+            _this.addChild(new CheckboxType({
+                data: key,
+                label: value,
+                checked: _.contains(data, key)
+            }));
+        });
+    };
+    MultiChoiceType.prototype.getData = function () {
+        if (!this.getFormElement()) {
+            return this.options.data;
+        }
+        return this.children.filter(function (child) { return child.isChecked(); }).map(function (child) { return child.getData(); });
+    };
+    MultiChoiceType.prototype.setData = function (data) {
+        var isSameData = _.isEqual(data, this.getData());
+        if (isSameData) {
+            return;
+        }
+        // Update child checkboxes fro mdata
+        this.children.forEach(function (child) {
+            if (_.contains(data, child.getData())) {
+                child.check();
+            }
+            else {
+                child.unCheck();
+            }
+        });
+        this.options.data = data;
+        this.emit('change');
+    };
+    MultiChoiceType.prototype.addChildElement = function (childType) {
+        this.getFormElement().appendChild(childType.el);
+    };
+    return MultiChoiceType;
+})(FieldType);
+module.exports = MultiChoiceType;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./CheckboxType":3,"./FieldType":5}],11:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -1070,7 +1236,7 @@ var OptionType = (function (_super) {
 module.exports = OptionType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/StringUtil":13,"./FieldType":4}],10:[function(require,module,exports){
+},{"../Util/StringUtil":15,"./FieldType":5}],12:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -1116,7 +1282,7 @@ var SubmitType = (function (_super) {
 module.exports = SubmitType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./AbstractFormType":2}],11:[function(require,module,exports){
+},{"./AbstractFormType":2}],13:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -1186,7 +1352,7 @@ var TextType = (function (_super) {
 module.exports = TextType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FieldType":4}],12:[function(require,module,exports){
+},{"./FieldType":5}],14:[function(require,module,exports){
 var HtmlEvents = {
     addEventListener: function (element, type, listener, useCapture) {
         element.addEventListener(type, listener, useCapture);
@@ -1194,7 +1360,7 @@ var HtmlEvents = {
 };
 module.exports = HtmlEvents;
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var StringUtil = (function () {
     function StringUtil() {
     }
@@ -1209,7 +1375,7 @@ var StringUtil = (function () {
 })();
 module.exports = StringUtil;
 
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 (function (global){
 var Handlebars = (typeof window !== "undefined" ? window.Handlebars : typeof global !== "undefined" ? global.Handlebars : null);
 var PartialWidgetHelper = (function () {
@@ -1234,7 +1400,7 @@ var PartialWidgetHelper = (function () {
 module.exports = PartialWidgetHelper;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function (global){
 //ts:ref=node.d.ts
 var AbstractFormType = require('./FormType/AbstractFormType');
@@ -1247,6 +1413,8 @@ var OptionType = require('./FormType/OptionType');
 var LabelType = require('./FormType/LabelType');
 var ListType = require('./FormType/ListType');
 var SubmitType = require('./FormType/SubmitType');
+var MultiChoiceType = require('./FormType/MultiChoiceType');
+var CheckboxType = require('./FormType/CheckboxType');
 var FormTypeExports = {
     AbstractFormType: AbstractFormType,
     GroupType: GroupType,
@@ -1255,6 +1423,8 @@ var FormTypeExports = {
     TextType: TextType,
     ChoiceType: ChoiceType,
     OptionType: OptionType,
+    MultiChoiceType: MultiChoiceType,
+    CheckboxType: CheckboxType,
     LabelType: LabelType,
     ListType: ListType,
     SubmitType: SubmitType
@@ -1263,5 +1433,5 @@ global.FormTypes = FormTypeExports;
 module.exports = FormTypeExports;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FormType/AbstractFormType":2,"./FormType/ChoiceType":3,"./FormType/FieldType":4,"./FormType/FormType":5,"./FormType/GroupType":6,"./FormType/LabelType":7,"./FormType/ListType":8,"./FormType/OptionType":9,"./FormType/SubmitType":10,"./FormType/TextType":11}]},{},[15])(15)
+},{"./FormType/AbstractFormType":2,"./FormType/CheckboxType":3,"./FormType/ChoiceType":4,"./FormType/FieldType":5,"./FormType/FormType":6,"./FormType/GroupType":7,"./FormType/LabelType":8,"./FormType/ListType":9,"./FormType/MultiChoiceType":10,"./FormType/OptionType":11,"./FormType/SubmitType":12,"./FormType/TextType":13}]},{},[17])(17)
 });

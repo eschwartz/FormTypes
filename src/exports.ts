@@ -9,6 +9,8 @@ import OptionType = require('./FormType/OptionType');
 import LabelType = require('./FormType/LabelType');
 import ListType = require('./FormType/ListType');
 import SubmitType = require('./FormType/SubmitType');
+import MultiChoiceType = require('./FormType/MultiChoiceType');
+import CheckboxType = require('./FormType/CheckboxType');
 
 var FormTypeExports = {
   AbstractFormType: AbstractFormType,
@@ -18,6 +20,8 @@ var FormTypeExports = {
   TextType: TextType,
   ChoiceType: ChoiceType,
   OptionType: OptionType,
+  MultiChoiceType: MultiChoiceType,
+  CheckboxType: CheckboxType,
   LabelType: LabelType,
   ListType: ListType,
   SubmitType: SubmitType
