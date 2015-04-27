@@ -16,6 +16,7 @@
   var formType = new FormTypes.FormType({
     children: [
       new FormTypes.TextType({
+        name: 'fullName',
         label: 'Full name',
         attrs: {
           placeholder: 'eg. John Smith'
@@ -33,6 +34,7 @@
             ')
       }),
       new FormTypes.ChoiceType({
+        name: 'country',
         label: 'Country of residence',
         choices: {
           ca: 'Canada',
@@ -44,6 +46,10 @@
     ]
   });
   formType.render();
+
+  formType.on('change', function() {
+    console.log('Form data changed:', formType.getData());
+  });
 
   document.body.appendChild(formType.el);
 </script>
