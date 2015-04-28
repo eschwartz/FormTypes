@@ -45,6 +45,22 @@ describe('MultiChoiceType', () => {
       assert.equal($checkboxes.filter('[value="ca"]').length, 1);
     });
 
+    it('should set the name of the checkbox to the data value', () => {
+      var $checkboxes:JQuery;
+      var multiChoiceType = new MultiChoiceType({
+        choices: {
+          us: 'United States',
+          ca: 'Canada'
+        }
+      });
+
+      multiChoiceType.render();
+      $checkboxes = $(multiChoiceType.el).find('input[type=checkbox]');
+
+      assert.equal($checkboxes.filter('[name="us"]').length, 1);
+      assert.equal($checkboxes.filter('[name="ca"]').length, 1);
+    });
+
     it('should render labels for each checkbox', () => {
       var $checkboxes:JQuery, $scope:JQuery
       var $usLabel:JQuery, $caLabel:JQuery;

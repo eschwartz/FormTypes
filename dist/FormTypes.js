@@ -1107,6 +1107,7 @@ var MultiChoiceType = (function (_super) {
         _.each(choices, function (value, key) {
             _this.addChild(new CheckboxType({
                 data: key,
+                name: key,
                 label: value,
                 checked: _.contains(data, key)
             }));
