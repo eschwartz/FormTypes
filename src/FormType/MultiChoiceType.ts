@@ -40,6 +40,7 @@ class MultiChoiceType extends FieldType {
     _.each(choices, (value:string, key:string) => {
       this.addChild(new CheckboxType({
         data: key,
+        name: key,
         label: value,
         checked: _.contains(data, key)
       }));
