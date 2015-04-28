@@ -1,3 +1,7 @@
+# 1.1.1
+
+- Fix CheckboxType template (was bad markup)
+
 # 1.1.0
 
 New Form Types:
