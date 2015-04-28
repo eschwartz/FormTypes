@@ -19,7 +19,7 @@ class CheckboxType extends FieldType {
       type: 'checkbox',
       data: '',
       label: StringUtil.camelCaseToWords(options.data || ''),
-      templates: this.Handlebars.compile(
+      template: this.Handlebars.compile(
        fs.readFileSync(__dirname + '/../View/form/checkbox_widget.html.hbs', 'utf8')
       )
     });

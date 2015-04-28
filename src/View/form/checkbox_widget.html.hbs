@@ -1,3 +1,8 @@
-<input value="{{form.data}}"
-        {{>html_attrs form.attrs}}>
-</input>{{form.label}}
+{{#if form.label}}
+  <label {{>html_attrs form.labelAttrs}}>
+    {{>simple_widget this}} {{form.label}}
+  </label>
+{{else}}
+  {{>simple_widget this}}
+{{/if}}
+

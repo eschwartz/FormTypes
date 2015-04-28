@@ -585,7 +585,7 @@ var CheckboxType = (function (_super) {
             type: 'checkbox',
             data: '',
             label: StringUtil.camelCaseToWords(options.data || ''),
-            templates: this.Handlebars.compile("<input value=\"{{form.data}}\"\n        {{>html_attrs form.attrs}}>\n</input>{{form.label}}\n")
+            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{>simple_widget this}} {{form.label}}\n  </label>\n{{else}}\n  {{>simple_widget this}}\n{{/if}}\n\n")
         });
         options = _super.prototype.setDefaultOptions.call(this, options);
         options.attrs['type'] = 'checkbox';
