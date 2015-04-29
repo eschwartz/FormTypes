@@ -628,7 +628,7 @@ var CheckboxType = (function (_super) {
     };
     CheckboxType.prototype.unCheck = function () {
         if (this.getFormElement()) {
-            this.getFormElement().removeAttribute('checked');
+            this.getFormElement().checked = false;
         }
         delete this.options.attrs['checked'];
     };

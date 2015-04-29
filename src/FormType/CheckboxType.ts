@@ -80,7 +80,7 @@ class CheckboxType extends FieldType {
 
   public unCheck() {
     if (this.getFormElement()) {
-      this.getFormElement().removeAttribute('checked');
+      this.getFormElement().checked = false;
     }
 
     delete this.options.attrs['checked'];
