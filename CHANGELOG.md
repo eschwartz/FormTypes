@@ -1,3 +1,15 @@
+# 1.2.0
+
+- Refactor child-closing behavior.
+  Fixes issues with attempting to close
+  not-rendered children, and separates concerns, some.
+  
+  Note that closing a view no longer removes it's from
+  the parent view -- meaning that it will still provide
+  data to parent GroupTypes.
+  If you want to fully remove a child, you'll need to
+  call `parentForm.removeChild()`, instead of just `child.close()`.
+
 # 1.1.1
 
 - Fix CheckboxType template (was bad markup)
