@@ -5,6 +5,7 @@
 ///ts:ref=node.d.ts
 /// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 import FieldType = require('./FieldType');
+import ServiceContainer = require('../Service/ServiceContainer');
 import CheckboxTypeOptions = require('../Options/CheckboxTypeOptionsInterface');
 import StringUtil = require('../Util/StringUtil');
 import fs = require('fs');
@@ -38,8 +39,8 @@ class CheckboxType extends FieldType {
   public render():CheckboxType {
     super.render();
 
-    this.getFormElement().
-      addEventListener('change', () => {
+    ServiceContainer.HtmlEvents.
+      addEventListener(this.getFormElement(), 'change', () => {
         this.emit('change');
       });
 

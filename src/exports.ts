@@ -11,6 +11,7 @@ import ListType = require('./FormType/ListType');
 import SubmitType = require('./FormType/SubmitType');
 import MultiChoiceType = require('./FormType/MultiChoiceType');
 import CheckboxType = require('./FormType/CheckboxType');
+import ServiceContainer = require('./Service/ServiceContainer');
 
 var FormTypeExports = {
   AbstractFormType: AbstractFormType,
@@ -24,7 +25,8 @@ var FormTypeExports = {
   CheckboxType: CheckboxType,
   LabelType: LabelType,
   ListType: ListType,
-  SubmitType: SubmitType
+  SubmitType: SubmitType,
+  ServiceContainer: ServiceContainer
 };
 global.FormTypes = FormTypeExports;
 export = FormTypeExports;

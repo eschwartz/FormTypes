@@ -27,10 +27,8 @@ class AbstractFormType {
   protected isRenderedFlag:boolean = false;
   protected listeners:_.Dictionary<any>;
   protected listenerId:string;
-  protected HtmlEvents:HtmlEventsInterface;
 
   constructor(options:FormTypeOptionsInterface = {}) {
-    this.HtmlEvents = HtmlEvents;
     this.Handlebars = Handlebars.create();
     this.eventEmitter = new Events.EventEmitter();
     this.listeners = {};
@@ -332,10 +330,6 @@ class AbstractFormType {
       type: eventType,
       args: arg === void 0 ? [] : [arg]
     });
-  }
-
-  public setHtmlEvents(HtmlEvents:HtmlEventsInterface) {
-    this.HtmlEvents = HtmlEvents;
   }
 }
 

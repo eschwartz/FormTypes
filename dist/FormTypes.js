@@ -307,13 +307,11 @@ var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined
 
 var Handlebars = (typeof window !== "undefined" ? window.Handlebars : typeof global !== "undefined" ? global.Handlebars : null);
 var PartialWidgetHelper = require('../View/TemplateHelper/PartialWidgetHelper');
-var HtmlEvents = require('../Util/HtmlEvents');
 var Events = require('events');
 var AbstractFormType = (function () {
     function AbstractFormType(options) {
         if (options === void 0) { options = {}; }
         this.isRenderedFlag = false;
-        this.HtmlEvents = HtmlEvents;
         this.Handlebars = Handlebars.create();
         this.eventEmitter = new Events.EventEmitter();
         this.listeners = {};
@@ -548,15 +546,12 @@ var AbstractFormType = (function () {
             args: arg === void 0 ? [] : [arg]
         });
     };
-    AbstractFormType.prototype.setHtmlEvents = function (HtmlEvents) {
-        this.HtmlEvents = HtmlEvents;
-    };
     return AbstractFormType;
 })();
 module.exports = AbstractFormType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/HtmlEvents":14,"../View/TemplateHelper/PartialWidgetHelper":16,"events":1}],3:[function(require,module,exports){
+},{"../View/TemplateHelper/PartialWidgetHelper":17,"events":1}],3:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -571,6 +566,7 @@ var __extends = this.__extends || function (d, b) {
 ///ts:ref=node.d.ts
 /// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 var FieldType = require('./FieldType');
+var ServiceContainer = require('../Service/ServiceContainer');
 var StringUtil = require('../Util/StringUtil');
 
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
@@ -598,7 +594,7 @@ var CheckboxType = (function (_super) {
     CheckboxType.prototype.render = function () {
         var _this = this;
         _super.prototype.render.call(this);
-        this.getFormElement().addEventListener('change', function () {
+        ServiceContainer.HtmlEvents.addEventListener(this.getFormElement(), 'change', function () {
             _this.emit('change');
         });
         return this;
@@ -652,7 +648,7 @@ var CheckboxType = (function (_super) {
 module.exports = CheckboxType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/StringUtil":15,"./FieldType":5}],4:[function(require,module,exports){
+},{"../Service/ServiceContainer":14,"../Util/StringUtil":16,"./FieldType":5}],4:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -660,6 +656,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
+var ServiceContainer = require('../Service/ServiceContainer');
 var FieldType = require('./FieldType');
 var OptionType = require('./OptionType');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
@@ -676,7 +673,7 @@ var ChoiceType = (function (_super) {
         if (_.isNull(this.options.data)) {
             this.getFormElement().selectedIndex = -1;
         }
-        this.getFormElement().addEventListener('change', function () {
+        ServiceContainer.HtmlEvents.addEventListener(this.getFormElement(), 'change', function () {
             _this.emit('change');
         });
         return this;
@@ -756,7 +753,7 @@ var ChoiceType = (function (_super) {
 module.exports = ChoiceType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FieldType":5,"./OptionType":11}],5:[function(require,module,exports){
+},{"../Service/ServiceContainer":14,"./FieldType":5,"./OptionType":11}],5:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -811,7 +808,7 @@ var FieldType = (function (_super) {
 module.exports = FieldType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/StringUtil":15,"./AbstractFormType":2}],6:[function(require,module,exports){
+},{"../Util/StringUtil":16,"./AbstractFormType":2}],6:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -828,6 +825,7 @@ var __extends = this.__extends || function (d, b) {
 var GroupType = require('./GroupType');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
 
+var ServiceContainer = require('../Service/ServiceContainer');
 var FormType = (function (_super) {
     __extends(FormType, _super);
     function FormType() {
@@ -836,7 +834,7 @@ var FormType = (function (_super) {
     FormType.prototype.render = function () {
         var _this = this;
         _super.prototype.render.call(this);
-        this.HtmlEvents.addEventListener(this.getFormElement(), 'submit', function () { return _this.emit('submit'); });
+        ServiceContainer.HtmlEvents.addEventListener(this.getFormElement(), 'submit', function () { return _this.emit('submit'); });
         return this;
     };
     FormType.prototype.setDefaultOptions = function (options) {
@@ -852,7 +850,7 @@ var FormType = (function (_super) {
 module.exports = FormType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./GroupType":7}],7:[function(require,module,exports){
+},{"../Service/ServiceContainer":14,"./GroupType":7}],7:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -1237,7 +1235,7 @@ var OptionType = (function (_super) {
 module.exports = OptionType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/StringUtil":15,"./FieldType":5}],12:[function(require,module,exports){
+},{"../Util/StringUtil":16,"./FieldType":5}],12:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -1296,6 +1294,7 @@ var __extends = this.__extends || function (d, b) {
 ///ts:ref=node.d.ts
 /// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 var FieldType = require('./FieldType');
+var ServiceContainer = require('../Service/ServiceContainer');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
 
 var TextType = (function (_super) {
@@ -1307,7 +1306,7 @@ var TextType = (function (_super) {
         var _this = this;
         _super.prototype.render.call(this);
         // Trigger change on 'input' events.
-        this.getFormElement().addEventListener('input', function () {
+        ServiceContainer.HtmlEvents.addEventListener(this.getFormElement(), 'input', function () {
             _this.emit('change');
         });
         return this;
@@ -1353,7 +1352,17 @@ var TextType = (function (_super) {
 module.exports = TextType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FieldType":5}],14:[function(require,module,exports){
+},{"../Service/ServiceContainer":14,"./FieldType":5}],14:[function(require,module,exports){
+var HtmlEvents = require('../Util/HtmlEvents');
+var ServiceContainer = (function () {
+    function ServiceContainer() {
+    }
+    ServiceContainer.HtmlEvents = HtmlEvents;
+    return ServiceContainer;
+})();
+module.exports = ServiceContainer;
+
+},{"../Util/HtmlEvents":15}],15:[function(require,module,exports){
 var HtmlEvents = {
     addEventListener: function (element, type, listener, useCapture) {
         element.addEventListener(type, listener, useCapture);
@@ -1361,7 +1370,7 @@ var HtmlEvents = {
 };
 module.exports = HtmlEvents;
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var StringUtil = (function () {
     function StringUtil() {
     }
@@ -1376,7 +1385,7 @@ var StringUtil = (function () {
 })();
 module.exports = StringUtil;
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function (global){
 var Handlebars = (typeof window !== "undefined" ? window.Handlebars : typeof global !== "undefined" ? global.Handlebars : null);
 var PartialWidgetHelper = (function () {
@@ -1401,7 +1410,7 @@ var PartialWidgetHelper = (function () {
 module.exports = PartialWidgetHelper;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 (function (global){
 //ts:ref=node.d.ts
 var AbstractFormType = require('./FormType/AbstractFormType');
@@ -1416,6 +1425,7 @@ var ListType = require('./FormType/ListType');
 var SubmitType = require('./FormType/SubmitType');
 var MultiChoiceType = require('./FormType/MultiChoiceType');
 var CheckboxType = require('./FormType/CheckboxType');
+var ServiceContainer = require('./Service/ServiceContainer');
 var FormTypeExports = {
     AbstractFormType: AbstractFormType,
     GroupType: GroupType,
@@ -1428,11 +1438,12 @@ var FormTypeExports = {
     CheckboxType: CheckboxType,
     LabelType: LabelType,
     ListType: ListType,
-    SubmitType: SubmitType
+    SubmitType: SubmitType,
+    ServiceContainer: ServiceContainer
 };
 global.FormTypes = FormTypeExports;
 module.exports = FormTypeExports;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FormType/AbstractFormType":2,"./FormType/CheckboxType":3,"./FormType/ChoiceType":4,"./FormType/FieldType":5,"./FormType/FormType":6,"./FormType/GroupType":7,"./FormType/LabelType":8,"./FormType/ListType":9,"./FormType/MultiChoiceType":10,"./FormType/OptionType":11,"./FormType/SubmitType":12,"./FormType/TextType":13}]},{},[17])(17)
+},{"./FormType/AbstractFormType":2,"./FormType/CheckboxType":3,"./FormType/ChoiceType":4,"./FormType/FieldType":5,"./FormType/FormType":6,"./FormType/GroupType":7,"./FormType/LabelType":8,"./FormType/ListType":9,"./FormType/MultiChoiceType":10,"./FormType/OptionType":11,"./FormType/SubmitType":12,"./FormType/TextType":13,"./Service/ServiceContainer":14}]},{},[18])(18)
 });

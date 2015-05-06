@@ -20,6 +20,7 @@
 /// <reference path="../../src/Options/MultiChoiceTypeOptionsInterface.ts" />
 /// <reference path="../../src/Options/OptionTypeOptionsInterface.ts" />
 /// <reference path="../../src/Options/SubmitTypeOptionInterface.ts" />
+/// <reference path="../../src/Service/ServiceContainer.ts" />
 /// <reference path="../../src/Util/HtmlEvents.ts" />
 /// <reference path="../../src/Util/HtmlEventsInterface.ts" />
 /// <reference path="../../src/Util/StringUtil.ts" />

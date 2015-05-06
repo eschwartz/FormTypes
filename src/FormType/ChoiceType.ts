@@ -5,6 +5,7 @@
 ///ts:ref=node.d.ts
 /// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 import AbstractFormType = require('./AbstractFormType');
+import ServiceContainer = require('../Service/ServiceContainer');
 import FieldType = require('./FieldType');
 import OptionType = require('./OptionType');
 import ChoiceTypeOptionsInterface = require('../Options/ChoiceTypeOptionsInterface');
@@ -29,10 +30,11 @@ class ChoiceType extends FieldType {
       this.getFormElement().selectedIndex = -1;
     }
 
-    this.getFormElement().
-      addEventListener('change', () => {
+    ServiceContainer.HtmlEvents.
+      addEventListener(this.getFormElement(), 'change', () => {
         this.emit('change');
       });
+
 
     return this;
   }

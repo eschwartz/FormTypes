@@ -16,6 +16,8 @@ import SubmitType = require('../../../src/FormType/SubmitType');
 import GroupType = require('../../../src/FormType/GroupType');
 import FormType = require('../../../src/FormType/FormType');
 import sinon = require('sinon');
+import ServiceContainer = require('../../../src/Service/ServiceContainer');
+
 var jsdom:jsdom = require('mocha-jsdom');
 var JQueryHtmlEvents:HtmlEventsInterface;
 
@@ -28,7 +30,7 @@ describe('SubmitType', () => {
 
   before(() => {
     $ = require('jquery');
-    JQueryHtmlEvents = require('../../Util/JQueryHtmlEvents');
+    ServiceContainer.HtmlEvents = JQueryHtmlEvents = require('../../Util/JQueryHtmlEvents');
   });
 
   describe('render', () => {

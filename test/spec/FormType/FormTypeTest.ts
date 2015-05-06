@@ -13,6 +13,7 @@ import assert = require('assert');
 import FormType = require('../../../src/FormType/FormType');
 import TextType = require('../../../src/FormType/TextType');
 import ChoiceType = require('../../../src/FormType/ChoiceType');
+import ServiceContainer = require('../../../src/Service/ServiceContainer');
 import _ = require('underscore');
 import DomEvents = require('../../Util/DomEvents');
 import sinon = require('sinon');
@@ -28,7 +29,7 @@ describe('FormType', () => {
 
   before(() => {
     $ = require('jquery');
-    JQueryHtmlEvents = require('../../Util/JQueryHtmlEvents');
+    ServiceContainer.HtmlEvents = JQueryHtmlEvents = require('../../Util/JQueryHtmlEvents');
   });
 
   describe('render', () => {
@@ -80,7 +81,6 @@ describe('FormType', () => {
       var onSubmit = sinon.spy();
       var $form:JQuery;
       var formType = new FormType();
-      formType.setHtmlEvents(JQueryHtmlEvents);
 
       formType.render();
       $form = $(formType.el);

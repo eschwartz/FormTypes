@@ -3,6 +3,7 @@
 ///ts:ref=node.d.ts
 /// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 import FieldType = require('./FieldType');
+import ServiceContainer = require('../Service/ServiceContainer');
 import FieldTypeOptionsInterface = require('../Options/FieldTypeOptionsInterface');
 import _ = require('underscore');
 import fs = require('fs');
@@ -13,8 +14,8 @@ class TextType extends FieldType {
     super.render();
 
     // Trigger change on 'input' events.
-    this.getFormElement()
-      .addEventListener('input', () => {
+    ServiceContainer.HtmlEvents.
+      addEventListener(this.getFormElement(), 'input', () => {
         this.emit('change');
       });
 

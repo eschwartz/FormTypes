@@ -9,14 +9,14 @@ import _ = require('underscore');
 import FormTypeOptionsInterface = require('../Options/FormTypeOptionsInterface');
 import Handlebars = require('Handlebars');
 import fs = require('fs');
-import AbstractFormType = require('./AbstractFormType');
+import ServiceContainer = require('../Service/ServiceContainer');
 
 class FormType extends GroupType {
 
   public render() {
     super.render();
 
-    this.HtmlEvents.
+    ServiceContainer.HtmlEvents.
       addEventListener(this.getFormElement(), 'submit', () => this.emit('submit'));
 
     return this;
