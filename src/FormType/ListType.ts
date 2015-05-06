@@ -20,11 +20,9 @@ class ListType extends FieldType {
   protected itemTypeOptions:any;
   protected itemTemplate:TemplateInterface;
   protected itemContainerSelector:string;
-  protected itemElements:HTMLElement[] = [];
 
   public constructor(options?:ListTypeOptionsInterface) {
     super(options);
-    this.itemElements = [];
   }
 
   public setDefaultOptions(options:ListTypeOptionsInterface):ListTypeOptionsInterface {
@@ -92,20 +90,13 @@ class ListType extends FieldType {
   protected addChildElement(childType:AbstractFormType) {
     var itemEl = this.renderItem(childType);
 
-    this.itemElements.push(itemEl);
-
     this.getFormElement().
       appendChild(itemEl);
-  }
 
-  protected removeChildElement(childType:AbstractFormType) {
-    // find the matching item element
-    var childIndex = this.children.indexOf(childType);
-    var itemEl = this.itemElements[childIndex];
-
-    itemEl.parentElement.removeChild(itemEl);
-
-    this.itemElements.splice(childIndex, 1);
+    // Remove the item element when the child closes
+    childType.on('close', () => {
+      this.getFormElement().removeChild(itemEl);
+    }, this.listenerId);
   }
 
   protected renderItem(childType:AbstractFormType):HTMLElement {

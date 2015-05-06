@@ -256,24 +256,6 @@ describe('ListType', () => {
       assert.equal($inputs.eq(0).val(), 'bar');
     });
 
-    it('should remove the child object', () => {
-      var fooChild:AbstractFormType;
-      var listType = new ListType({
-        ItemType: TextType,
-        data: [
-          'foo',
-          'bar'
-        ]
-      });
-      listType.render();
-
-      fooChild = listType.getChildren()[0];
-      fooChild.close();
-
-      assert.equal(listType.getChildren().length, 1);
-      assert.equal(listType.getChildren()[0].getData(), 'bar');
-    });
-
   });
 
 });

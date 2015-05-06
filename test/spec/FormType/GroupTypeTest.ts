@@ -71,6 +71,61 @@ describe('GroupType', () => {
 
   });
 
+  describe('removeChild', () => {
+
+    it('should remove a child element from the dom', () => {
+      var child:TextType;
+      var groupType = new GroupType({
+        children: [
+          child = new TextType({
+            name: 'fooInput',
+            data: 'foo'
+          })
+        ]
+      });
+
+      groupType.render();
+
+      assert.equal($(groupType.el).find(child.el).length, 1, 'Child should have a parent element (baseline)');
+
+      groupType.removeChild(child);
+
+      assert.equal($(groupType.el).find(child.el).length, 0, 'Child should not have a parent element');
+    });
+
+    it('should not complain if the GroupType is not rendered', () => {
+      var child:TextType;
+      var groupType = new GroupType({
+        children: [
+          child = new TextType({
+            name: 'fooInput',
+            data: 'foo'
+          })
+        ]
+      });
+
+      groupType.removeChild(child);
+    });
+
+    it('should not complain if the child element was closed independently', () => {
+      var child:TextType;
+      var groupType = new GroupType({
+        children: [
+          child = new TextType({
+            name: 'fooInput',
+            data: 'foo'
+          })
+        ]
+      });
+
+      groupType.render();
+
+      child.close();
+
+      groupType.removeChild(child);
+    });
+
+  });
 
   describe('getData', () => {
 

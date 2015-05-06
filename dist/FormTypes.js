@@ -366,11 +366,13 @@ var AbstractFormType = (function () {
     };
     AbstractFormType.prototype.close = function () {
         this.children.forEach(function (child) { return child.close(); });
-        this.el.parentElement.removeChild(this.el);
-        this.removeAllListenersById(this.listenerId);
+        if (this.el && this.el.parentElement) {
+            this.el.parentElement.removeChild(this.el);
+        }
         this.isRenderedFlag = false;
         this.el = null;
         this.emit('close', this);
+        this.removeAllListeners();
     };
     AbstractFormType.prototype.setTemplate = function (template) {
         this.template = template;
@@ -412,12 +414,11 @@ var AbstractFormType = (function () {
             _this.emit('change');
             _this.emit('change:' + child.getName());
         }, this.listenerId);
-        child.on('close', function () { return _this.removeChild(child); });
         child.on('all', function (evt) {
             var isChildEvent = evt.type.indexOf('child:') === 0;
             var proxyEventType = isChildEvent ? evt.type : 'child:' + evt.type;
             _this.emit(proxyEventType, evt);
-        });
+        }, this.listenerId);
         if (this.isRendered()) {
             // Render child, if necessary
             if (!child.isRendered()) {
@@ -427,8 +428,7 @@ var AbstractFormType = (function () {
         }
     };
     AbstractFormType.prototype.removeChild = function (child) {
-        this.removeChildElement(child);
-        child.removeAllListenersById(this.listenerId);
+        child.close();
         this.children = _.without(this.children, child);
     };
     AbstractFormType.prototype.removeChildByName = function (name) {
@@ -445,14 +445,6 @@ var AbstractFormType = (function () {
     };
     AbstractFormType.prototype.addChildElement = function (childType) {
         this.el.appendChild(childType.el);
-    };
-    /**
-     * Remove a childType's element from parent form's element
-     */
-    AbstractFormType.prototype.removeChildElement = function (child) {
-        if (child.el) {
-            child.el.parentElement.removeChild(child.el);
-        }
     };
     AbstractFormType.prototype.getName = function () {
         return this.options.name;
@@ -978,8 +970,6 @@ var ListType = (function (_super) {
     __extends(ListType, _super);
     function ListType(options) {
         _super.call(this, options);
-        this.itemElements = [];
-        this.itemElements = [];
     }
     ListType.prototype.setDefaultOptions = function (options) {
         var internalOptions;
@@ -1030,16 +1020,13 @@ var ListType = (function (_super) {
         });
     };
     ListType.prototype.addChildElement = function (childType) {
+        var _this = this;
         var itemEl = this.renderItem(childType);
-        this.itemElements.push(itemEl);
         this.getFormElement().appendChild(itemEl);
-    };
-    ListType.prototype.removeChildElement = function (childType) {
-        // find the matching item element
-        var childIndex = this.children.indexOf(childType);
-        var itemEl = this.itemElements[childIndex];
-        itemEl.parentElement.removeChild(itemEl);
-        this.itemElements.splice(childIndex, 1);
+        // Remove the item element when the child closes
+        childType.on('close', function () {
+            _this.getFormElement().removeChild(itemEl);
+        }, this.listenerId);
     };
     ListType.prototype.renderItem = function (childType) {
         var itemContainerHtml = this.itemTemplate({

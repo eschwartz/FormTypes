@@ -97,14 +97,16 @@ class AbstractFormType {
   public close() {
     this.children.forEach((child:AbstractFormType) => child.close());
 
-    this.el.parentElement.removeChild(this.el);
-
-    this.removeAllListenersById(this.listenerId);
+    if (this.el && this.el.parentElement) {
+      this.el.parentElement.removeChild(this.el);
+    }
 
     this.isRenderedFlag = false;
     this.el = null;
 
     this.emit('close', this);
+
+    this.removeAllListeners();
   }
 
   public setTemplate(template:TemplateInterface) {
@@ -158,14 +160,12 @@ class AbstractFormType {
       this.emit('change:' + child.getName());
     }, this.listenerId);
 
-    child.on('close', () => this.removeChild(child));
-
     child.on('all', (evt:AllEvent) => {
       var isChildEvent = evt.type.indexOf('child:') === 0;
       var proxyEventType = isChildEvent ? evt.type : 'child:' + evt.type;
 
       this.emit(proxyEventType, evt);
-    });
+    }, this.listenerId);
 
     if (this.isRendered()) {
       // Render child, if necessary
@@ -177,9 +177,7 @@ class AbstractFormType {
   }
 
   public removeChild(child:AbstractFormType) {
-    this.removeChildElement(child);
-
-    child.removeAllListenersById(this.listenerId);
+    child.close();
 
     this.children = _.without(this.children, child);
   }
@@ -202,15 +200,6 @@ class AbstractFormType {
 
   protected addChildElement(childType:AbstractFormType) {
     this.el.appendChild(childType.el);
-  }
-
-  /**
-   * Remove a childType's element from parent form's element
-   */
-  protected removeChildElement(child:AbstractFormType) {
-    if (child.el) {
-      child.el.parentElement.removeChild(child.el);
-    }
   }
 
   public getName():string {
