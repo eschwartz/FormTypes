@@ -18,7 +18,6 @@ import _ = require('underscore');
 import DomEvents = require('../../Util/DomEvents');
 import sinon = require('sinon');
 var jsdom:jsdom = require('mocha-jsdom');
-var JQueryHtmlEvents:HtmlEventsInterface;
 
 describe('FormType', () => {
   var $:JQueryStatic;
@@ -29,7 +28,7 @@ describe('FormType', () => {
 
   before(() => {
     $ = require('jquery');
-    ServiceContainer.HtmlEvents = JQueryHtmlEvents = require('../../Util/JQueryHtmlEvents');
+    ServiceContainer.HtmlEvents = require('../../Util/JQueryHtmlEvents');
   });
 
   describe('render', () => {

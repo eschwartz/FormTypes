@@ -19,7 +19,6 @@ import sinon = require('sinon');
 import ServiceContainer = require('../../../src/Service/ServiceContainer');
 
 var jsdom:jsdom = require('mocha-jsdom');
-var JQueryHtmlEvents:HtmlEventsInterface;
 
 describe('SubmitType', () => {
   var $:JQueryStatic;
@@ -30,7 +29,7 @@ describe('SubmitType', () => {
 
   before(() => {
     $ = require('jquery');
-    ServiceContainer.HtmlEvents = JQueryHtmlEvents = require('../../Util/JQueryHtmlEvents');
+    ServiceContainer.HtmlEvents = require('../../Util/JQueryHtmlEvents');
   });
 
   describe('render', () => {

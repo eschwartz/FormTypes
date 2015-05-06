@@ -8,6 +8,7 @@
 /// <reference path="../../../typings/generated/sinon/sinon.d.ts"/> ///ts:ref:generated
 import assert = require('assert');
 import MultiChoiceType = require('../../../src/FormType/MultiChoiceType');
+import ServiceContainer = require('../../../src/Service/ServiceContainer');
 import sinon = require('sinon');
 import DomEvents = require('../../Util/DomEvents');
 import _ = require('underscore');
@@ -22,6 +23,7 @@ describe('MultiChoiceType', () => {
 
   before(() => {
     $ = require('jquery');
+    ServiceContainer.HtmlEvents = require('../../Util/JQueryHtmlEvents');
   });
 
   describe('render', () => {
@@ -382,6 +384,59 @@ describe('MultiChoiceType', () => {
 
       assert.equal($checkboxes.filter('[value=pa]').length, 1);
       assert.equal($checkboxes.filter('[value=qa]').length, 1);
+    });
+
+  });
+
+  describe('events', () => {
+
+    it('should fire a change event when a checkbox is checked', () => {
+      var onChange = sinon.spy();
+      var onChangeUs = sinon.spy();
+      var $checkboxes:JQuery;
+      var multiChoiceType = new MultiChoiceType({
+        choices: {
+          us: 'United States',
+          ca: 'Canada'
+        }
+      });
+
+      multiChoiceType.render();
+      $checkboxes = $(multiChoiceType.el).find('input[type=checkbox]');
+
+      multiChoiceType.on('change', onChange);
+      multiChoiceType.on('change:us', onChangeUs);
+
+      $checkboxes.filter('[name=us]').click().trigger('change');
+      assert($checkboxes.filter('[name=us]').is(':checked'), 'just making sure the US checkbox is checked...');
+
+      assert(onChange.called, 'Should have triggered change event');
+      assert(onChangeUs.called, 'Should have triggered change:us event');
+    });
+
+    it('should fire a change event when a checkbox is unchecked', () => {
+      var onChange = sinon.spy();
+      var onChangeUs = sinon.spy();
+      var $checkboxes:JQuery;
+      var multiChoiceType = new MultiChoiceType({
+        choices: {
+          us: 'United States',
+          ca: 'Canada'
+        },
+        data: ['us']
+      });
+
+      multiChoiceType.render();
+      $checkboxes = $(multiChoiceType.el).find('input[type=checkbox]');
+
+      multiChoiceType.on('change', onChange);
+      multiChoiceType.on('change:us', onChangeUs);
+
+      $checkboxes.filter('[name=us]').click().trigger('change');
+      assert(!$checkboxes.filter('[name=us]').is(':checked'), 'just making sure the US checkbox is not checked...');
+
+      assert(onChange.called, 'Should have triggered change event');
+      assert(onChangeUs.called, 'Should have triggered change:us event');
     });
 
   });
