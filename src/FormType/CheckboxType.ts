@@ -46,7 +46,6 @@ class CheckboxType extends FieldType {
     ServiceContainer.HtmlEvents.
       addEventListener(this.getFormElement(), 'change', () => {
         this.setData(!!this.getFormElement().checked);
-        this.emit('change');
       });
 
     return this;

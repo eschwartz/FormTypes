@@ -22,10 +22,7 @@ class ChoiceType extends FieldType {
 
     ServiceContainer.HtmlEvents.
       addEventListener(this.getFormElement(), 'change', () => {
-        this.setState({
-          selected: this.getFormElement().value
-        });
-        this.emit('change');
+        this.setData(this.getFormElement().value);
       });
 
 

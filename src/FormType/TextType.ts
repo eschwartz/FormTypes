@@ -17,7 +17,6 @@ class TextType extends FieldType {
     ServiceContainer.HtmlEvents.
       addEventListener(this.getFormElement(), 'input', () => {
         this.setData(this.getFormElement().value);
-        this.emit('change');
       });
 
     return this;
@@ -28,6 +27,7 @@ class TextType extends FieldType {
   }
 
   protected update(changedState) {
+    super.update(changedState);
     if ('value' in changedState) {
       this.getFormElement().value = changedState.value;
     }

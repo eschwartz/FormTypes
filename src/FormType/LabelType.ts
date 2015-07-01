@@ -23,6 +23,7 @@ class LabelType extends AbstractFormType {
   }
 
   public update(state) {
+    super.update(state);
     if ('label' in state) {
       this.getFormElement().textContent = state.label;
     }

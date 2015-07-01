@@ -9,7 +9,6 @@
 import assert = require('assert');
 import TextType = require('../../../src/FormType/TextType');
 import sinon = require('sinon');
-import DomEvents = require('../../Util/DomEvents');
 var jsdom:jsdom = require('mocha-jsdom');
 
 describe('TextType', () => {
@@ -227,17 +226,14 @@ describe('TextType', () => {
     it('should fire after the input\'s value has changed', (done) => {
       var onChange = sinon.spy();
       var textType = new TextType();
-      var input:HTMLInputElement;
 
-      input = <HTMLInputElement>textType.getFormElement();
 
       textType.on('change', () => {
-        assert.equal(input.value, 'foo');
         onChange();
         done();
       });
 
-      DomEvents.dispatchInputEvent(input, 'foo');
+      $(textType.getFormElement()).val('foo').trigger('input');
     });
 
   });

@@ -6,10 +6,10 @@
 /// <reference path="../../../typings/generated/jquery/jquery.d.ts"/> ///ts:ref:generated
 ///ts:ref=sinon.d.ts
 /// <reference path="../../../typings/generated/sinon/sinon.d.ts"/> ///ts:ref:generated
+import ServiceContainer = require('../../../src/Service/ServiceContainer');
 import assert = require('assert');
 import ChoiceType = require('../../../src/FormType/ChoiceType');
 import sinon = require('sinon');
-import DomEvents = require('../../Util/DomEvents');
 var jsdom:jsdom = require('mocha-jsdom');
 
 describe('ChoiceType', () => {
@@ -21,6 +21,7 @@ describe('ChoiceType', () => {
 
   before(() => {
     $ = require('jquery');
+    ServiceContainer.HtmlEvents = require('../../Util/JQueryHtmlEvents');
   });
 
   describe('init', () => {
@@ -274,7 +275,6 @@ describe('ChoiceType', () => {
   describe('change event', () => {
 
     it('should fire when the select input\'s value changes', (done) => {
-      var select:HTMLSelectElement;
       var onChange = sinon.spy();
       var choiceType = new ChoiceType({
         choices: {
@@ -285,15 +285,12 @@ describe('ChoiceType', () => {
         data: 'us'
       });
 
-      select = <HTMLSelectElement>choiceType.getFormElement();
-
       choiceType.on('change', () => {
-        assert.equal(select.value, 'fr');
         onChange();
         done();
       });
 
-      DomEvents.dispatchChangeEvent(select, 'fr');
+      $(choiceType.getFormElement()).val('fr').trigger('change');
     });
 
   });

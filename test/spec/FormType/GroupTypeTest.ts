@@ -12,13 +12,58 @@ import assert = require('assert');
 import GroupType = require('../../../src/FormType/GroupType');
 import TextType = require('../../../src/FormType/TextType');
 import ChoiceType = require('../../../src/FormType/ChoiceType');
+import FormErrorsInterface = require('../../../src/FormType/FormErrorsInterface');
 import _ = require('underscore');
 import DomEvents = require('../../Util/DomEvents');
 import sinon = require('sinon');
 var jsdom:jsdom = require('mocha-jsdom');
+var $:JQueryStatic;
+
+class GroupTypeView {
+  protected groupType:GroupType;
+
+  constructor(groupType:GroupType) {
+    this.groupType = groupType;
+  }
+
+  get $el() {
+    return $(this.groupType.el);
+  }
+
+  get $errorList() {
+    return this.$el.children('.errors');
+  }
+
+  get $allErrorLists() {
+    return this.$el.find('.errors');
+  }
+
+  get $formErrors() {
+    return this.$errorList.children();
+  }
+
+  get $allErrors() {
+    return this.$el.find('.errors > *');
+  }
+
+  get $label() {
+    return this.$el.children('label');
+  }
+
+  get $fields() {
+    return this.$el.children().not(this.$errorList).not(this.$label);
+  }
+
+  get $fieldErrors() {
+    return this.$fields.find('.errors').children();
+  }
+
+  $errorsForField(index) {
+    return this.$fields.eq(index).find(this.$fieldErrors);
+  }
+}
 
 describe('GroupType', () => {
-  var $:JQueryStatic;
 
   if (typeof window === 'undefined') {
     jsdom();
@@ -32,13 +77,12 @@ describe('GroupType', () => {
 
     it('should render an empty HTML div element', () => {
       var groupType = new GroupType();
-      var $group:JQuery;
+      var view = new GroupTypeView(groupType);
 
       groupType.render();
-      $group = $(groupType.el);
 
-      assert.equal($group.prop('tagName').toLowerCase(), 'div', 'Expected div element to exist');
-      assert.equal($group.children().length, 0, 'Expected group to have no children');
+      assert.equal(view.$el.prop('tagName').toLowerCase(), 'div', 'Expected div element to exist');
+      assert.equal(view.$fields.length, 0, 'Expected group to have no child fields');
     });
 
     it('should render child form types', () => {
@@ -71,42 +115,48 @@ describe('GroupType', () => {
 
   });
 
-  describe('setErrors', function() {
+  describe('setErrors', function () {
 
-    it('should render form errors (called before render)', function() {
-      var $errors:JQuery;
+    it('should render form errors', function () {
       var groupType = new GroupType();
-      
-      groupType.setErrors({
-        form: ['form error A', 'form error B']
-      });
-      
-      groupType.render();
-
-      $errors = $(groupType.el).find('.error');
-      assert.equal($errors.length, 2, 'Should render 2 errors');
-      assert.equal($errors.eq(0).text(), 'form error A', 'Should render the error text (1)');
-      assert.equal($errors.eq(1).text(), 'form error B', 'Should render the error text (2)');
-    });
-
-    it('should render form errors (called after render)', function() {
-      var $errors:JQuery;
-      var groupType = new GroupType();
-
-      groupType.render();
+      var view = new GroupTypeView(groupType);
 
       groupType.setErrors({
         form: ['form error A', 'form error B']
       });
 
-      $errors = $(groupType.el).find('.error');
-      assert.equal($errors.length, 2, 'Should render 2 errors');
-      assert.equal($errors.eq(0).text(), 'form error A', 'Should render the error text (1)');
-      assert.equal($errors.eq(1).text(), 'form error B', 'Should render the error text (2)');
+      assert.equal(view.$formErrors.length, 2, 'Should render 2 errors');
+      assert.equal(view.$formErrors.eq(0).text(), 'form error A', 'Should render the error text (1)');
+      assert.equal(view.$formErrors.eq(1).text(), 'form error B', 'Should render the error text (2)');
     });
 
-    it('should render field errors', function() {
-      var $fields:JQuery;
+    it('should un-hide the errors container view', function () {
+      var groupType = new GroupType();
+      var view = new GroupTypeView(groupType);
+
+      groupType.setErrors({
+        form: ['form error A', 'form error B']
+      });
+
+      assert.equal(view.$errorList.css('display'), '');
+    });
+
+    it('should re-render form errors', function () {
+      var groupType = new GroupType();
+      var view = new GroupTypeView(groupType);
+
+      groupType.setErrors({
+        form: ['form error A', 'form error B']
+      });
+
+      groupType.render();
+
+      assert.equal(view.$formErrors.length, 2, 'Should render 2 errors');
+      assert.equal(view.$formErrors.eq(0).text(), 'form error A', 'Should render the error text (1)');
+      assert.equal(view.$formErrors.eq(1).text(), 'form error B', 'Should render the error text (2)');
+    });
+
+    it('should render field errors', function () {
       var groupType = new GroupType({
         children: [
           new TextType({
@@ -117,7 +167,7 @@ describe('GroupType', () => {
           })
         ]
       });
-      groupType.render();
+      var view = new GroupTypeView(groupType);
 
       groupType.setErrors({
         fields: {
@@ -130,13 +180,11 @@ describe('GroupType', () => {
         }
       });
 
-      $fields = $(groupType.el).children();
-      assert.equal($fields.eq(0).find('.error').text(), 'foo is no good');
-      assert.equal($fields.eq(1).find('.error').text(), 'bar is not great either');
+      assert.equal(view.$errorsForField(0).text(), 'foo is no good');
+      assert.equal(view.$errorsForField(1).text(), 'bar is not great either');
     });
 
-    it('should render nested errors', function() {
-      var $nestedGroup:JQuery, $nestedField:JQuery;
+    it('should render nested errors', function () {
       var groupType = new GroupType({
         children: [
           new GroupType({
@@ -149,28 +197,26 @@ describe('GroupType', () => {
           })
         ]
       });
-      groupType.render();
+      var nestedView = new GroupTypeView(<GroupType>groupType.getChild('nestedGroup'));
 
       groupType.setErrors({
-        nestedGroup: {
-          form: ['error for nestedGroup'],
-          fields: {
-            nestedField: {
-              form: ['error for nestedField']
+        fields: {
+          nestedGroup: {
+            form: ['error for nestedGroup'],
+            fields: {
+              nestedField: {
+                form: ['error for nestedField']
+              }
             }
           }
         }
       });
 
-      $nestedGroup = $(groupType.el).children();
-      $nestedField = $nestedGroup.children();
-
-      assert.equal($nestedGroup.children('.error').text(), 'error for nestedGroup');
-      assert.equal($nestedField.children('.error').text(), 'error for nestedField');
+      assert.equal(nestedView.$formErrors.text(), 'error for nestedGroup');
+      assert.equal(nestedView.$fieldErrors.text(), 'error for nestedField');
     });
 
-    it('should override existing field errors', function() {
-      var $fields:JQuery;
+    it('should override existing field errors', function () {
       var groupType = new GroupType({
         children: [
           new TextType({
@@ -181,7 +227,7 @@ describe('GroupType', () => {
           })
         ]
       });
-      groupType.render();
+      var view = new GroupTypeView(groupType);
 
       groupType.setErrors({
         form: ['form error A', 'form error B'],
@@ -204,23 +250,149 @@ describe('GroupType', () => {
         }
       });
 
-      $fields = $(groupType.el).children();
 
-      assert.equal($(groupType.el).children('.error').text(), 'changed form error', 'Should update the form error');
-      assert.equal($fields.find('.error').length, 1, 'Should remove old errors');
-      assert.equal($fields.find('.error').text(), 'changed fooInput error');
+      assert.equal(view.$formErrors.text(), 'changed form error', 'Should update the form error');
+      assert.equal(view.$fieldErrors.length, 1, 'Should remove old errors');
+      assert.equal(view.$fieldErrors.text(), 'changed fooInput error');
     });
 
   });
 
-  describe('clearErrors', function() {
+  describe('clearErrors', function () {
 
-    it('should remove all form errors', function() {
-      console.warn('Spec not yet defined');
+    it('should remove all form errors', function () {
+      var groupType = new GroupType({
+        children: [
+          new TextType({
+            name: 'formField'
+          }),
+          new GroupType({
+            name: 'nestedGroup',
+            children: [
+              new TextType({
+                name: 'nestedField'
+              })
+            ]
+          })
+        ],
+        errors: {
+          form: ['form error'],
+          fields: {
+            formField: {
+              form: ['formField error']
+            },
+            nestedGroup: {
+              form: ['nestedGroup error'],
+              fields: {
+                nestedField: {
+                  form: ['nestedField error']
+                }
+              }
+            }
+          }
+        }
+      });
+      var view = new GroupTypeView(groupType);
+
+      assert.equal(view.$allErrors.length, 4, 'baseline test');
+
+      groupType.clearErrors();
+
+      assert.equal(view.$allErrors.length, 0);
+      assert(view.$allErrorLists.toArray().every(el => el.style.display === 'none'),
+        'Should hide all error lists');
     });
 
-    it('should remove all field errors', function() {
-      console.warn('Spec not yet defined');
+  });
+
+  describe('getErrors', function () {
+
+    it('should return form errors', function () {
+      var errors:FormErrorsInterface = {
+        form: ['form error'],
+        fields: {
+          formField: {
+            form: ['formField error']
+          },
+          nestedGroup: {
+            form: ['nestedGroup error'],
+            fields: {
+              nestedField: {
+                form: ['nestedField error']
+              }
+            }
+          }
+        }
+      };
+      var groupType = new GroupType({
+        children: [
+          new TextType({
+            name: 'formField'
+          }),
+          new GroupType({
+            name: 'nestedGroup',
+            children: [
+              new TextType({
+                name: 'nestedField'
+              })
+            ]
+          })
+        ],
+        errors: errors
+      });
+
+      assert.equal(JSON.stringify(groupType.getErrors()), JSON.stringify(errors))
+    });
+
+  });
+
+  describe('hasErrors', function () {
+
+    it('should return true if the form has form errors', function() {
+      var groupType = new GroupType({
+        children: [
+          new TextType({
+            name: 'formField'
+          })
+        ],
+        errors: {
+          form: ['formError']
+        }
+      });
+
+      assert(groupType.hasErrors());
+    });
+
+    it('should return true if the form has field errors', function() {
+      var groupType = new GroupType({
+        children: [
+          new TextType({
+            name: 'formField'
+          })
+        ],
+        errors: {
+          fields: {
+            formField: {
+              form: ['formField error']
+            }
+          }
+        }
+      });
+
+      assert(groupType.hasErrors());
+    });
+
+    it('should return false if the form does not have errors', function() {
+      var groupType = new GroupType({
+        children: [
+          new TextType({
+            name: 'formField'
+          })
+        ],
+        errors: {}
+      });
+
+      assert(!groupType.hasErrors());
     });
 
   });
@@ -313,14 +485,14 @@ describe('GroupType', () => {
 
     describe('after render', () => {
 
-      it('should return an empty object, if there are no child types', function() {
+      it('should return an empty object, if there are no child types', function () {
         var groupType = new GroupType();
         groupType.render();
 
         assert(_.isEqual(groupType.getData(), {}));
       });
 
-      it('should return a hash of all the child type values, by type name', function() {
+      it('should return a hash of all the child type values, by type name', function () {
         var groupType = new GroupType({
           children: [
             new TextType({
@@ -345,7 +517,7 @@ describe('GroupType', () => {
         }));
       });
 
-      it('should reflect changes to child type form elements', function() {
+      it('should reflect changes to child type form elements', function () {
         var $group:JQuery, $input:JQuery, $select:JQuery;
         var groupType = new GroupType({
           children: [
@@ -377,7 +549,7 @@ describe('GroupType', () => {
         }));
       });
 
-      it('should get data for nested GroupType children', function() {
+      it('should get data for nested GroupType children', function () {
         var groupType = new GroupType({
           children: [
             new TextType({
@@ -482,7 +654,6 @@ describe('GroupType', () => {
 
     it('should fire when any child type changes', (done) => {
       var onChange = sinon.spy();
-      var input:HTMLInputElement;
       var groupType = new GroupType({
         children: [
           new TextType({
@@ -490,9 +661,6 @@ describe('GroupType', () => {
           })
         ]
       });
-      groupType.render();
-
-      input = groupType.el.getElementsByTagName('input').item(0);
 
       groupType.on('change', () => {
         assert.equal(groupType.getData()['fullName'], 'Bob the Bob');
@@ -500,7 +668,10 @@ describe('GroupType', () => {
         done();
       });
 
-      DomEvents.dispatchInputEvent(input, 'Bob the Bob');
+      $(groupType.el).find('input').
+        val('Bob the Bob').
+        trigger('input');
+
       assert(onChange.called);
     });
 
@@ -533,5 +704,5 @@ describe('GroupType', () => {
     });
 
   });
-  
+
 });

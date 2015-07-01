@@ -17,7 +17,17 @@ class GroupType extends AbstractFormType {
     _.defaults(options, {
       type: 'group',
       tagName: 'div',
-      template: this.Handlebars.compile('{{>field_widget}}')
+      template: this.Handlebars.compile('\
+        <div>\
+          {{#if form.label}}\
+            <label {{>html_attrs form.labelAttrs}}>\
+              {{form.label}}\
+            </label>\
+          {{/if}}\
+          \
+          <ul class="errors" style="display:none"></ul>\
+        </div>\
+      ')
     });
 
     return super.setDefaultOptions(options);

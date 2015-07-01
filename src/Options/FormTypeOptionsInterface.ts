@@ -2,6 +2,7 @@
 /// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
 import AbstractFormType = require('../FormType/AbstractFormType');
 import TemplateInterface = require('../View/Template/TemplateInterface');
+import FormErrorsInterface = require('../FormType/FormErrorsInterface');
 interface FormTypeOptionsInterface extends _.Dictionary<any> {
   type?:string;
 
@@ -30,6 +31,8 @@ interface FormTypeOptionsInterface extends _.Dictionary<any> {
   data?:any;
 
   template?:TemplateInterface;
+
+  errors?:FormErrorsInterface;
 }
 
 export = FormTypeOptionsInterface;

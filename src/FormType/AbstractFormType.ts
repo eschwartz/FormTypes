@@ -5,6 +5,7 @@
 ///ts:ref=handlebars.ext.d.ts
 /// <reference path="../../typings/handlebars/handlebars.ext.d.ts"/> ///ts:ref:generated
 import FormTypeOptionsInterface = require('../Options/FormTypeOptionsInterface');
+import FormErrorsInterface = require('./FormErrorsInterface');
 import _ = require('underscore');
 import fs = require('fs');
 import Handlebars = require('Handlebars');
@@ -47,6 +48,7 @@ class AbstractFormType {
     this.render();
 
     this.options.children.forEach(child => this.addChild(child));
+    this.setErrors(this.options.errors);
 
     if ('data' in this.options) {
       this.setData(this.options.data);
@@ -64,7 +66,8 @@ class AbstractFormType {
       type: 'form_type',
       name: _.uniqueId('form_'),
       attrs: {},
-      children: []
+      children: [],
+      errors: {}
     };
 
     _.defaults(options, defaults);
@@ -90,9 +93,40 @@ class AbstractFormType {
     return this;
   }
 
-  /* abstract */ protected update(changedState) {
-    // Update the view when the state has changed.
-    // Should be overrided by FormType implementations
+  /**
+   * Update the view, in response
+   * to changes in the state.
+   *
+   * @param changedState
+   */
+  protected update(changedState) {
+    if ('errors' in changedState) {
+      this.renderErrors(changedState.errors);
+    }
+  }
+
+  /** Render a list of errors into the form view. */
+  protected renderErrors(errors:string[]) {
+    var errorsListView = <HTMLElement>this.el.getElementsByClassName('errors').item(0);
+    var errorTemplate = Handlebars.compile('<li>{{this}}</li>');
+
+    if (!errorsListView) {
+      return;
+    }
+
+    errorsListView.innerHTML = '';
+
+    if (!errors.length) {
+      errorsListView.style.display = 'none';
+      return;
+    }
+
+
+    errors.
+      map(err => this.createElementFromString(errorTemplate(err))).
+      forEach(errView => errorsListView.appendChild(errView));
+
+    errorsListView.style.display = '';
   }
 
   public close() {
@@ -247,6 +281,40 @@ class AbstractFormType {
    */
   public hasData():boolean {
     return true;
+  }
+
+  public setErrors(errors:FormErrorsInterface) {
+    _.defaults(errors, {
+      form: [],
+      fields: {}
+    });
+    this.setState({
+      errors: errors.form
+    });
+
+    this.children.forEach(child => {
+      var errorsForChild = errors.fields[child.getName()] || {};
+      child.setErrors(errorsForChild);
+    });
+  }
+
+  public clearErrors() {
+    this.setErrors({});
+  }
+
+  public getErrors():FormErrorsInterface {
+    return {
+      form: _.clone(this.state.errors),
+      fields: <_.Dictionary<FormErrorsInterface>>this.children.reduce((fieldErrors, child) => {
+        fieldErrors[child.getName()] = child.getErrors();
+        return fieldErrors;
+      }, {})
+    };
+  }
+
+  public hasErrors():boolean {
+    return this.state.errors.length > 0 ||
+        this.children.some(child => child.hasErrors());
   }
 
   public on(event:string, listener:Function, listenerId?:string) {
