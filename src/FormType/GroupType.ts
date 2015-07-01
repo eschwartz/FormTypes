@@ -17,12 +17,10 @@ class GroupType extends AbstractFormType {
     _.defaults(options, {
       type: 'group',
       tagName: 'div',
-      template: this.Handlebars.compile(
-        fs.readFileSync(__dirname + '/../View/form/field_widget.html.hbs', 'utf8')
-      )
+      template: this.Handlebars.compile('{{>field_widget}}')
     });
 
-    return options;
+    return super.setDefaultOptions(options);
   }
 
   public getData():_.Dictionary<any> {

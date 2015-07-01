@@ -8,6 +8,7 @@ import FieldType = require('./FieldType');
 import ServiceContainer = require('../Service/ServiceContainer');
 import CheckboxTypeOptions = require('../Options/CheckboxTypeOptionsInterface');
 import StringUtil = require('../Util/StringUtil');
+import whenIn = require('../Util/whenIn');
 import fs = require('fs');
 import _ = require('underscore');
 
@@ -18,20 +19,23 @@ class CheckboxType extends FieldType {
     _.defaults(options, {
       tagName: 'input',
       type: 'checkbox',
-      data: '',
-      label: StringUtil.camelCaseToWords(options.data || ''),
-      template: this.Handlebars.compile(
-       fs.readFileSync(__dirname + '/../View/form/checkbox_widget.html.hbs', 'utf8')
-      )
+      data: false,
+      label: StringUtil.camelCaseToWords(options.name || ''),
+      template: this.Handlebars.compile('\
+        {{#if form.label}}\
+          <label {{>html_attrs form.labelAttrs}}>\
+            {{>simple_widget this}} {{form.label}}\
+          </label>\
+        {{else}}\
+          {{>simple_widget this}}\
+        {{/if}}\
+      ')
     });
 
     options = super.setDefaultOptions(options);
 
     options.attrs['type'] = 'checkbox';
-    options.attrs['value'] = options.data;
-    if (options.checked) {
-      options.attrs['checked'] = true;
-    }
+    options.attrs['value'] = options.name;
 
     return options;
   }
@@ -41,71 +45,67 @@ class CheckboxType extends FieldType {
 
     ServiceContainer.HtmlEvents.
       addEventListener(this.getFormElement(), 'change', () => {
+        this.setData(!!this.getFormElement().checked);
         this.emit('change');
       });
 
     return this;
   }
 
+  public update(state) {
+    super.update(state);
+    whenIn(state, {
+      checked: isChecked => this.getFormElement().checked = !!isChecked,
+      disabled: isDisabled => this.getFormElement().disabled = !!isDisabled
+    });
+  }
+
   public getFormElement():HTMLInputElement {
     return <HTMLInputElement>super.getFormElement();
   }
 
-  public getData():string {
-    var formElement = this.getFormElement();
-
-    return formElement ? formElement.value : this.options.data;
+  /** Returns true if the checkbox is checked */
+  public getData():boolean {
+    return this.isChecked();
   }
 
-  public setData(data:string):void {
-    var isSameData = data = this.getData();
-
-    if (this.getFormElement()) {
-      this.getFormElement().value = data;
-    }
-
-    this.options.data = data;
+  public setData(data:boolean):void {
+    var isSameData = data === this.getData();
 
     if (!isSameData) {
+      this.setState({
+        checked: data
+      });
       this.emit('change');
     }
   }
 
   public check() {
-    if (this.getFormElement()) {
-      this.getFormElement().checked = true;
-    }
-
-    this.options.attrs['checked'] = true;
+    this.setState({
+      checked: true
+    });
   }
 
   public unCheck() {
-    if (this.getFormElement()) {
-      this.getFormElement().checked = false;
-    }
+    this.setState({
+      checked: false
+    });
+  }
 
-    delete this.options.attrs['checked'];
+  public isChecked() {
+    return !!this.state.checked;
   }
 
   public enable() {
-    if (this.getFormElement()) {
-      this.getFormElement().removeAttribute('disabled');
-    }
-
-    delete this.options.attrs['disabled'];
+    this.setState({
+      disabled: false
+    });
   }
 
   public disable() {
-    if (this.getFormElement()) {
-      this.getFormElement().disabled = true;
-    }
-
-    this.options.attrs['disabled'] = true;
-  }
-
-  public isChecked():boolean {
-    return this.getFormElement() ?
-      this.getFormElement().checked : !!this.options.attrs['checked'];
+    this.setState({
+      disabled: true
+    });
   }
 }
 export = CheckboxType;

@@ -24,9 +24,9 @@ class AbstractFormType {
   protected children:AbstractFormType[];
   protected Handlebars:HandlebarsStatic;
   protected eventEmitter:NodeJS.EventEmitter;
-  protected isRenderedFlag:boolean = false;
   protected listeners:_.Dictionary<any>;
   protected listenerId:string;
+  protected state: any;
 
   constructor(options:FormTypeOptionsInterface = {}) {
     this.Handlebars = Handlebars.create();
@@ -34,18 +34,23 @@ class AbstractFormType {
     this.listeners = {};
     this.listenerId = _.uniqueId('form_type_');
 
+    this.state = {};
     this.options = this.setDefaultOptions(_.clone(options));
     this.children = [];
-    if (this.options.children) {
-      this.options.children.forEach(this.addChild, this);
-    }
+
+    this.template = this.options.template;
+    delete this.options.template;
+
+    this.prepareTemplateEnvironment();
+    this.el = null;
+
+    this.render();
+
+    this.options.children.forEach(child => this.addChild(child));
+
     if ('data' in this.options) {
       this.setData(this.options.data);
     }
-
-    this.template = this.options.template;
-    this.prepareTemplateEnvironment();
-    this.el = null;
   }
 
   /**
@@ -79,19 +84,15 @@ class AbstractFormType {
 
     this.el = this.createElementFromString(html);
 
-    this.children.forEach((formType:AbstractFormType) => {
-      formType.render();
-
-      if (!formType.isRendered()) {
-        formType.render();
-      }
-
-      this.addChildElement(formType);
-    });
-
-    this.isRenderedFlag = true;
+    this.children.forEach(child => this.addChildElement(child));
+    this.update(this.state);
 
     return this;
+  }
+
+  /* abstract */ protected update(changedState) {
+    // Update the view when the state has changed.
+    // Should be overrided by FormType implementations
   }
 
   public close() {
@@ -101,7 +102,6 @@ class AbstractFormType {
       this.el.parentElement.removeChild(this.el);
     }
 
-    this.isRenderedFlag = false;
     this.el = null;
 
     this.emit('close', this);
@@ -128,20 +128,7 @@ class AbstractFormType {
   }
 
   protected createTemplateContext():FormContextInterface {
-    var blacklist = [
-      'template'
-    ];
-    var cleanOptions = _.omit(this.options, blacklist);
-    var formContext:FormContextInterface = _.extend({},
-      cleanOptions, {
-        children: this.children.
-          map((childForm:AbstractFormType) => {
-            var childContext = childForm.createTemplateContext();
-            return childContext;
-          })
-      });
-
-    return formContext;
+    return _.clone(this.options);
   }
 
   protected createElementFromString(htmlString:string):HTMLElement {
@@ -167,19 +154,19 @@ class AbstractFormType {
       this.emit(proxyEventType, evt);
     }, this.listenerId);
 
-    if (this.isRendered()) {
-      // Render child, if necessary
-      if (!child.isRendered()) {
-        child.render();
-      }
-      this.addChildElement(child);
-    }
+
+    this.addChildElement(child);
   }
 
   public removeChild(child:AbstractFormType) {
-    child.close();
-
+    this.removeChildElement(child);
     this.children = _.without(this.children, child);
+  }
+
+  protected removeChildElement(child:AbstractFormType) {
+    if (child.el && child.el.parentElement) {
+      child.el.parentElement.removeChild(child.el);
+    }
   }
 
   public removeChildByName(name:string):void {
@@ -214,9 +201,6 @@ class AbstractFormType {
   public getFormElement():HTMLElement {
     var isInputTopLevelElement:boolean;
 
-    if (!this.el) {
-      return null;
-    }
     isInputTopLevelElement = this.el.tagName.toLowerCase() === this.options.tagName;
 
     return <HTMLElement>(
@@ -225,20 +209,29 @@ class AbstractFormType {
     );
   }
 
-  public isRendered():boolean {
-    return this.isRenderedFlag;
-  }
-
-  public getData():any {
+  /** abstract */public getData():any {
+    // Implementations should use this method to
+    // retrieve state attributes of the FormType
     throw new Error(
       'Form of type "' + this.options.type + '" must implement a getData() method.'
     );
   }
 
-  public setData(data:any):void {
+  /** abstract */public setData(data:any):void {
+    // Implementations should use this method to
+    // update the state of the FormType
+    // In this way, a FormType's data acts kind of like
+    // a facade around it's state.
+    // Should trigger a 'change' event,
+    // if the data is different
     throw new Error(
       'Form of type "' + this.options.type + '" must implement a setData() method.'
     );
+  }
+
+  protected setState(state) {
+    _.extend(this.state, state);
+    this.update(state);
   }
 
   /**

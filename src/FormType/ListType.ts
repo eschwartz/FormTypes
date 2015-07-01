@@ -32,12 +32,14 @@ class ListType extends FieldType {
       itemTypeOptions: {},
       tagName: 'ul',
       data: [],
-      template: this.Handlebars.compile(
-        fs.readFileSync(__dirname + '/../View/form/list_widget.html.hbs', 'utf8')
-      ),
-      itemTemplate: this.Handlebars.compile(
-        fs.readFileSync(__dirname + '/../View/form/list_item_widget.html.hbs', 'utf8')
-      ),
+      label: null,
+      template: this.Handlebars.compile('\
+        {{#if form.label}}\
+          <label {{>html_attrs form.labelAttrs}}>{{label}}</label>\
+        {{/if}}\
+        <{{form.tagName}} {{>html_attrs form.attrs}}></{{form.tagName}}>\
+      '),
+      itemTemplate: this.Handlebars.compile('<li></li>'),
       itemContainerSelector: 'li'
     });
 
@@ -50,7 +52,7 @@ class ListType extends FieldType {
     _.extend(this, _.pick(options, internalOptions));
     options = _.omit(options, internalOptions);
 
-    return options;
+    return super.setDefaultOptions(options);
   }
 
   /**
@@ -60,7 +62,7 @@ class ListType extends FieldType {
   public setData(data:any[]) {
     // We're actually resetting the data, so we'll
     // remove what we've got, first.
-    this.children.forEach(this.removeChild, this);
+    this.children.forEach(child => this.removeChild(child));
 
     data.forEach(this.addData, this);
   }
@@ -97,6 +99,16 @@ class ListType extends FieldType {
     childType.on('close', () => {
       this.getFormElement().removeChild(itemEl);
     }, this.listenerId);
+  }
+
+  protected removeChildElement(child:AbstractFormType) {
+    var childIndex = this.children.indexOf(child);
+
+    var containerEl = this.el.
+      querySelectorAll(this.itemContainerSelector).
+      item(childIndex);
+
+    containerEl.parentNode.removeChild(containerEl);
   }
 
   protected renderItem(childType:AbstractFormType):HTMLElement {

@@ -71,6 +71,160 @@ describe('GroupType', () => {
 
   });
 
+  describe('setErrors', function() {
+
+    it('should render form errors (called before render)', function() {
+      var $errors:JQuery;
+      var groupType = new GroupType();
+      
+      groupType.setErrors({
+        form: ['form error A', 'form error B']
+      });
+      
+      groupType.render();
+
+      $errors = $(groupType.el).find('.error');
+      assert.equal($errors.length, 2, 'Should render 2 errors');
+      assert.equal($errors.eq(0).text(), 'form error A', 'Should render the error text (1)');
+      assert.equal($errors.eq(1).text(), 'form error B', 'Should render the error text (2)');
+    });
+
+    it('should render form errors (called after render)', function() {
+      var $errors:JQuery;
+      var groupType = new GroupType();
+
+      groupType.render();
+
+      groupType.setErrors({
+        form: ['form error A', 'form error B']
+      });
+
+      $errors = $(groupType.el).find('.error');
+      assert.equal($errors.length, 2, 'Should render 2 errors');
+      assert.equal($errors.eq(0).text(), 'form error A', 'Should render the error text (1)');
+      assert.equal($errors.eq(1).text(), 'form error B', 'Should render the error text (2)');
+    });
+
+    it('should render field errors', function() {
+      var $fields:JQuery;
+      var groupType = new GroupType({
+        children: [
+          new TextType({
+            name: 'fooInput'
+          }),
+          new TextType({
+            name: 'barInput'
+          })
+        ]
+      });
+      groupType.render();
+
+      groupType.setErrors({
+        fields: {
+          fooInput: {
+            form: ['foo is no good']
+          },
+          barInput: {
+            form: ['bar is not great either']
+          }
+        }
+      });
+
+      $fields = $(groupType.el).children();
+      assert.equal($fields.eq(0).find('.error').text(), 'foo is no good');
+      assert.equal($fields.eq(1).find('.error').text(), 'bar is not great either');
+    });
+
+    it('should render nested errors', function() {
+      var $nestedGroup:JQuery, $nestedField:JQuery;
+      var groupType = new GroupType({
+        children: [
+          new GroupType({
+            name: 'nestedGroup',
+            children: [
+              new TextType({
+                name: 'nestedField'
+              })
+            ]
+          })
+        ]
+      });
+      groupType.render();
+
+      groupType.setErrors({
+        nestedGroup: {
+          form: ['error for nestedGroup'],
+          fields: {
+            nestedField: {
+              form: ['error for nestedField']
+            }
+          }
+        }
+      });
+
+      $nestedGroup = $(groupType.el).children();
+      $nestedField = $nestedGroup.children();
+
+      assert.equal($nestedGroup.children('.error').text(), 'error for nestedGroup');
+      assert.equal($nestedField.children('.error').text(), 'error for nestedField');
+    });
+
+    it('should override existing field errors', function() {
+      var $fields:JQuery;
+      var groupType = new GroupType({
+        children: [
+          new TextType({
+            name: 'fooInput'
+          }),
+          new TextType({
+            name: 'barInput'
+          })
+        ]
+      });
+      groupType.render();
+
+      groupType.setErrors({
+        form: ['form error A', 'form error B'],
+        fields: {
+          fooInput: {
+            form: ['fooInput error']
+          },
+          barInput: {
+            form: ['barInput error']
+          }
+        }
+      });
+
+      groupType.setErrors({
+        form: ['changed form error'],
+        fields: {
+          fooInput: {
+            form: ['changed fooInput error']
+          }
+        }
+      });
+
+      $fields = $(groupType.el).children();
+
+      assert.equal($(groupType.el).children('.error').text(), 'changed form error', 'Should update the form error');
+      assert.equal($fields.find('.error').length, 1, 'Should remove old errors');
+      assert.equal($fields.find('.error').text(), 'changed fooInput error');
+    });
+
+  });
+
+  describe('clearErrors', function() {
+
+    it('should remove all form errors', function() {
+      console.warn('Spec not yet defined');
+    });
+
+    it('should remove all field errors', function() {
+      console.warn('Spec not yet defined');
+    });
+
+  });
+
   describe('removeChild', () => {
 
     it('should remove a child element from the dom', () => {
@@ -209,14 +363,13 @@ describe('GroupType', () => {
             })
           ]
         });
-        groupType.render();
 
         $group = $(groupType.el);
         $input = $group.find('input');
         $select = $group.find('select');
 
-        $input.val('Bob The Bob');
-        $select.val('us');
+        $input.val('Bob The Bob').trigger('input');
+        $select.val('us').trigger('change');
 
         assert(_.isEqual(groupType.getData(), {
           fullName: 'Bob The Bob',

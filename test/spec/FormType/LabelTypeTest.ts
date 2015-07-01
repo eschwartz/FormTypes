@@ -55,21 +55,15 @@ describe('LabelType', () => {
   describe('getData', () => {
 
     it('should return the label text', () => {
-      var $label:JQuery;
       var labelType = new LabelType({
         data: 'foo'
       });
       labelType.render();
 
-      $label = $(labelType.el);
-
       assert.equal(labelType.getData(), 'foo');
 
-      $label.text('shazaam');
+      labelType.setData('shazaam');
       assert.equal(labelType.getData(), 'shazaam');
-
-      labelType.setData('kablooey');
-      assert.equal(labelType.getData(), 'kablooey');
     });
 
   });

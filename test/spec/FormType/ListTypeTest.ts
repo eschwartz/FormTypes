@@ -48,11 +48,10 @@ describe('ListType', () => {
 
   });
 
-  describe('render', () => {
+  describe('init', () => {
 
     it('should render an empty list', () => {
       var listType = new ListType();
-      listType.render();
 
       assert.equal(listType.el.tagName.toLowerCase(), 'ul');
       assert.equal(listType.el.childNodes.length, 0);
@@ -67,7 +66,6 @@ describe('ListType', () => {
           'bar'
         ]
       });
-      listType.render();
 
       $list = $(listType.el);
       $items = $list.children();
@@ -108,7 +106,6 @@ describe('ListType', () => {
           'bar'
         ]
       });
-      listType.render();
 
       $list = $(listType.el);
       $items = $list.children();
@@ -118,7 +115,7 @@ describe('ListType', () => {
       listType.getChildren()[0].setData('shazaam');
 
       // Modify a child's form element
-      $inputs.eq(1).val('kablooey');
+      $inputs.eq(1).val('kablooey').trigger('input');
 
       assert(_.isEqual(listType.getData(), ['shazaam', 'kablooey']));
     });
@@ -136,7 +133,6 @@ describe('ListType', () => {
           'bar'
         ]
       });
-      listType.render();
 
       listType.setData(['shazaam', 'kablooey']);
 
@@ -162,7 +158,6 @@ describe('ListType', () => {
           'bar'
         ]
       });
-      listType.render();
 
       listType.addData('shazaam');
 
@@ -188,13 +183,12 @@ describe('ListType', () => {
           'bar'
         ]
       });
-      listType.render();
 
       fooItem = <TextType>listType.getChildren()[1];
       listType.removeChild(fooItem);
 
       $list = $(listType.el);
-      $items = $list.children();
+      $items = $list.find('li');
       $inputs = $items.find('input');
 
       assert.equal($items.length, 1);
@@ -215,7 +209,6 @@ describe('ListType', () => {
           'bar'
         ]
       });
-      listType.render();
 
       fooChild = listType.getChildren()[0];
       fooChild.close();
@@ -243,7 +236,6 @@ describe('ListType', () => {
 </div>\
         '
       });
-      listType.render();
 
       fooChild = listType.getChildren()[0];
       fooChild.close();

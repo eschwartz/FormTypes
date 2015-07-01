@@ -16,26 +16,34 @@ class TextType extends FieldType {
     // Trigger change on 'input' events.
     ServiceContainer.HtmlEvents.
       addEventListener(this.getFormElement(), 'input', () => {
+        this.setData(this.getFormElement().value);
         this.emit('change');
       });
 
     return this;
   }
 
+  public getFormElement():HTMLInputElement {
+    return <HTMLInputElement>super.getFormElement();
+  }
+
+  protected update(changedState) {
+    if ('value' in changedState) {
+      this.getFormElement().value = changedState.value;
+    }
+  }
+
   protected setDefaultOptions(options:FieldTypeOptionsInterface):FieldTypeOptionsInterface {
     _.defaults(options, {
       tagName: 'input',
       data: '',
-      template: this.Handlebars.compile(
-        fs.readFileSync(__dirname + '/../View/form/text_widget.html.hbs', 'utf8')
-      )
+      template: this.Handlebars.compile('{{>field_widget}}')
     });
 
 
     options = super.setDefaultOptions(options);
 
     _.defaults(options.attrs, {
-      value: options.data,
       type: 'text'
     });
 
@@ -51,25 +59,19 @@ class TextType extends FieldType {
 
 
   public getData():string {
-    var input = <HTMLInputElement>this.getFormElement();
-
-    return input ? input.value : this.options.data;
+    return this.state.value;
   }
 
   public setData(data:string):void {
-    var input = <HTMLInputElement>this.getFormElement();
     var isSame = data === this.getData();
 
     if (isSame) {
       return;
     }
 
-    if (!input) {
-      this.options.data = data;
-    }
-    else {
-      input.value = data;
-    }
+    this.setState({
+      value: data
+    });
 
     this.emit('change');
   }

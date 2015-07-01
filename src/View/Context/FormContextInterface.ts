@@ -7,24 +7,20 @@ interface FormContextInterface extends _.Dictionary<any> {
    * This may also serve as the form elements `name` attribute,
    * where applicable.
    */
-  name:string;
+  name?:string;
 
-  type:string;
+  type?:string;
 
   /**
    * HTML tag name for the form element.
    */
-  tagName:string;
+  tagName?:string;
 
   /**
    * Attributes to apply to the HTML element
    */
-  attrs:_.Dictionary<string>;
+  attrs?:_.Dictionary<string>;
 
-  /**
-   * Child form elements.
-   */
-  children:FormContextInterface[];
 }
 
 export = FormContextInterface;

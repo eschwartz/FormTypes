@@ -25,6 +25,7 @@
 /// <reference path="../../src/Util/HtmlEvents.ts" />
 /// <reference path="../../src/Util/HtmlEventsInterface.ts" />
 /// <reference path="../../src/Util/StringUtil.ts" />
+/// <reference path="../../src/Util/whenIn.ts" />
 /// <reference path="../../src/View/Context/FormContextInterface.ts" />
 /// <reference path="../../src/View/Template/FormTemplateCollection.d.ts" />
 /// <reference path="../../src/View/Template/FormTemplateCollection.ts" />

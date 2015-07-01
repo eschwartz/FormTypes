@@ -8,7 +8,6 @@
 /// <reference path="../../../typings/generated/sinon/sinon.d.ts"/> ///ts:ref:generated
 import assert = require('assert');
 import MultiChoiceType = require('../../../src/FormType/MultiChoiceType');
-import ServiceContainer = require('../../../src/Service/ServiceContainer');
 import sinon = require('sinon');
 import DomEvents = require('../../Util/DomEvents');
 import _ = require('underscore');
@@ -23,10 +22,9 @@ describe('MultiChoiceType', () => {
 
   before(() => {
     $ = require('jquery');
-    ServiceContainer.HtmlEvents = require('../../Util/JQueryHtmlEvents');
   });
 
-  describe('render', () => {
+  describe('init', () => {
 
     it('should create checkboxes for each choice', () => {
       var $checkboxes:JQuery;
@@ -37,7 +35,6 @@ describe('MultiChoiceType', () => {
         }
       });
 
-      multiChoiceType.render();
       $checkboxes = $(multiChoiceType.el).find('input[type=checkbox]');
 
       assert.equal($checkboxes.length, 2,
@@ -56,7 +53,7 @@ describe('MultiChoiceType', () => {
         }
       });
 
-      multiChoiceType.render();
+
       $checkboxes = $(multiChoiceType.el).find('input[type=checkbox]');
 
       assert.equal($checkboxes.filter('[name="us"]').length, 1);
@@ -75,7 +72,7 @@ describe('MultiChoiceType', () => {
         }
       });
 
-      multiChoiceType.render();
+
       $scope = $(multiChoiceType.el);
       $checkboxes = $scope.find('input[type=checkbox]');
 
@@ -103,7 +100,6 @@ describe('MultiChoiceType', () => {
         data: ['us', 'fr']
       });
 
-      multiChoiceType.render();
       $scope = $(multiChoiceType.el);
       $checkboxes = $scope.find('input[type=checkbox]');
 
@@ -125,7 +121,6 @@ describe('MultiChoiceType', () => {
         }
       });
 
-      choiceType.render();
       scope.appendChild(choiceType.el);
 
       choiceType.close();
@@ -137,7 +132,7 @@ describe('MultiChoiceType', () => {
 
   describe('getData', () => {
 
-    it('should return the initial data values, before rendering the type', () => {
+    it('should return the initial data values', () => {
       var choiceType = new MultiChoiceType({
         data: ['bar'],
         choices: {
@@ -145,20 +140,6 @@ describe('MultiChoiceType', () => {
           bar: 'Bar'
         }
       });
-
-      assert(_.isEqual(choiceType.getData(), ['bar']));
-    });
-
-    it('should return the initial data values, after rendering the type', () => {
-      var choiceType = new MultiChoiceType({
-        data: ['bar'],
-        choices: {
-          foo: 'Foo',
-          bar: 'Bar'
-        }
-      });
-
-      choiceType.render();
 
       assert(_.isEqual(choiceType.getData(), ['bar']));
     });
@@ -171,8 +152,6 @@ describe('MultiChoiceType', () => {
         }
       });
 
-      choiceType.render();
-
       assert(_.isEqual(choiceType.getData(), []));
     });
 
@@ -184,11 +163,10 @@ describe('MultiChoiceType', () => {
         }
       });
 
-      choiceType.render();
-
       $(choiceType.el).
         find('input[value="bar"]').
-        attr('checked', 'true');
+        prop('checked', true).
+        trigger('change');
 
       assert(_.isEqual(choiceType.getData(), ['bar']));
     });
@@ -197,7 +175,7 @@ describe('MultiChoiceType', () => {
 
   describe('setData', () => {
 
-    it('should update which checkboxes are selected - setData called before render', () => {
+    it('should update which checkboxes are selected', () => {
       var $scope:JQuery;
       var multiChoiceType = new MultiChoiceType({
         choices: {
@@ -208,27 +186,6 @@ describe('MultiChoiceType', () => {
         data: ['us', 'ca']
       });
 
-      multiChoiceType.setData(['us', 'fr']);
-
-      multiChoiceType.render();
-      $scope = $(multiChoiceType.el);
-
-      assert($scope.find('[value="us"]').is(':checked'), 'US should be checked');
-      assert(!$scope.find('[value="ca"]').is(':checked'), 'CA should not be checked');
-      assert($scope.find('[value="fr"]').is(':checked'), 'FR should be checked');
-    });
-
-    it('should update which checkboxes are selected - setData called after render', () => {
-      var $scope:JQuery;
-      var multiChoiceType = new MultiChoiceType({
-        choices: {
-          us: 'United States',
-          ca: 'Canada',
-          fr: 'France'
-        },
-        data: ['us', 'ca']
-      });
-      multiChoiceType.render();
 
       multiChoiceType.setData(['us', 'fr']);
 
@@ -248,27 +205,10 @@ describe('MultiChoiceType', () => {
         },
         data: ['us', 'ca']
       });
-      multiChoiceType.render();
+
 
       multiChoiceType.setData(['us', 'fr']);
 
-
-      assert(_.isEqual(multiChoiceType.getData(), ['us', 'fr']));
-    });
-
-    it('should update the return value of getData() - before render', () => {
-      var multiChoiceType = new MultiChoiceType({
-        choices: {
-          us: 'United States',
-          ca: 'Canada',
-          fr: 'France'
-        },
-        data: ['us', 'ca']
-      });
-
-      multiChoiceType.setData(['us', 'fr']);
-
-      multiChoiceType.render();
 
       assert(_.isEqual(multiChoiceType.getData(), ['us', 'fr']));
     });
@@ -283,7 +223,7 @@ describe('MultiChoiceType', () => {
         },
         data: ['us', 'ca']
       });
-      multiChoiceType.render();
+
 
       multiChoiceType.setData([]);
 
@@ -304,7 +244,7 @@ describe('MultiChoiceType', () => {
         },
         data: ['us', 'ca']
       });
-      multiChoiceType.render();
+
       multiChoiceType.on('change', () => onChange());
 
       multiChoiceType.setData(['us', 'fr']);
@@ -322,68 +262,12 @@ describe('MultiChoiceType', () => {
         },
         data: ['us', 'ca']
       });
-      multiChoiceType.render();
+
       multiChoiceType.on('change', () => onChange());
 
       multiChoiceType.setData(['us', 'ca']);
 
       assert(!onChange.called);
-    });
-
-  });
-
-  describe('setChoices', () => {
-
-    it('should update rendered option elements (before render)', () => {
-      var $scope:JQuery, $checkboxes:JQuery;
-      var multiChoiceType = new MultiChoiceType({
-        choices: {
-          us: 'United States',
-          ca: 'Canada',
-          fr: 'France'
-        }
-      });
-
-      multiChoiceType.setChoices({
-        pa: 'Panama',
-        qa: 'Qatar'
-      });
-
-      multiChoiceType.render();
-
-      $scope = $(multiChoiceType.el);
-      $checkboxes = $scope.find('[type="checkbox"]');
-
-      assert.equal($checkboxes.length, 2);
-
-      assert.equal($checkboxes.filter('[value=pa]').length, 1);
-      assert.equal($checkboxes.filter('[value=qa]').length, 1);
-    });
-
-    it('should update rendered option elements (after render)', () => {
-      var $scope:JQuery, $checkboxes:JQuery;
-      var multiChoiceType = new MultiChoiceType({
-        choices: {
-          us: 'United States',
-          ca: 'Canada',
-          fr: 'France'
-        }
-      });
-
-      multiChoiceType.render();
-
-      multiChoiceType.setChoices({
-        pa: 'Panama',
-        qa: 'Qatar'
-      });
-
-      $scope = $(multiChoiceType.el);
-      $checkboxes = $scope.find('[type="checkbox"]');
-
-      assert.equal($checkboxes.length, 2);
-
-      assert.equal($checkboxes.filter('[value=pa]').length, 1);
-      assert.equal($checkboxes.filter('[value=qa]').length, 1);
     });
 
   });
@@ -401,7 +285,7 @@ describe('MultiChoiceType', () => {
         }
       });
 
-      multiChoiceType.render();
+
       $checkboxes = $(multiChoiceType.el).find('input[type=checkbox]');
 
       multiChoiceType.on('change', onChange);
@@ -426,7 +310,6 @@ describe('MultiChoiceType', () => {
         data: ['us']
       });
 
-      multiChoiceType.render();
       $checkboxes = $(multiChoiceType.el).find('input[type=checkbox]');
 
       multiChoiceType.on('change', onChange);

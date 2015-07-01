@@ -23,13 +23,12 @@ describe('TextType', () => {
     $ = require('jquery');
   });
 
-  describe('render', () => {
+  describe('init', () => {
 
     it('should render a text input', () => {
       var textType = new TextType();
       var $inputForm:JQuery, $input:JQuery;
 
-      textType.render();
       $inputForm = $(textType.el);
       $input = $inputForm.find('input');
 
@@ -44,7 +43,6 @@ describe('TextType', () => {
         data: 'foobar'
       });
 
-      textType.render();
       $input = $(textType.el).find('input');
 
       assert.equal($input.val(), 'foobar');
@@ -59,7 +57,7 @@ describe('TextType', () => {
         }
       });
 
-      $input = $(textType.render().el).find('input');
+      $input = $(textType.el).find('input');
 
       assert.equal($input.attr('placeholder'), 'Enter stuff here...',
         'Expected `placeholder` attribute to be set.');
@@ -69,8 +67,6 @@ describe('TextType', () => {
 
     it('should render a label for the input', () => {
       var textType = new TextType();
-
-      textType.render();
 
       assert.equal($(textType.el).find('label').length, 1,
         'Expected a single label to be rendered.');
@@ -82,7 +78,6 @@ describe('TextType', () => {
         label: 'My Great Text Input'
       });
 
-      textType.render();
       $label = $(textType.el).find('label');
 
       assert.equal($label.text().trim(), 'My Great Text Input',
@@ -95,7 +90,6 @@ describe('TextType', () => {
         name: 'userName'
       });
 
-      textType.render();
       $label = $(textType.el).find('label');
 
       assert.equal($label.text().trim(), 'User Name',
@@ -108,7 +102,6 @@ describe('TextType', () => {
         name: 'userName'
       });
 
-      textType.render();
       $label = $(textType.el).find('label');
       $input = $(textType.el).find('input');
 
@@ -127,7 +120,6 @@ describe('TextType', () => {
         }
       });
 
-      textType.render();
       $label = $(textType.el).find('label');
 
       assert.equal($label.attr('class'), 'foo-bar faz-baz',
@@ -139,8 +131,6 @@ describe('TextType', () => {
         label: false
       });
 
-      textType.render();
-
       assert.equal($(textType.el).find('label').length, 0);
     });
 
@@ -148,27 +138,16 @@ describe('TextType', () => {
 
   describe('getData', () => {
 
-    it('should return the initial data value, before rendering the type', () => {
+    it('should return the initial data value', () => {
       var textType = new TextType({
         data: 'foo'
       });
-
-      assert.equal(textType.getData(), 'foo');
-    });
-
-    it('should return the initial data value, after rendering the type', () => {
-      var textType = new TextType({
-        data: 'foo'
-      });
-
-      textType.render();
 
       assert.equal(textType.getData(), 'foo');
     });
 
     it('should return an empty string, if no data is provided', function() {
       var textType = new TextType();
-      textType.render();
 
       assert.strictEqual(textType.getData(), '');
     });
@@ -178,10 +157,9 @@ describe('TextType', () => {
       var textType = new TextType({
         data: 'foo'
       });
-      textType.render();
 
       $input = $(textType.el).find('input');
-      $input.val('bar');
+      $input.val('bar').trigger('input');
 
       assert.equal(textType.getData(), 'bar');
     });
@@ -193,7 +171,6 @@ describe('TextType', () => {
     it('should set the value of the input element', () => {
       var input:HTMLInputElement;
       var textType = new TextType();
-      textType.render();
 
       textType.setData('foo');
 
@@ -203,28 +180,17 @@ describe('TextType', () => {
 
     it('should set the return value of getData()', () => {
       var textType = new TextType();
-      textType.render();
 
       textType.setData('foo');
 
       assert.equal(textType.getData(), 'foo');
     });
 
-    it('should set the return value of getData() - before render', () => {
-      var textType = new TextType();
 
-      textType.setData('foo');
-
-      assert.equal(textType.getData(), 'foo');
-    });
-
-    it('should set the value of the input element, once rendered', () => {
+    it('should set the value of the input element', () => {
       var input:HTMLInputElement;
       var textType = new TextType();
       textType.setData('foo');
-
-      textType.render();
-
 
       input = <HTMLInputElement>textType.getFormElement();
       assert.equal(input.value, 'foo');
@@ -263,7 +229,6 @@ describe('TextType', () => {
       var textType = new TextType();
       var input:HTMLInputElement;
 
-      textType.render();
       input = <HTMLInputElement>textType.getFormElement();
 
       textType.on('change', () => {

@@ -14,34 +14,34 @@ class LabelType extends AbstractFormType {
       tagName: 'label',
       type: 'label',
       data: '',
-      template: this.Handlebars.compile(
-        fs.readFileSync(__dirname + '/../View/form/label_widget.html.hbs', 'utf8')
-      )
+      template: this.Handlebars.compile('\
+        <{{form.tagName}} {{>html_attrs form.attrs}}></{{form.tagName}}>\
+      ')
     });
 
     return super.setDefaultOptions(options);
   }
 
-  public getData() {
-    var label = this.getFormElement();
+  public update(state) {
+    if ('label' in state) {
+      this.getFormElement().textContent = state.label;
+    }
+  }
 
-    return label ? label.textContent : this.options.data;
+  public getData():string {
+    return this.state.label;
   }
 
   public setData(data:string):void {
-    var label = this.getFormElement();
     var isSameData = data === this.getData();
 
     if (isSameData) {
       return;
     }
 
-    if (!label) {
-      this.options.data = data;
-    }
-    else {
-      label.textContent = data;
-    }
+    this.setState({
+      label: data
+    });
 
     this.emit('change');
   }

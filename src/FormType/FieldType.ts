@@ -22,17 +22,14 @@ class FieldType extends AbstractFormType {
     _.defaults(options, {
       tagName: 'input',
       type: 'field',
-      label: null,   // to be defaulted below, after we have name option
       labelAttrs: {},
-      template: this.Handlebars.compile(
-        fs.readFileSync(__dirname + '/../View/form/field_widget.html.hbs', 'utf8')
-      )
+      template: this.Handlebars.compile('{{>field_widget}}')
     });
 
     options = super.setDefaultOptions(options);
 
     // set default label
-    if (_.isNull(options.label)) {
+    if (!options.hasOwnProperty('label')) {
       options.label = StringUtil.camelCaseToWords(options.name);
     }
 

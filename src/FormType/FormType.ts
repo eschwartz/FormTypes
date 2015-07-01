@@ -31,7 +31,7 @@ class FormType extends GroupType {
       )
     });
 
-    return options;
+    return super.setDefaultOptions(options);
   }
 
 }

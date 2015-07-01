@@ -9,52 +9,33 @@ import FieldType = require('./FieldType');
 import _ = require('underscore');
 import MultiChoiceTypeOptions = require('../Options/MultiChoiceTypeOptionsInterface');
 import CheckboxType = require('./CheckboxType');
+import whenIn = require('../Util/whenIn');
 
 class MultiChoiceType extends FieldType {
   protected children:CheckboxType[];
   protected options:MultiChoiceTypeOptions;
 
-  public constructor(options?:MultiChoiceTypeOptions) {
-    super(options);
-
-    this.setChoices(this.options.choices);
-  }
-
   protected setDefaultOptions(options:MultiChoiceTypeOptions):MultiChoiceTypeOptions {
     _.defaults(options, {
       tagName: 'div',
       type: 'multi_choice',
-      choices: {}
+      choices: {},
+      data: []
     });
+
+    // Create child Checkbox types from choices
+    options.children = _.map(options.choices, (label, name) => new CheckboxType({
+        name: name,
+        label: label
+      }));
 
     return super.setDefaultOptions(options);
   }
 
-  public setChoices(choices:_.Dictionary<string>):void {
-    var data = this.getData();
-
-    // Remove all children
-    this.children.forEach((child:AbstractFormType) => this.removeChild(child));
-
-    // Add new children
-    _.each(choices, (value:string, key:string) => {
-      this.addChild(new CheckboxType({
-        data: key,
-        name: key,
-        label: value,
-        checked: _.contains(data, key)
-      }));
-    });
-  }
-
   public getData():string[] {
-    if (!this.getFormElement()) {
-      return this.options.data;
-    }
-
     return this.children.
       filter((child:CheckboxType) => child.isChecked()).
-      map((child:CheckboxType) => child.getData());
+      map((child:CheckboxType) => child.getName());
   }
 
   public setData(data:string[]):void {
@@ -66,15 +47,13 @@ class MultiChoiceType extends FieldType {
 
     // Update child checkboxes fro mdata
     this.children.forEach((child:CheckboxType) => {
-      if (_.contains(data, child.getData())) {
+      if (_.contains(data, child.getName())) {
         child.check();
       }
       else {
         child.unCheck();
       }
     });
-
-    this.options.data = data;
 
     this.emit('change');
   }

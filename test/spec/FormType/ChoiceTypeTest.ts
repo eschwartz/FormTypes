@@ -23,7 +23,7 @@ describe('ChoiceType', () => {
     $ = require('jquery');
   });
 
-  describe('render', () => {
+  describe('init', () => {
     it('should create an empty select element', () => {
       var $select:JQuery;
       var choiceType = new ChoiceType();
@@ -138,7 +138,7 @@ describe('ChoiceType', () => {
       assert.equal(choiceType.getData(), 'bar');
     });
 
-    it('should return the value of the first choice element, if no data is provided', function() {
+    it('should return null, if no data is provided', function() {
       var choiceType = new ChoiceType({
         choices: {
           foo: 'Foo',
@@ -147,7 +147,7 @@ describe('ChoiceType', () => {
       });
       choiceType.render();
 
-      assert.equal(choiceType.getData(), 'foo');
+      assert.equal(choiceType.getData(), null);
     });
 
     it('should return changed values', function() {
@@ -159,10 +159,10 @@ describe('ChoiceType', () => {
           bar: 'Bar'
         }
       });
-      choiceType.render();
+
 
       $select = $(choiceType.el).find('select');
-      $select.val('bar');
+      $select.val('bar').trigger('change');
 
       assert.equal(choiceType.getData(), 'bar');
     });
@@ -180,7 +180,7 @@ describe('ChoiceType', () => {
         },
         data: 'egg'
       });
-      choiceType.render();
+
 
       choiceType.setData('chicken');
 
@@ -196,45 +196,11 @@ describe('ChoiceType', () => {
         },
         data: 'egg'
       });
-      choiceType.render();
+
 
       choiceType.setData('chicken');
 
       assert.equal(choiceType.getData(), 'chicken');
-    });
-
-    it('should set the return value of getData() - before render', () => {
-      var choiceType = new ChoiceType({
-        choices: {
-          chicken: 'The Chicken',
-          egg: 'The Egg'
-        },
-        data: 'egg'
-      });
-
-      choiceType.setData('chicken');
-
-      assert.equal(choiceType.getData(), 'chicken');
-    });
-
-    it('should set the eventual rendered value of the select element - before render', () => {
-      var $select:JQuery, $options:JQuery;
-      var choiceType = new ChoiceType({
-        choices: {
-          chicken: 'The Chicken',
-          egg: 'The Egg'
-        },
-        data: 'egg'
-      });
-
-      choiceType.setData('chicken');
-      choiceType.render();
-
-      $select = $(choiceType.getFormElement());
-      $options = $select.find('option');
-
-      assert.equal($select.val(), 'chicken');
-      assert.equal($options.filter(':selected').val(), 'chicken');
     });
 
     it('should select none for falsey data values', () => {
@@ -246,7 +212,7 @@ describe('ChoiceType', () => {
         },
         data: null
       });
-      choiceType.render();
+
 
       $options = $(choiceType.el).find('options');
 
@@ -262,7 +228,7 @@ describe('ChoiceType', () => {
         },
         data: 200
       });
-      choiceType.render();
+
 
       $select = $(choiceType.getFormElement());
 
@@ -318,7 +284,7 @@ describe('ChoiceType', () => {
         },
         data: 'us'
       });
-      choiceType.render();
+
       select = <HTMLSelectElement>choiceType.getFormElement();
 
       choiceType.on('change', () => {
@@ -334,7 +300,7 @@ describe('ChoiceType', () => {
 
   describe('disableOption', () => {
 
-    it('should disabled an option element', () => {
+    it('should disable an option element', () => {
       var $options:JQuery, $chickenOpt:JQuery;
       var choiceType = new ChoiceType({
         choices: {
@@ -343,7 +309,7 @@ describe('ChoiceType', () => {
         },
         data: 'egg'
       });
-      choiceType.render();
+
 
       choiceType.disableOption('chicken');
 
@@ -366,7 +332,7 @@ describe('ChoiceType', () => {
         },
         data: 'egg'
       });
-      choiceType.render();
+
 
       choiceType.disableOption('egg');
 
@@ -374,29 +340,6 @@ describe('ChoiceType', () => {
 
       assert(!$select.children('[value="egg"]').is(':selected'), 'Egg should not be selected');
       assert($select.children('[value="egg"]').is(':disabled'), 'Egg should be disabled')
-    });
-
-    it('before render - should disable once rendered', () => {
-      var $options:JQuery, $chickenOpt:JQuery;
-      var choiceType = new ChoiceType({
-        choices: {
-          chicken: 'The Chicken',
-          egg: 'The Egg'
-        },
-        data: 'egg'
-      });
-
-      choiceType.disableOption('chicken');
-
-      choiceType.render();
-      $options = $(choiceType.getFormElement()).children();
-      $chickenOpt = $options.filter('[value="chicken"]');
-
-      // Check that chicken is disabled
-      assert($chickenOpt.is(':disabled'));
-
-      // egg should not be disabled
-      assert(!$options.filter('[value="egg"]').is(':disabled'));
     });
 
   });
@@ -412,7 +355,7 @@ describe('ChoiceType', () => {
         },
         data: 'egg'
       });
-      choiceType.render();
+
 
       choiceType.disableOption('chicken');
       choiceType.enableOption('chicken');
@@ -420,60 +363,6 @@ describe('ChoiceType', () => {
       $select = $(choiceType.el);
 
       assert(!$select.find('[value="chicken"]').is(':disabled'));
-    });
-
-  });
-
-  describe('setChoices', () => {
-
-    it('should update rendered option elements (before render)', () => {
-      var $select:JQuery, $options:JQuery;
-      var choiceType = new ChoiceType({
-        choices: {
-          us: 'United States',
-          ca: 'Canada'
-        }
-      });
-
-      choiceType.setChoices({
-        pa: 'Panama',
-        qa: 'Qatar'
-      });
-
-      choiceType.render();
-
-      $select = $(choiceType.el).find('select');
-      $options = $select.children('option');
-
-      assert.equal($options.length, 2);
-
-      assert.equal($options.filter('[value=pa]').text().trim(), 'Panama');
-      assert.equal($options.filter('[value=qa]').text().trim(), 'Qatar');
-    });
-
-    it('should update rendered option elements (after render)', () => {
-      var $select:JQuery, $options:JQuery;
-      var choiceType = new ChoiceType({
-        choices: {
-          us: 'United States',
-          ca: 'Canada'
-        }
-      });
-
-      choiceType.render();
-
-      choiceType.setChoices({
-        pa: 'Panama',
-        qa: 'Qatar'
-      });
-
-      $select = $(choiceType.el).find('select');
-      $options = $select.children('option');
-
-      assert.equal($options.length, 2);
-
-      assert.equal($options.filter('[value=pa]').text().trim(), 'Panama');
-      assert.equal($options.filter('[value=qa]').text().trim(), 'Qatar');
     });
 
   });

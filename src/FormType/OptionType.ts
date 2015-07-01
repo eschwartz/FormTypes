@@ -10,6 +10,7 @@ import StringUtil = require('../Util/StringUtil');
 import _ = require('underscore');
 import Handlebars = require('Handlebars');
 import fs = require('fs');
+import whenIn = require('../Util/whenIn');
 
 class OptionType extends FieldType {
   protected options:OptionTypeOptionsInterface;
@@ -39,67 +40,64 @@ class OptionType extends FieldType {
     return options;
   }
 
+  public update(state) {
+    super.update(state);
+    whenIn(state, {
+      selected: isSelected => isSelected ?
+        this.getFormElement().selected = true :
+        this.getFormElement().removeAttribute('selected'),
+      disabled: isDisabled => isDisabled ?
+        this.getFormElement().disabled = true :
+        this.getFormElement().removeAttribute('disabled'),
+      value: value => this.getFormElement().value = value
+    });
+  }
+
   public getFormElement():HTMLOptionElement {
     return <HTMLOptionElement>super.getFormElement();
   }
 
   public getData():string {
-    var formEl = <HTMLOptionElement>this.getFormElement();
-
-    return formEl ? formEl.value : this.options.data;
+    return this.state.value;
   }
 
   public setData(data:string):void {
-    var formEl = <HTMLOptionElement>this.getFormElement();
     var isSame = data === this.getData();
 
-    if (!formEl) {
-      this.options.data = data;
-    }
-    else {
-      formEl.value = data;
-    }
-
     if (!isSame) {
+      this.setState({
+        value: data
+      });
       this.emit('change');
     }
   }
 
   public select() {
-    if (this.getFormElement()) {
-      this.getFormElement().selected = true;
-    }
-
-    this.options.attrs['selected'] = true;
+    this.setState({
+      selected: true
+    });
   }
 
   public deselect() {
-    if (this.getFormElement()) {
-      this.getFormElement().removeAttribute('selected');
-    }
-
-    delete this.options.attrs['selected'];
+    this.setState({
+      selected: false
+    });
   }
 
   public enable() {
-    if (this.getFormElement()) {
-      this.getFormElement().removeAttribute('disabled');
-    }
-
-    delete this.options.attrs['disabled'];
+    this.setState({
+      disabled: false
+    });
   }
 
   public disable() {
-    if (this.getFormElement()) {
-      this.getFormElement().disabled = true;
-    }
-
-    this.options.attrs['disabled'] = true;
+    this.setState({
+      disabled: true
+    });
   }
 
   public isSelected():boolean {
-    return this.getFormElement() ?
-      this.getFormElement().selected : !!this.options.attrs['selected'];
+    return !!this.state.selected;
   }
 }
 
