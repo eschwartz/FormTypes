@@ -76,10 +76,7 @@ class ChoiceType extends FieldType {
       )
     });
 
-    options.children = _.map(options.choices, (label, key) => new OptionType({
-      data: key,
-      label: label
-    }));
+    options.children = this.optionsFromChoices(options.choices);
 
     return super.setDefaultOptions(options);
   }
@@ -99,6 +96,20 @@ class ChoiceType extends FieldType {
       });
       this.emit('change');
     }
+  }
+
+  public setChoices(choices:_.Dictionary<string>) {
+    this.children.forEach(child => this.removeChild(child));
+
+    this.optionsFromChoices(choices).
+      forEach(option => this.addChild(option));
+  }
+
+  protected optionsFromChoices(choices:_.Dictionary<string>):OptionType[] {
+    return _.map(choices, (label, key) => new OptionType({
+      data: key,
+      label: label
+    }));
   }
 
   public disableOption(optionValue:string) {

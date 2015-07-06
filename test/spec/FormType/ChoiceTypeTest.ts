@@ -364,4 +364,31 @@ describe('ChoiceType', () => {
 
   });
 
+  describe('setChoices', () => {
+
+    it('should update rendered option element', () => {
+      var $select:JQuery, $options:JQuery;
+      var choiceType = new ChoiceType({
+        choices: {
+          us: 'United States',
+          ca: 'Canada'
+        }
+      });
+
+      choiceType.setChoices({
+        pa: 'Panama',
+        qa: 'Qatar'
+      });
+
+      $select = $(choiceType.el).find('select');
+      $options = $select.children('option');
+
+      assert.equal($options.length, 2);
+
+      assert.equal($options.filter('[value=pa]').text().trim(), 'Panama');
+      assert.equal($options.filter('[value=qa]').text().trim(), 'Qatar');
+    });
+
+  });
+
 });
