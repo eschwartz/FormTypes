@@ -195,6 +195,7 @@ class AbstractFormType {
   public removeChild(child:AbstractFormType) {
     this.removeChildElement(child);
     this.children = _.without(this.children, child);
+    child.removeAllListenersById(this.listenerId);
   }
 
   protected removeChildElement(child:AbstractFormType) {
