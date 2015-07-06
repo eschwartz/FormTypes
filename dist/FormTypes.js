@@ -1077,15 +1077,16 @@ var ListType = (function (_super) {
         this.emit('change');
     };
     ListType.prototype.addData = function (dataItem) {
-        this.setData(this.getData().concat(dataItem));
+        this.addChild(this.createItemType(dataItem));
+        this.emit('change');
     };
     ListType.prototype.removeData = function (dataItem) {
-        var data = this.getData();
-        var item = data.filter(function (item) { return _.isEqual(item, dataItem); })[0];
-        if (!item) {
+        var child = this.children.filter(function (child) { return _.isEqual(child.getData(), dataItem); })[0];
+        if (!child) {
             return;
         }
-        this.setData(_.without(data, item));
+        this.removeChild(child);
+        this.emit('change');
     };
     ListType.prototype.createItemType = function (data) {
         var hasDataArg = data === void 0;

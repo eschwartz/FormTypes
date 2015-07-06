@@ -80,18 +80,21 @@ class ListType extends FieldType {
   }
 
   public addData(dataItem:any) {
-    this.setData(this.getData().concat(dataItem));
+    this.addChild(this.createItemType(dataItem));
+
+    this.emit('change');
   }
 
   public removeData(dataItem:any) {
-    var data = this.getData();
-    var item = data.filter(item => _.isEqual(item, dataItem))[0];
+    var child = this.children.filter(child => _.isEqual(child.getData(), dataItem))[0];
 
-    if (!item) {
+    if (!child) {
       return;
     }
 
-    this.setData(_.without(data, item));
+    this.removeChild(child);
+
+    this.emit('change');
   }
 
   protected createItemType(data?:any):AbstractFormType {
