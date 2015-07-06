@@ -14,7 +14,6 @@ import TextType = require('../../../src/FormType/TextType');
 import ChoiceType = require('../../../src/FormType/ChoiceType');
 import FormErrorsInterface = require('../../../src/FormType/FormErrorsInterface');
 import _ = require('underscore');
-import DomEvents = require('../../Util/DomEvents');
 import sinon = require('sinon');
 var jsdom:jsdom = require('mocha-jsdom');
 var $:JQueryStatic;
@@ -481,13 +480,8 @@ describe('GroupType', () => {
         }));
       });
 
-    });
-
-    describe('after render', () => {
-
       it('should return an empty object, if there are no child types', function () {
         var groupType = new GroupType();
-        groupType.render();
 
         assert(_.isEqual(groupType.getData(), {}));
       });
@@ -509,7 +503,6 @@ describe('GroupType', () => {
             })
           ]
         });
-        groupType.render();
 
         assert(_.isEqual(groupType.getData(), {
           fullName: 'John Doe',
@@ -579,7 +572,6 @@ describe('GroupType', () => {
             })
           ]
         });
-        groupType.render();
 
         assert(_.isEqual(groupType.getData(), {
           fullName: 'John Doe',
@@ -681,7 +673,6 @@ describe('GroupType', () => {
 
     it('should fire when the child type changes', (done) => {
       var onChange = sinon.spy();
-      var input:HTMLInputElement;
       var groupType = new GroupType({
         children: [
           new TextType({
@@ -691,15 +682,16 @@ describe('GroupType', () => {
       });
       groupType.render();
 
-      input = groupType.el.getElementsByTagName('input').item(0);
-
       groupType.on('change:fullName', () => {
         assert.equal(groupType.getData()['fullName'], 'Bob the Bob');
         onChange();
         done();
       });
 
-      DomEvents.dispatchInputEvent(input, 'Bob the Bob');
+      $(groupType.el).find('input').
+        val('Bob the Bob').
+        trigger('input');
+
       assert(onChange.called);
     });
 
