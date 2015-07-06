@@ -310,23 +310,25 @@ var PartialWidgetHelper = require('../View/TemplateHelper/PartialWidgetHelper');
 var Events = require('events');
 var AbstractFormType = (function () {
     function AbstractFormType(options) {
+        var _this = this;
         if (options === void 0) { options = {}; }
-        this.isRenderedFlag = false;
         this.Handlebars = Handlebars.create();
         this.eventEmitter = new Events.EventEmitter();
         this.listeners = {};
         this.listenerId = _.uniqueId('form_type_');
+        this.state = {};
+        this.prepareTemplateEnvironment();
         this.options = this.setDefaultOptions(_.clone(options));
         this.children = [];
-        if (this.options.children) {
-            this.options.children.forEach(this.addChild, this);
-        }
+        this.template = this.options.template;
+        delete this.options.template;
+        this.el = null;
+        this.render();
+        this.options.children.forEach(function (child) { return _this.addChild(child); });
+        this.setErrors(this.options.errors);
         if ('data' in this.options) {
             this.setData(this.options.data);
         }
-        this.template = this.options.template;
-        this.prepareTemplateEnvironment();
-        this.el = null;
     }
     /**
      * Apply defaults to the options object.
@@ -339,7 +341,8 @@ var AbstractFormType = (function () {
             type: 'form_type',
             name: _.uniqueId('form_'),
             attrs: {},
-            children: []
+            children: [],
+            errors: {}
         };
         _.defaults(options, defaults);
         _.defaults(options.attrs, {
@@ -354,22 +357,42 @@ var AbstractFormType = (function () {
             form: context
         });
         this.el = this.createElementFromString(html);
-        this.children.forEach(function (formType) {
-            formType.render();
-            if (!formType.isRendered()) {
-                formType.render();
-            }
-            _this.addChildElement(formType);
-        });
-        this.isRenderedFlag = true;
+        this.children.forEach(function (child) { return _this.addChildElement(child); });
+        this.update(this.state);
         return this;
+    };
+    /**
+     * Update the view, in response
+     * to changes in the state.
+     *
+     * @param changedState
+     */
+    AbstractFormType.prototype.update = function (changedState) {
+        if ('errors' in changedState) {
+            this.renderErrors(changedState.errors);
+        }
+    };
+    /** Render a list of errors into the form view. */
+    AbstractFormType.prototype.renderErrors = function (errors) {
+        var _this = this;
+        var errorsListView = this.el.getElementsByClassName('errors').item(0);
+        var errorTemplate = Handlebars.compile('<li>{{this}}</li>');
+        if (!errorsListView) {
+            return;
+        }
+        errorsListView.innerHTML = '';
+        if (!errors.length) {
+            errorsListView.style.display = 'none';
+            return;
+        }
+        errors.map(function (err) { return _this.createElementFromString(errorTemplate(err)); }).forEach(function (errView) { return errorsListView.appendChild(errView); });
+        errorsListView.style.display = '';
     };
     AbstractFormType.prototype.close = function () {
         this.children.forEach(function (child) { return child.close(); });
         if (this.el && this.el.parentElement) {
             this.el.parentElement.removeChild(this.el);
         }
-        this.isRenderedFlag = false;
         this.el = null;
         this.emit('close', this);
         this.removeAllListeners();
@@ -381,7 +404,7 @@ var AbstractFormType = (function () {
         var _this = this;
         var partials = {
             html_attrs: "{{#each this}}\n  {{@key}}=\"{{this}}\"\n{{/each}}",
-            field_widget: "{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n{{>simple_widget this}}\n",
+            field_widget: "{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<ul class=\"errors\" style=\"display:none\"></ul>\n\n{{>simple_widget this}}\n",
             simple_widget: "<{{form.tagName}} {{>html_attrs form.attrs}} />"
         };
         _.each(partials, function (partial, name) {
@@ -390,17 +413,7 @@ var AbstractFormType = (function () {
         PartialWidgetHelper.register(this.Handlebars);
     };
     AbstractFormType.prototype.createTemplateContext = function () {
-        var blacklist = [
-            'template'
-        ];
-        var cleanOptions = _.omit(this.options, blacklist);
-        var formContext = _.extend({}, cleanOptions, {
-            children: this.children.map(function (childForm) {
-                var childContext = childForm.createTemplateContext();
-                return childContext;
-            })
-        });
-        return formContext;
+        return _.clone(this.options);
     };
     AbstractFormType.prototype.createElementFromString = function (htmlString) {
         var container = document.createElement('div');
@@ -419,17 +432,17 @@ var AbstractFormType = (function () {
             var proxyEventType = isChildEvent ? evt.type : 'child:' + evt.type;
             _this.emit(proxyEventType, evt);
         }, this.listenerId);
-        if (this.isRendered()) {
-            // Render child, if necessary
-            if (!child.isRendered()) {
-                child.render();
-            }
-            this.addChildElement(child);
-        }
+        this.addChildElement(child);
     };
     AbstractFormType.prototype.removeChild = function (child) {
-        child.close();
+        this.removeChildElement(child);
         this.children = _.without(this.children, child);
+        child.removeAllListenersById(this.listenerId);
+    };
+    AbstractFormType.prototype.removeChildElement = function (child) {
+        if (child.el && child.el.parentElement) {
+            child.el.parentElement.removeChild(child.el);
+        }
     };
     AbstractFormType.prototype.removeChildByName = function (name) {
         var child = this.getChild(name);
@@ -456,20 +469,18 @@ var AbstractFormType = (function () {
      */
     AbstractFormType.prototype.getFormElement = function () {
         var isInputTopLevelElement;
-        if (!this.el) {
-            return null;
-        }
         isInputTopLevelElement = this.el.tagName.toLowerCase() === this.options.tagName;
         return (isInputTopLevelElement ? this.el : this.el.getElementsByTagName(this.options.tagName).item(0));
     };
-    AbstractFormType.prototype.isRendered = function () {
-        return this.isRenderedFlag;
-    };
-    AbstractFormType.prototype.getData = function () {
+    /** abstract */ AbstractFormType.prototype.getData = function () {
         throw new Error('Form of type "' + this.options.type + '" must implement a getData() method.');
     };
-    AbstractFormType.prototype.setData = function (data) {
+    /** abstract */ AbstractFormType.prototype.setData = function (data) {
         throw new Error('Form of type "' + this.options.type + '" must implement a setData() method.');
+    };
+    AbstractFormType.prototype.setState = function (state) {
+        _.extend(this.state, state);
+        this.update(state);
     };
     /**
      * Does the form type contain data.
@@ -484,6 +495,34 @@ var AbstractFormType = (function () {
      */
     AbstractFormType.prototype.hasData = function () {
         return true;
+    };
+    AbstractFormType.prototype.setErrors = function (errors) {
+        _.defaults(errors, {
+            form: [],
+            fields: {}
+        });
+        this.setState({
+            errors: errors.form
+        });
+        this.children.forEach(function (child) {
+            var errorsForChild = errors.fields[child.getName()] || {};
+            child.setErrors(errorsForChild);
+        });
+    };
+    AbstractFormType.prototype.clearErrors = function () {
+        this.setErrors({});
+    };
+    AbstractFormType.prototype.getErrors = function () {
+        return {
+            form: _.clone(this.state.errors),
+            fields: this.children.reduce(function (fieldErrors, child) {
+                fieldErrors[child.getName()] = child.getErrors();
+                return fieldErrors;
+            }, {})
+        };
+    };
+    AbstractFormType.prototype.hasErrors = function () {
+        return this.state.errors.length > 0 || this.children.some(function (child) { return child.hasErrors(); });
     };
     AbstractFormType.prototype.on = function (event, listener, listenerId) {
         this.eventEmitter.on(event, listener);
@@ -543,7 +582,7 @@ var AbstractFormType = (function () {
 module.exports = AbstractFormType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../View/TemplateHelper/PartialWidgetHelper":17,"events":1}],3:[function(require,module,exports){
+},{"../View/TemplateHelper/PartialWidgetHelper":18,"events":1}],3:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -560,7 +599,7 @@ var __extends = this.__extends || function (d, b) {
 var FieldType = require('./FieldType');
 var ServiceContainer = require('../Service/ServiceContainer');
 var StringUtil = require('../Util/StringUtil');
-
+var whenIn = require('../Util/whenIn');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
 var CheckboxType = (function (_super) {
     __extends(CheckboxType, _super);
@@ -571,76 +610,84 @@ var CheckboxType = (function (_super) {
         _.defaults(options, {
             tagName: 'input',
             type: 'checkbox',
-            data: '',
-            label: StringUtil.camelCaseToWords(options.data || ''),
-            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{>simple_widget this}} {{form.label}}\n  </label>\n{{else}}\n  {{>simple_widget this}}\n{{/if}}\n\n")
+            data: false,
+            label: StringUtil.camelCaseToWords(options.name || ''),
+            template: this.Handlebars.compile('\
+        {{#if form.label}}\
+          <label {{>html_attrs form.labelAttrs}}>\
+            {{>simple_widget this}} {{form.label}}\
+          </label>\
+        {{else}}\
+          {{>simple_widget this}}\
+        {{/if}}\
+      ')
         });
         options = _super.prototype.setDefaultOptions.call(this, options);
         options.attrs['type'] = 'checkbox';
-        options.attrs['value'] = options.data;
-        if (options.checked) {
-            options.attrs['checked'] = true;
-        }
+        options.attrs['value'] = options.name;
         return options;
     };
     CheckboxType.prototype.render = function () {
         var _this = this;
         _super.prototype.render.call(this);
         ServiceContainer.HtmlEvents.addEventListener(this.getFormElement(), 'change', function () {
-            _this.emit('change');
+            _this.setData(!!_this.getFormElement().checked);
         });
         return this;
+    };
+    CheckboxType.prototype.update = function (state) {
+        var _this = this;
+        _super.prototype.update.call(this, state);
+        whenIn(state, {
+            checked: function (isChecked) { return _this.getFormElement().checked = !!isChecked; },
+            disabled: function (isDisabled) { return _this.getFormElement().disabled = !!isDisabled; }
+        });
     };
     CheckboxType.prototype.getFormElement = function () {
         return _super.prototype.getFormElement.call(this);
     };
+    /** Returns true if the checkbox is checked */
     CheckboxType.prototype.getData = function () {
-        var formElement = this.getFormElement();
-        return formElement ? formElement.value : this.options.data;
+        return this.isChecked();
     };
     CheckboxType.prototype.setData = function (data) {
-        var isSameData = data = this.getData();
-        if (this.getFormElement()) {
-            this.getFormElement().value = data;
-        }
-        this.options.data = data;
+        var isSameData = data === this.getData();
         if (!isSameData) {
+            this.setState({
+                checked: data
+            });
             this.emit('change');
         }
     };
     CheckboxType.prototype.check = function () {
-        if (this.getFormElement()) {
-            this.getFormElement().checked = true;
-        }
-        this.options.attrs['checked'] = true;
+        this.setState({
+            checked: true
+        });
     };
     CheckboxType.prototype.unCheck = function () {
-        if (this.getFormElement()) {
-            this.getFormElement().checked = false;
-        }
-        delete this.options.attrs['checked'];
-    };
-    CheckboxType.prototype.enable = function () {
-        if (this.getFormElement()) {
-            this.getFormElement().removeAttribute('disabled');
-        }
-        delete this.options.attrs['disabled'];
-    };
-    CheckboxType.prototype.disable = function () {
-        if (this.getFormElement()) {
-            this.getFormElement().disabled = true;
-        }
-        this.options.attrs['disabled'] = true;
+        this.setState({
+            checked: false
+        });
     };
     CheckboxType.prototype.isChecked = function () {
-        return this.getFormElement() ? this.getFormElement().checked : !!this.options.attrs['checked'];
+        return !!this.state.checked;
+    };
+    CheckboxType.prototype.enable = function () {
+        this.setState({
+            disabled: false
+        });
+    };
+    CheckboxType.prototype.disable = function () {
+        this.setState({
+            disabled: true
+        });
     };
     return CheckboxType;
 })(FieldType);
 module.exports = CheckboxType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Service/ServiceContainer":14,"../Util/StringUtil":16,"./FieldType":5}],4:[function(require,module,exports){
+},{"../Service/ServiceContainer":14,"../Util/StringUtil":16,"../Util/whenIn":17,"./FieldType":5}],4:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -655,20 +702,41 @@ var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined
 
 var ChoiceType = (function (_super) {
     __extends(ChoiceType, _super);
-    function ChoiceType(options) {
-        _super.call(this, options);
-        this.setChoices(this.options.choices);
+    function ChoiceType() {
+        _super.apply(this, arguments);
     }
     ChoiceType.prototype.render = function () {
         var _this = this;
         _super.prototype.render.call(this);
-        if (_.isNull(this.options.data)) {
-            this.getFormElement().selectedIndex = -1;
-        }
         ServiceContainer.HtmlEvents.addEventListener(this.getFormElement(), 'change', function () {
-            _this.emit('change');
+            _this.setData(_this.getFormElement().value);
         });
         return this;
+    };
+    ChoiceType.prototype.update = function (state) {
+        _super.prototype.update.call(this, state);
+        if ('selected' in state) {
+            if (state.selected === null) {
+                this.getFormElement().selectedIndex = -1;
+            }
+            else {
+                this.getFormElement().value = state.selected;
+            }
+        }
+        if ('disabled' in state) {
+            this.children.forEach(function (child) {
+                if (_.contains(state.disabled, child.getData())) {
+                    child.disable();
+                }
+                else {
+                    child.enable();
+                }
+            });
+            // Deselected disabled option
+            if (_.contains(state.disabled, this.getData())) {
+                this.getFormElement().selectedIndex = -1;
+            }
+        }
     };
     ChoiceType.prototype.getFormElement = function () {
         return _super.prototype.getFormElement.call(this);
@@ -680,61 +748,46 @@ var ChoiceType = (function (_super) {
         _.defaults(options, {
             tagName: 'select',
             type: 'choice',
+            data: null,
             choices: {},
             template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<select {{>html_attrs form.attrs}}></select>\n")
         });
+        options.children = this.optionsFromChoices(options.choices);
         return _super.prototype.setDefaultOptions.call(this, options);
     };
     ChoiceType.prototype.getData = function () {
-        var selectedChild = _.find(this.children, function (child) { return child.isSelected(); });
-        return selectedChild ? selectedChild.getData() : this.options.data;
+        return this.state.selected;
     };
     ChoiceType.prototype.setData = function (data) {
         var isSameData = data === this.getData();
         data = data ? data.toString() : data;
-        this.children.forEach(function (child) {
-            if (child.getData() === data) {
-                child.select();
-            }
-            else {
-                child.deselect();
-            }
-        });
-        this.options.data = data;
         if (!isSameData) {
+            this.setState({
+                selected: data
+            });
             this.emit('change');
         }
     };
     ChoiceType.prototype.setChoices = function (choices) {
         var _this = this;
-        var currVal = this.getData();
         this.children.forEach(function (child) { return _this.removeChild(child); });
-        _.each(choices, function (value, key) {
-            var optionType = new OptionType({
-                data: key,
-                label: value,
-                selected: currVal === key
-            });
-            _this.addChild(optionType);
-        });
+        this.optionsFromChoices(choices).forEach(function (option) { return _this.addChild(option); });
+    };
+    ChoiceType.prototype.optionsFromChoices = function (choices) {
+        return _.map(choices, function (label, key) { return new OptionType({
+            data: key,
+            label: label
+        }); });
     };
     ChoiceType.prototype.disableOption = function (optionValue) {
-        var option = this.getOption(optionValue);
-        if (!option) {
-            throw new Error('Unable to disable option ' + optionValue + ': the option does not exist');
-        }
-        option.disable();
-        if (option.isSelected()) {
-            option.deselect();
-            this.getFormElement().selectedIndex = -1;
-        }
+        this.setState({
+            disabled: (this.state.disabled || []).concat(optionValue)
+        });
     };
     ChoiceType.prototype.enableOption = function (optionValue) {
-        var option = this.getOption(optionValue);
-        if (!option) {
-            throw new Error('Unable to enable option ' + optionValue + ': the option does not exist');
-        }
-        option.enable();
+        this.setState({
+            disabled: _.without(this.state.disabled || [], optionValue)
+        });
     };
     ChoiceType.prototype.getOption = function (value) {
         var matchingOptions = this.children.filter(function (child) { return child.getData() === value; });
@@ -762,7 +815,6 @@ var __extends = this.__extends || function (d, b) {
 var AbstractFormType = require('./AbstractFormType');
 var StringUtil = require('../Util/StringUtil');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
-
 /**
  * Base class for all form fields
  */
@@ -776,13 +828,12 @@ var FieldType = (function (_super) {
         _.defaults(options, {
             tagName: 'input',
             type: 'field',
-            label: null,
             labelAttrs: {},
-            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n{{>simple_widget this}}\n")
+            template: this.Handlebars.compile('{{>field_widget}}')
         });
         options = _super.prototype.setDefaultOptions.call(this, options);
         // set default label
-        if (_.isNull(options.label)) {
+        if (!options.hasOwnProperty('label')) {
             options.label = StringUtil.camelCaseToWords(options.name);
         }
         // Set the `for`/`id` matching attributes
@@ -835,7 +886,7 @@ var FormType = (function (_super) {
             type: 'form',
             template: this.Handlebars.compile("<form {{>html_attrs form.attrs}}></form>")
         });
-        return options;
+        return _super.prototype.setDefaultOptions.call(this, options);
     };
     return FormType;
 })(GroupType);
@@ -858,7 +909,6 @@ var __extends = this.__extends || function (d, b) {
 /// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 var AbstractFormType = require('./AbstractFormType');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
-
 var GroupType = (function (_super) {
     __extends(GroupType, _super);
     function GroupType() {
@@ -868,9 +918,19 @@ var GroupType = (function (_super) {
         _.defaults(options, {
             type: 'group',
             tagName: 'div',
-            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n{{>simple_widget this}}\n")
+            template: this.Handlebars.compile('\
+        <div>\
+          {{#if form.label}}\
+            <label {{>html_attrs form.labelAttrs}}>\
+              {{form.label}}\
+            </label>\
+          {{/if}}\
+          \
+          <ul class="errors" style="display:none"></ul>\
+        </div>\
+      ')
         });
-        return options;
+        return _super.prototype.setDefaultOptions.call(this, options);
     };
     GroupType.prototype.getData = function () {
         var data = {};
@@ -910,7 +970,6 @@ var __extends = this.__extends || function (d, b) {
 /// <reference path="../../typings/generated/node/node.d.ts"/> ///ts:ref:generated
 var AbstractFormType = require('./AbstractFormType');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
-
 var LabelType = (function (_super) {
     __extends(LabelType, _super);
     function LabelType() {
@@ -921,26 +980,29 @@ var LabelType = (function (_super) {
             tagName: 'label',
             type: 'label',
             data: '',
-            template: this.Handlebars.compile("<{{form.tagName}} {{>html_attrs form.attrs}}>{{form.data}}</{{form.tagName}}>")
+            template: this.Handlebars.compile('\
+        <{{form.tagName}} {{>html_attrs form.attrs}}></{{form.tagName}}>\
+      ')
         });
         return _super.prototype.setDefaultOptions.call(this, options);
     };
+    LabelType.prototype.update = function (state) {
+        _super.prototype.update.call(this, state);
+        if ('label' in state) {
+            this.getFormElement().textContent = state.label;
+        }
+    };
     LabelType.prototype.getData = function () {
-        var label = this.getFormElement();
-        return label ? label.textContent : this.options.data;
+        return this.state.label;
     };
     LabelType.prototype.setData = function (data) {
-        var label = this.getFormElement();
         var isSameData = data === this.getData();
         if (isSameData) {
             return;
         }
-        if (!label) {
-            this.options.data = data;
-        }
-        else {
-            label.textContent = data;
-        }
+        this.setState({
+            label: data
+        });
         this.emit('change');
     };
     return LabelType;
@@ -964,7 +1026,6 @@ var __extends = this.__extends || function (d, b) {
 /// <reference path="../../typings/web-api/web-api.ext.d.ts"/> ///ts:ref:generated
 var FieldType = require('./FieldType');
 var TextType = require('./TextType');
-
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
 var ListType = (function (_super) {
     __extends(ListType, _super);
@@ -978,8 +1039,14 @@ var ListType = (function (_super) {
             itemTypeOptions: {},
             tagName: 'ul',
             data: [],
-            template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>{{label}}</label>\n{{/if}}\n<{{form.tagName}} {{>html_attrs form.attrs}}></{{form.tagName}}>"),
-            itemTemplate: this.Handlebars.compile("<li></li>"),
+            label: null,
+            template: this.Handlebars.compile('\
+        {{#if form.label}}\
+          <label {{>html_attrs form.labelAttrs}}>{{label}}</label>\
+        {{/if}}\
+        <{{form.tagName}} {{>html_attrs form.attrs}}></{{form.tagName}}>\
+      '),
+            itemTemplate: this.Handlebars.compile('<li></li>'),
             itemContainerSelector: 'li'
         });
         internalOptions = [
@@ -990,16 +1057,17 @@ var ListType = (function (_super) {
         ];
         _.extend(this, _.pick(options, internalOptions));
         options = _.omit(options, internalOptions);
-        return options;
+        return _super.prototype.setDefaultOptions.call(this, options);
     };
     /**
      * Note that this will remove any existing child form items.
      * Use `addData()` if you want to to keep existing form items.
      */
     ListType.prototype.setData = function (data) {
+        var _this = this;
         // We're actually resetting the data, so we'll
         // remove what we've got, first.
-        this.children.forEach(this.removeChild, this);
+        this.children.forEach(function (child) { return _this.removeChild(child); });
         data.forEach(this.addData, this);
     };
     ListType.prototype.addData = function (data) {
@@ -1027,6 +1095,11 @@ var ListType = (function (_super) {
         childType.on('close', function () {
             _this.getFormElement().removeChild(itemEl);
         }, this.listenerId);
+    };
+    ListType.prototype.removeChildElement = function (child) {
+        var childIndex = this.children.indexOf(child);
+        var containerEl = this.el.querySelectorAll(this.itemContainerSelector).item(childIndex);
+        containerEl.parentNode.removeChild(containerEl);
     };
     ListType.prototype.renderItem = function (childType) {
         var itemContainerHtml = this.itemTemplate({
@@ -1071,38 +1144,25 @@ var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined
 var CheckboxType = require('./CheckboxType');
 var MultiChoiceType = (function (_super) {
     __extends(MultiChoiceType, _super);
-    function MultiChoiceType(options) {
-        _super.call(this, options);
-        this.setChoices(this.options.choices);
+    function MultiChoiceType() {
+        _super.apply(this, arguments);
     }
     MultiChoiceType.prototype.setDefaultOptions = function (options) {
         _.defaults(options, {
             tagName: 'div',
             type: 'multi_choice',
-            choices: {}
+            choices: {},
+            data: []
         });
+        // Create child Checkbox types from choices
+        options.children = _.map(options.choices, function (label, name) { return new CheckboxType({
+            name: name,
+            label: label
+        }); });
         return _super.prototype.setDefaultOptions.call(this, options);
     };
-    MultiChoiceType.prototype.setChoices = function (choices) {
-        var _this = this;
-        var data = this.getData();
-        // Remove all children
-        this.children.forEach(function (child) { return _this.removeChild(child); });
-        // Add new children
-        _.each(choices, function (value, key) {
-            _this.addChild(new CheckboxType({
-                data: key,
-                name: key,
-                label: value,
-                checked: _.contains(data, key)
-            }));
-        });
-    };
     MultiChoiceType.prototype.getData = function () {
-        if (!this.getFormElement()) {
-            return this.options.data;
-        }
-        return this.children.filter(function (child) { return child.isChecked(); }).map(function (child) { return child.getData(); });
+        return this.children.filter(function (child) { return child.isChecked(); }).map(function (child) { return child.getName(); });
     };
     MultiChoiceType.prototype.setData = function (data) {
         var isSameData = _.isEqual(data, this.getData());
@@ -1111,14 +1171,13 @@ var MultiChoiceType = (function (_super) {
         }
         // Update child checkboxes fro mdata
         this.children.forEach(function (child) {
-            if (_.contains(data, child.getData())) {
+            if (_.contains(data, child.getName())) {
                 child.check();
             }
             else {
                 child.unCheck();
             }
         });
-        this.options.data = data;
         this.emit('change');
     };
     MultiChoiceType.prototype.addChildElement = function (childType) {
@@ -1147,6 +1206,7 @@ var FieldType = require('./FieldType');
 var StringUtil = require('../Util/StringUtil');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
 
+var whenIn = require('../Util/whenIn');
 var OptionType = (function (_super) {
     __extends(OptionType, _super);
     function OptionType() {
@@ -1170,59 +1230,59 @@ var OptionType = (function (_super) {
         }
         return options;
     };
+    OptionType.prototype.update = function (state) {
+        var _this = this;
+        _super.prototype.update.call(this, state);
+        whenIn(state, {
+            selected: function (isSelected) { return isSelected ? _this.getFormElement().selected = true : _this.getFormElement().removeAttribute('selected'); },
+            disabled: function (isDisabled) { return isDisabled ? _this.getFormElement().disabled = true : _this.getFormElement().removeAttribute('disabled'); },
+            value: function (value) { return _this.getFormElement().value = value; }
+        });
+    };
     OptionType.prototype.getFormElement = function () {
         return _super.prototype.getFormElement.call(this);
     };
     OptionType.prototype.getData = function () {
-        var formEl = this.getFormElement();
-        return formEl ? formEl.value : this.options.data;
+        return this.state.value;
     };
     OptionType.prototype.setData = function (data) {
-        var formEl = this.getFormElement();
         var isSame = data === this.getData();
-        if (!formEl) {
-            this.options.data = data;
-        }
-        else {
-            formEl.value = data;
-        }
         if (!isSame) {
+            this.setState({
+                value: data
+            });
             this.emit('change');
         }
     };
     OptionType.prototype.select = function () {
-        if (this.getFormElement()) {
-            this.getFormElement().selected = true;
-        }
-        this.options.attrs['selected'] = true;
+        this.setState({
+            selected: true
+        });
     };
     OptionType.prototype.deselect = function () {
-        if (this.getFormElement()) {
-            this.getFormElement().removeAttribute('selected');
-        }
-        delete this.options.attrs['selected'];
+        this.setState({
+            selected: false
+        });
     };
     OptionType.prototype.enable = function () {
-        if (this.getFormElement()) {
-            this.getFormElement().removeAttribute('disabled');
-        }
-        delete this.options.attrs['disabled'];
+        this.setState({
+            disabled: false
+        });
     };
     OptionType.prototype.disable = function () {
-        if (this.getFormElement()) {
-            this.getFormElement().disabled = true;
-        }
-        this.options.attrs['disabled'] = true;
+        this.setState({
+            disabled: true
+        });
     };
     OptionType.prototype.isSelected = function () {
-        return this.getFormElement() ? this.getFormElement().selected : !!this.options.attrs['selected'];
+        return !!this.state.selected;
     };
     return OptionType;
 })(FieldType);
 module.exports = OptionType;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../Util/StringUtil":16,"./FieldType":5}],12:[function(require,module,exports){
+},{"../Util/StringUtil":16,"../Util/whenIn":17,"./FieldType":5}],12:[function(require,module,exports){
 (function (global){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -1283,7 +1343,6 @@ var __extends = this.__extends || function (d, b) {
 var FieldType = require('./FieldType');
 var ServiceContainer = require('../Service/ServiceContainer');
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
-
 var TextType = (function (_super) {
     __extends(TextType, _super);
     function TextType() {
@@ -1294,19 +1353,27 @@ var TextType = (function (_super) {
         _super.prototype.render.call(this);
         // Trigger change on 'input' events.
         ServiceContainer.HtmlEvents.addEventListener(this.getFormElement(), 'input', function () {
-            _this.emit('change');
+            _this.setData(_this.getFormElement().value);
         });
         return this;
+    };
+    TextType.prototype.getFormElement = function () {
+        return _super.prototype.getFormElement.call(this);
+    };
+    TextType.prototype.update = function (changedState) {
+        _super.prototype.update.call(this, changedState);
+        if ('value' in changedState) {
+            this.getFormElement().value = changedState.value;
+        }
     };
     TextType.prototype.setDefaultOptions = function (options) {
         _.defaults(options, {
             tagName: 'input',
             data: '',
-            template: this.Handlebars.compile("{{>field_widget}}")
+            template: this.Handlebars.compile('{{>field_widget}}')
         });
         options = _super.prototype.setDefaultOptions.call(this, options);
         _.defaults(options.attrs, {
-            value: options.data,
             type: 'text'
         });
         return options;
@@ -1317,21 +1384,16 @@ var TextType = (function (_super) {
         return context;
     };
     TextType.prototype.getData = function () {
-        var input = this.getFormElement();
-        return input ? input.value : this.options.data;
+        return this.state.value;
     };
     TextType.prototype.setData = function (data) {
-        var input = this.getFormElement();
         var isSame = data === this.getData();
         if (isSame) {
             return;
         }
-        if (!input) {
-            this.options.data = data;
-        }
-        else {
-            input.value = data;
-        }
+        this.setState({
+            value: data
+        });
         this.emit('change');
     };
     return TextType;
@@ -1374,6 +1436,21 @@ module.exports = StringUtil;
 
 },{}],17:[function(require,module,exports){
 (function (global){
+///ts:ref=underscore.d.ts
+/// <reference path="../../typings/generated/underscore/underscore.d.ts"/> ///ts:ref:generated
+var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null);
+function whenIn(target, conf) {
+    _.each(conf, function (cb, key) {
+        if (key in target) {
+            cb(target[key]);
+        }
+    });
+}
+module.exports = whenIn;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],18:[function(require,module,exports){
+(function (global){
 var Handlebars = (typeof window !== "undefined" ? window.Handlebars : typeof global !== "undefined" ? global.Handlebars : null);
 var PartialWidgetHelper = (function () {
     function PartialWidgetHelper() {
@@ -1397,7 +1474,7 @@ var PartialWidgetHelper = (function () {
 module.exports = PartialWidgetHelper;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 (function (global){
 //ts:ref=node.d.ts
 var AbstractFormType = require('./FormType/AbstractFormType');
@@ -1432,5 +1509,5 @@ global.FormTypes = FormTypeExports;
 module.exports = FormTypeExports;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./FormType/AbstractFormType":2,"./FormType/CheckboxType":3,"./FormType/ChoiceType":4,"./FormType/FieldType":5,"./FormType/FormType":6,"./FormType/GroupType":7,"./FormType/LabelType":8,"./FormType/ListType":9,"./FormType/MultiChoiceType":10,"./FormType/OptionType":11,"./FormType/SubmitType":12,"./FormType/TextType":13,"./Service/ServiceContainer":14}]},{},[18])(18)
+},{"./FormType/AbstractFormType":2,"./FormType/CheckboxType":3,"./FormType/ChoiceType":4,"./FormType/FieldType":5,"./FormType/FormType":6,"./FormType/GroupType":7,"./FormType/LabelType":8,"./FormType/ListType":9,"./FormType/MultiChoiceType":10,"./FormType/OptionType":11,"./FormType/SubmitType":12,"./FormType/TextType":13,"./Service/ServiceContainer":14}]},{},[19])(19)
 });
