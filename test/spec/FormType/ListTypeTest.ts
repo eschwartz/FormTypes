@@ -169,6 +169,49 @@ describe('ListType', () => {
       assert.equal($inputs.eq(2).val().trim(), 'shazaam');
     });
 
+    it('should trigger a change event', function() {
+      var listType = new ListType({
+        ItemType: TextType,
+        data: [
+          'foo',
+          'bar'
+        ]
+      });
+      var onChange = sinon.spy();
+
+      listType.on('change', onChange);
+
+      listType.addData('shazaam');
+
+      assert.equal(onChange.callCount, 1);
+    });
+
+  });
+
+  describe('removeData', function() {
+
+    it('should remove a list item', () => {
+      var $list:JQuery, $items:JQuery, $inputs:JQuery;
+      var listType = new ListType({
+        ItemType: TextType,
+        data: [
+          'foo',
+          'bar',
+          'shazaam'
+        ]
+      });
+
+      listType.removeData('bar');
+
+      $list = $(listType.el);
+      $items = $list.children();
+      $inputs = $items.find('input');
+
+      assert.equal($items.length, 2);
+      assert.equal($inputs.eq(0).val().trim(), 'foo');
+      assert.equal($inputs.eq(1).val().trim(), 'shazaam');
+    });
+
   });
 
   describe('removeChild', () => {

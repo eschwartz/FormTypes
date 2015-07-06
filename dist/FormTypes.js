@@ -1065,14 +1065,27 @@ var ListType = (function (_super) {
      */
     ListType.prototype.setData = function (data) {
         var _this = this;
+        var oldData = this.getData();
+        var isSameData = data.length === oldData.length && data.every(function (item, index) { return _.isEqual(item, oldData[index]); });
+        if (isSameData) {
+            return;
+        }
         // We're actually resetting the data, so we'll
         // remove what we've got, first.
         this.children.forEach(function (child) { return _this.removeChild(child); });
-        data.forEach(this.addData, this);
+        data.map(function (item) { return _this.createItemType(item); }).forEach(function (child) { return _this.addChild(child); });
+        this.emit('change');
     };
-    ListType.prototype.addData = function (data) {
-        var childType = this.createItemType(data);
-        this.addChild(childType);
+    ListType.prototype.addData = function (dataItem) {
+        this.setData(this.getData().concat(dataItem));
+    };
+    ListType.prototype.removeData = function (dataItem) {
+        var data = this.getData();
+        var item = data.filter(function (item) { return _.isEqual(item, dataItem); })[0];
+        if (!item) {
+            return;
+        }
+        this.setData(_.without(data, item));
     };
     ListType.prototype.createItemType = function (data) {
         var hasDataArg = data === void 0;
@@ -1098,7 +1111,7 @@ var ListType = (function (_super) {
     };
     ListType.prototype.removeChildElement = function (child) {
         var childIndex = this.children.indexOf(child);
-        var containerEl = this.el.querySelectorAll(this.itemContainerSelector).item(childIndex);
+        var containerEl = this.getFormElement().querySelectorAll(this.itemContainerSelector).item(childIndex);
         containerEl.parentNode.removeChild(containerEl);
     };
     ListType.prototype.renderItem = function (childType) {

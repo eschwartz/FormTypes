@@ -60,16 +60,38 @@ class ListType extends FieldType {
    * Use `addData()` if you want to to keep existing form items.
    */
   public setData(data:any[]) {
+    var oldData = this.getData();
+    var isSameData = data.length === oldData.length &&
+        data.every((item, index) => _.isEqual(item, oldData[index]));
+
+    if (isSameData) {
+      return;
+    }
+
     // We're actually resetting the data, so we'll
     // remove what we've got, first.
     this.children.forEach(child => this.removeChild(child));
 
-    data.forEach(this.addData, this);
+    data.
+      map(item => this.createItemType(item)).
+      forEach(child => this.addChild(child));
+
+    this.emit('change');
   }
 
-  public addData(data:any) {
-    var childType = this.createItemType(data);
-    this.addChild(childType);
+  public addData(dataItem:any) {
+    this.setData(this.getData().concat(dataItem));
+  }
+
+  public removeData(dataItem:any) {
+    var data = this.getData();
+    var item = data.filter(item => _.isEqual(item, dataItem))[0];
+
+    if (!item) {
+      return;
+    }
+
+    this.setData(_.without(data, item));
   }
 
   protected createItemType(data?:any):AbstractFormType {
@@ -104,7 +126,7 @@ class ListType extends FieldType {
   protected removeChildElement(child:AbstractFormType) {
     var childIndex = this.children.indexOf(child);
 
-    var containerEl = this.el.
+    var containerEl = this.getFormElement().
       querySelectorAll(this.itemContainerSelector).
       item(childIndex);
 
