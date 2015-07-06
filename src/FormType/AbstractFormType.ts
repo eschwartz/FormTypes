@@ -36,13 +36,13 @@ class AbstractFormType {
     this.listenerId = _.uniqueId('form_type_');
 
     this.state = {};
+    this.prepareTemplateEnvironment();
     this.options = this.setDefaultOptions(_.clone(options));
     this.children = [];
 
     this.template = this.options.template;
     delete this.options.template;
 
-    this.prepareTemplateEnvironment();
     this.el = null;
 
     this.render();
