@@ -69,7 +69,6 @@ class ChoiceType extends FieldType {
     _.defaults(options, {
       tagName: 'select',
       type: 'choice',
-      data: null,
       choices: {},
       template: this.Handlebars.compile(
         fs.readFileSync(__dirname + '/../View/form/choice_widget.html.hbs', 'utf8')
@@ -77,6 +76,8 @@ class ChoiceType extends FieldType {
     });
 
     options.children = this.optionsFromChoices(options.choices);
+    // set default data
+    options.data = options.data || Object.keys(options.choices)[0];
 
     return super.setDefaultOptions(options);
   }
@@ -103,6 +104,9 @@ class ChoiceType extends FieldType {
 
     this.optionsFromChoices(choices).
       forEach(option => this.addChild(option));
+
+    // Update data with a default choice
+    this.setData(Object.keys(choices)[0]);
   }
 
   protected optionsFromChoices(choices:_.Dictionary<string>):OptionType[] {

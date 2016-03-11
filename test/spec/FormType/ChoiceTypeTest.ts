@@ -139,7 +139,7 @@ describe('ChoiceType', () => {
       assert.equal(choiceType.getData(), 'bar');
     });
 
-    it('should return null, if no data is provided', function() {
+    it('should return the default selected option, if no data is provided', function() {
       var choiceType = new ChoiceType({
         choices: {
           foo: 'Foo',
@@ -148,7 +148,7 @@ describe('ChoiceType', () => {
       });
       choiceType.render();
 
-      assert.equal(choiceType.getData(), null);
+      assert.equal(choiceType.getData(), 'foo');
     });
 
     it('should return changed values', function() {
@@ -387,6 +387,23 @@ describe('ChoiceType', () => {
 
       assert.equal($options.filter('[value=pa]').text().trim(), 'Panama');
       assert.equal($options.filter('[value=qa]').text().trim(), 'Qatar');
+    });
+    
+    it('should update the form data, with the default choice value', function() {
+      var $select:JQuery, $options:JQuery;
+      var choiceType = new ChoiceType({
+        choices: {
+          us: 'United States',
+          ca: 'Canada'
+        }
+      });
+
+      choiceType.setChoices({
+        pa: 'Panama',
+        qa: 'Qatar'
+      });
+
+      assert.strictEqual(choiceType.getData(), 'pa');
     });
 
   });
