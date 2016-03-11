@@ -1,3 +1,7 @@
+# 1.2.1
+
+- ChoiceType: make sure that `getData` reflects the default selected <option>
+
 # 1.2.0
 
 - Refactor child-closing behavior.

@@ -1,6 +1,6 @@
 {
   "name": "form-types",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Forms in Javascript. For Real.",
   "main": "dist/FormTypes.js",
   "scripts": {
