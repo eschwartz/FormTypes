@@ -4,7 +4,9 @@
   "description": "Forms in Javascript. For Real.",
   "main": "dist/FormTypes.js",
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test",
+    "build": "grunt build",
+    "deploy": "npm publish"
   },
   "authors": [
     {
