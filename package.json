@@ -5,6 +5,8 @@
   "main": "dist/FormTypes.js",
   "scripts": {
     "test": "grunt test",
+    "test-browser": "grunt test/browser",
+    "test-browser-update": "grunt test/browser --quick",
     "build": "grunt build",
     "deploy": "npm publish"
   },
