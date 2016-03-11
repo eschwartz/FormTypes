@@ -748,11 +748,12 @@ var ChoiceType = (function (_super) {
         _.defaults(options, {
             tagName: 'select',
             type: 'choice',
-            data: null,
             choices: {},
             template: this.Handlebars.compile("{{#if form.label}}\n  <label {{>html_attrs form.labelAttrs}}>\n    {{form.label}}\n  </label>\n{{/if}}\n\n<select {{>html_attrs form.attrs}}></select>\n")
         });
         options.children = this.optionsFromChoices(options.choices);
+        // set default data
+        options.data = options.data || Object.keys(options.choices)[0];
         return _super.prototype.setDefaultOptions.call(this, options);
     };
     ChoiceType.prototype.getData = function () {
@@ -772,6 +773,8 @@ var ChoiceType = (function (_super) {
         var _this = this;
         this.children.forEach(function (child) { return _this.removeChild(child); });
         this.optionsFromChoices(choices).forEach(function (option) { return _this.addChild(option); });
+        // Update data with a default choice
+        this.setData(Object.keys(choices)[0]);
     };
     ChoiceType.prototype.optionsFromChoices = function (choices) {
         return _.map(choices, function (label, key) { return new OptionType({
